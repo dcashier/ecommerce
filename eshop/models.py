@@ -42,20 +42,46 @@ class Shop(models.Model):
     def add_storage(self, storage):
         self.storages.add(storage)
 
+    def is_offer_pickup_in_city(self, offer, pickup_in_city):
+        return True
+
+    def is_order_issue_in_pickup_point(self, order, pickup_point):
+        return True
+
+    def is_order_pickup_in_city(self, order, pickup_in_city):
+        return True
+
     def is_pickup_in_city(self, pickup_in_city):
         return True
 
     #def list_offer(self, session):
     def list_offer_for_user_with_pickup_in_city(self, user, pickup_in_city):
-        return sorted(list(self.offers.all()), key=lambda x : x.id)
+        #return sorted(list(self.offers.all()), key=lambda x : x.id)
+        offers = []
+        for offer in self.offers.all():
+            #if self.is_offer_pickup_in_city(offer, pickup_in_city):
+            #   offers.append(offer)
+            order = Order()
+            order.add_offer(offer)
+            if self.is_order_pickup_in_city(order, pickup_in_city):
+                offers.append(offer)
+        return sorted(offers, key=lambda x : x.id)
 
     #def list_pickup(self, session, order):
     def list_pickup_for_user_with_pickup_in_city_with_order(self, user, pickup_in_city, order):
-        return sorted(list(self.pickup_points.all()), key=lambda x : x.id)
+        #return sorted(list(self.pickup_points.all()), key=lambda x : x.id)
+        pickup_points = []
+        for pickup_point in self.pickup_points.all():
+            if self.is_order_issue_in_pickup_point(order, pickup_point):
+                pickup_points.append(pickup_point)
+        return sorted(pickup_points, key=lambda x : x.id)
 
     #def list_storage(self, session, order):
-    def list_storage_for_user_with_pickup_in_city_with_order(self, user, pickup_in_city, order):
+    def __list_storage_for_user_with_pickup_in_city_with_order(self, user, pickup_in_city, order):
         return sorted(list(self.storages.all()), key=lambda x : x.id)
+
+    def test_list_storage_for_user_with_pickup_in_city_with_order(self, user, pickup_in_city, order):
+        return self.__list_storage_for_user_with_pickup_in_city_with_order(user, pickup_in_city, order)
 
 
 class User(models.Model):

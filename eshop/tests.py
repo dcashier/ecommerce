@@ -18,8 +18,21 @@ class TestEShop(TestCase):
         #catalog_shops = CatalogShops(title=u"main catalog")
         #catalog_shops.save()
 
+    def test_1(self):
+        """
+        Вова живет в Крыиу(в Алуште), и хочет себе новый телефон. Выбирает между Apple и Samsung. За телеофном готов сьездить и в Ялту и в Семфирополь.
+
+        Компания E-commerce имеет на своих складах в Москве Сочи и Симферополе телефоны Apple LG Samsung Nokia
+        """
+        pass
+
     #def test_list_shop_for_session(self):
     def test_list_shop_for_user_with_pickup_in_city(self):
+        """
+        Получить список разрешенных магазинов в определнном городе для пользователя.
+        К примеру с обычными пользователями не будут работать оптовые магазины.
+        А соответсвенно нет необходимости получать от них офферы.
+        """
         city_moscow = City(title=u"Moscow")
         city_spb = City(title=u"SPB")
 
@@ -43,6 +56,10 @@ class TestEShop(TestCase):
 
     #def test_list_offer_from_shop_for_session(self):
     def test_list_offer_from_shop_for_user_with_pickup_in_city(self):
+        """
+        Получить список офферов которые он может забрать в городе у выбранного магазина для пользователя.
+        Айфоны в рознице, по причине политической, не продаем во всех городах Крыма .
+        """
         city_moscow = City(title=u"Moscow")
         city_spb = City(title=u"SPB")
 
@@ -87,7 +104,7 @@ class TestEShop(TestCase):
         order = Order()
         order.add_offer(offer_1)
         order.add_offer(offer_2)
-        list_storage = shop.list_storage_for_user_with_pickup_in_city_with_order(user_vova, city_moscow, order)
+        list_storage = shop.test_list_storage_for_user_with_pickup_in_city_with_order(user_vova, city_moscow, order)
         self.assertEqual([storage_1], list_storage)
 
     #def test_list_pickup_from_shop_for_session_with_order(self):
