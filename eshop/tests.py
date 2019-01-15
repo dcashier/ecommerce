@@ -34,8 +34,8 @@ class TestEShop(TestCase):
 
         catalog_shops = CatalogShops(title=u"main catalog")
         catalog_shops.save()
-        catalog_shops.add_shop_for_user_from_city(shop_1, city_moscow)
-        catalog_shops.add_shop_for_user_from_city(shop_2, city_spb)
+        catalog_shops.add_shop_for_user_with_pickup_in_city(shop_1, city_moscow)
+        catalog_shops.add_shop_for_user_with_pickup_in_city(shop_2, city_spb)
 
         #shops = catalog_shops.allow_shops_for_session(session)
         shops = catalog_shops.allow_shops_for_user_with_pickup_in_city(user_vova, city_moscow)
@@ -57,8 +57,8 @@ class TestEShop(TestCase):
 
         shop = Shop(title=u"main shop")
         shop.save()
-        shop.add_offer_for_user_from_city(offer_1, city_moscow)
-        shop.add_offer_for_user_from_city(offer_2, city_spb)
+        shop.add_offer_for_user_with_pickup_in_city(offer_1, city_moscow)
+        shop.add_offer_for_user_with_pickup_in_city(offer_2, city_spb)
 
         #offers = shop.list_offer(session)
         offers = shop.list_offer_for_user_with_pickup_in_city(user_vova, city_moscow)
@@ -106,14 +106,15 @@ class TestEShop(TestCase):
 
         shop = Shop(title=u"main shop")
         shop.save()
-        shop.add_pickup_for_user_from_city(pickup_1, city_moscow)
+        shop.add_pickup_for_user_with_pickup_in_city(pickup_1, city_moscow)
 
         offer_1 = Offer(text=u"offer 1 price 1 product 1 quantity 1")
         offer_2 = Offer(text=u"offer 2 price 2 product 2 quantity 2")
         order = Order()
         order.add_offer(offer_1)
         order.add_offer(offer_2)
-        list_pickup = shop.list_pickup(session, order)
+        #list_pickup = shop.list_pickup(session, order)
+        list_pickup = shop.list_pickup_for_user_with_pickup_in_city_with_order(user_vova, city_moscow, order)
         self.assertEqual([pickup_1], list_pickup)
 
 
