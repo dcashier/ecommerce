@@ -147,6 +147,10 @@ class TestEShop(TestCase):
         shops = catalog_shops.allow_shops_for_user_with_pickup_in_city(user_vova, city_moscow)
         self.assertEqual([shop_1, shop_2], shops)
 
+        shops = catalog_shops.allow_shops_for_user_with_pickup_in_city(user_vova, city_spb)
+        self.assertEqual([shop_1], shops)
+
+
     #def test_list_offer_from_shop_for_session(self):
     def test_list_offer_from_shop_for_user_with_pickup_in_city(self):
         """
@@ -154,21 +158,64 @@ class TestEShop(TestCase):
         Айфоны в рознице, по причине политической, не продаем во всех городах Крыма .
         """
         city_moscow = City(title=u"Moscow")
+        city_moscow.save()
         city_spb = City(title=u"SPB")
+        city_spb.save()
+
+        storage_1 = Storage(title=u"main storage")
+        storage_1.save()
+
+        pickup_point_1 = Pickup(title=u"pickup 1", city=city_moscow)
+        pickup_point_1.save()
+        pickup_point_2 = Pickup(title=u"pickup 2", city=city_moscow)
+        pickup_point_2.save()
+        pickup_point_3 = Pickup(title=u"pickup 3", city=city_spb)
+        pickup_point_3.save()
+
+        shop_1 = Shop(title=u"main shop")
+        shop_1.save()
+        shop_2 = Shop(title=u"next shop")
+        shop_2.save()
+
+        shop_1.add_pickup(pickup_point_1)
+        shop_1.add_pickup(pickup_point_2)
+        shop_1.add_pickup(pickup_point_3)
 
         user_vova = User(first_name=u"Vova")
 
         session = Session(user=user_vova, city=city_moscow)
 
-        offer_1 = Offer(text=u"offer 1 price 1 product 1 quantity 1")
-        offer_1.save()
-        offer_2 = Offer(text=u"offer 2 price 2 product 2 quantity 2")
-        offer_2.save()
+        product = Product()
+        product.save()
 
         shop = Shop(title=u"main shop")
         shop.save()
-        shop.add_offer_for_user_with_pickup_in_city(offer_1, city_moscow)
-        shop.add_offer_for_user_with_pickup_in_city(offer_2, city_spb)
+
+        offer_1 = OfferProductPriceStoragePickuppoint(
+            shop=shop,
+            text=u"offer 1 price 1 product 1 quantity 1 storage pickup_point",
+            product=product,
+            price=100000,
+            #quantity=1,
+            storage=storage_1,
+            pickup_point=pickup_point_1, # конкретная точка получения
+            #pickup_points=[pickup_point_1, pickup_point_2, pickup_point_3, ...] # множество точек получения
+            #city_for_pickup=city_moscow, # город, для которого нужно взять все точки получения
+            #filter_pickup_points=... # както сформированное множество точек получения 
+            )
+        offer_1.save()
+        offer_2 = OfferProductPriceStoragePickuppoint(
+            shop=shop,
+            text=u"offer 2 price 2 product 2 quantity 2 storage pickup_point",
+            product=product,
+            price=100000,
+            storage=storage_1,
+            pickup_point=pickup_point_1,
+            )
+        offer_2.save()
+
+        #shop.add_offer_for_user_with_pickup_in_city(offer_1, city_moscow)
+        #shop.add_offer_for_user_with_pickup_in_city(offer_2, city_spb)
 
         #offers = shop.list_offer(session)
         offers = shop.list_offer_for_user_with_pickup_in_city(user_vova, city_moscow)
