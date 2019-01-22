@@ -111,21 +111,37 @@ class TestEShop(TestCase):
         А соответсвенно нет необходимости получать от них офферы.
         """
         city_moscow = City(title=u"Moscow")
+        city_moscow.save()
         city_spb = City(title=u"SPB")
+        city_spb.save()
 
         user_vova = User(first_name=u"Vova")
 
         session = Session(user=user_vova, city=city_moscow)
+
+        pickup_1 = Pickup(title=u"pickup 1", city=city_moscow)
+        pickup_1.save()
+        pickup_2 = Pickup(title=u"pickup 2", city=city_moscow)
+        pickup_2.save()
+        pickup_3 = Pickup(title=u"pickup 3", city=city_spb)
+        pickup_3.save()
 
         shop_1 = Shop(title=u"main shop")
         shop_1.save()
         shop_2 = Shop(title=u"next shop")
         shop_2.save()
 
+        shop_1.add_pickup(pickup_1)
+        shop_1.add_pickup(pickup_2)
+        shop_1.add_pickup(pickup_3)
+        shop_2.add_pickup(pickup_1)
+
         catalog_shops = CatalogShops(title=u"main catalog")
         catalog_shops.save()
-        catalog_shops.add_shop_for_user_with_pickup_in_city(shop_1, city_moscow)
-        catalog_shops.add_shop_for_user_with_pickup_in_city(shop_2, city_spb)
+        #catalog_shops.add_shop_for_user_with_pickup_in_city(shop_1, city_moscow)
+        #catalog_shops.add_shop_for_user_with_pickup_in_city(shop_2, city_spb)
+        catalog_shops.add_shop(shop_1)
+        catalog_shops.add_shop(shop_2)
 
         #shops = catalog_shops.allow_shops_for_session(session)
         shops = catalog_shops.allow_shops_for_user_with_pickup_in_city(user_vova, city_moscow)
@@ -187,20 +203,23 @@ class TestEShop(TestCase):
     #def test_list_pickup_from_shop_for_session_with_order(self):
     def test_list_pickup_from_shop_for_user_with_pickup_in_city_with_order(self):
         city_moscow = City(title=u"Moscow")
+        city_moscow.save()
         city_spb = City(title=u"SPB")
+        city_spb.save()
 
         user_vova = User(first_name=u"Vova")
 
         session = Session(user=user_vova, city=city_moscow)
 
-        pickup_1 = Pickup(title=u"pickup 1")
+        pickup_1 = Pickup(title=u"pickup 1", city=city_moscow)
         pickup_1.save()
-        pickup_2 = Pickup(title=u"pickup 2")
+        pickup_2 = Pickup(title=u"pickup 2", city=city_moscow)
         pickup_2.save()
 
         shop = Shop(title=u"main shop")
         shop.save()
-        shop.add_pickup_for_user_with_pickup_in_city(pickup_1, city_moscow)
+        #shop.add_pickup_for_user_with_pickup_in_city(pickup_1, city_moscow)
+        shop.add_pickup(pickup_1)
 
         offer_1 = Offer(text=u"offer 1 price 1 product 1 quantity 1")
         offer_2 = Offer(text=u"offer 2 price 2 product 2 quantity 2")

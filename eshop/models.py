@@ -2,11 +2,15 @@ from django.db import models
 
 # Create your models here.
 
+class City(models.Model):
+    title = models.CharField(max_length=200)
+
 class Storage(models.Model):
     title = models.CharField(max_length=200)
 
 class Pickup(models.Model):
     title = models.CharField(max_length=200)
+    city = models.ForeignKey(City)
 
 class ZoneCourier(models.Model):
     title = models.CharField(max_length=200)
@@ -36,8 +40,11 @@ class Shop(models.Model):
     def add_offer_for_user_with_pickup_in_city(self, offer, pickup_in_city):
         self.offers.add(offer)
 
-    def add_pickup_for_user_with_pickup_in_city(self, pickup_point, pickup_in_city):
+    def add_pickup(self, pickup_point):
         self.pickup_points.add(pickup_point)
+
+    #def add_pickup_for_user_with_pickup_in_city(self, pickup_point, pickup_in_city):
+    #    self.pickup_points.add(pickup_point)
 
     def add_storage(self, storage):
         self.storages.add(storage)
@@ -88,9 +95,6 @@ class User(models.Model):
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
 
-class City(models.Model):
-    title = models.CharField(max_length=200)
-
 class Session(models.Model):
     user = models.ForeignKey(User)
     city = models.ForeignKey(City)
@@ -108,8 +112,11 @@ class CatalogShops(models.Model):
                 shops.append(shop)
         return sorted(shops, key=lambda x : x.id)
 
-    def add_shop_for_user_with_pickup_in_city(self, shop, pickup_in_city):
+    def add_shop(self, shop):
         self.shops.add(shop)
+
+    #def add_shop_for_user_with_pickup_in_city(self, shop, pickup_in_city):
+    #    self.shops.add(shop)
 
 
 #class Poll(models.Model):
