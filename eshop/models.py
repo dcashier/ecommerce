@@ -264,6 +264,12 @@ class Seller(models.Model):
                     raise ValidationError(u"Не коректное количество остатоков. Хотя приконкурентном взаимодействии могут продать больше чем есть в наличии, и тогда такая ситуация возможна")
         return quantity
 
+    def __is_allow_product_for_client(self, product, client_city, client_type):
+        print 'check Rule'
+        print 'check Delivery'
+        print 'check Quantity for Sale'
+        return True
+
     def __price_factories_allow_for_situation_one_product(self, product, storage, pickup_point):
         quantity = 1
         price_factories = []
@@ -331,6 +337,13 @@ class Seller(models.Model):
 
     #def get_factory_allow_for_situation_many_diffirent_stocks(self, [{product, quantity, storage], {}], pickup_point):
     #    pass
+
+    def list_allow_product_for_client(self, products, client_city, client_type):
+        allow_products = []
+        for product in products:
+            if self.__is_allow_product_for_client(product, client_city, client_type):
+                allow_products.append(product)
+        return allow_products
 
     def list_product(self, category):
         storages = self.shop.allow_storages()

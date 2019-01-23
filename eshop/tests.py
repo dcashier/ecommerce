@@ -189,6 +189,13 @@ class TestEShop(TestCase):
         products = seller.list_product(category="mobile phone")
         self.assertEqual([product_mi8], products)
 
+        # Так как для покупателей из разных городов матрицы у нас разные
+        # и зависят от многих праметров: 
+        #     политичекских - аппле в крыму не проддаем, 
+        #     на сахалине КБТ так как море не спокойно а воздухом возим только телефоны
+        products_allow = seller.list_allow_product_for_client(products, client_city, client_type)
+        self.assertEqual([product_mi8], products_allow)
+
         # Из всего списка Вове понравился только Mi8
         # Вова спрашивает у продавца какая цна на Mi8, если он придет на одну из Московских точек самовывоза?
         prices = seller.generate_prices(product_mi8, client_city, client_type)
