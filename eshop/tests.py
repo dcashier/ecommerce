@@ -147,6 +147,19 @@ class TestEShop(TestCase):
         currency_mi8 = "USD"
         storage_1.load(product_mi8, quantity_mi8, purchase_cost_mi8, currency_mi8)
 
+        seller = Seller(shop=shop_1)
+	seller.save()
+
+        quantity = seller.check_quantity_for_sale(product_mi8)
+        self.assertEqual(10, quantity)
+
+        info_text = u"продавца попросили зарезервирвать для большиз босов"
+        reserve_for_big_boss_quantity = 2
+        seller.reserve_product_on_storage(product_mi8, reserve_for_big_boss_quantity, storage_1, info_text)
+        quantity = seller.check_quantity_for_sale(product_mi8)
+        self.assertEqual(8, quantity)
+
+
 	filter_produce_1 = FilterProductCrossIdCategoryBrand()
         filter_produce_1.save()
 	filter_storage_1 = FilterStorageId()
@@ -166,13 +179,11 @@ class TestEShop(TestCase):
 	price_policy_1.price_factory_part_purchase_cost_from_stock.add(price_factory_part_purchase_cost_from_stock_1)
         price_policy_1.price_factory_fix.add(price_factory_fix_1)
 
-        client_city = city_moscow
-        client_type = 'onliner'
-
-        seller = Seller(shop=shop_1)
-	seller.save()
 	seller.price_policies.add(price_policy_1)
 	#seller.price_policies.add(price_policy_2)
+
+        client_city = city_moscow
+        client_type = 'onliner'
 
         #Какие модели телефонов есть в вашем магазине?
         products = seller.list_product(category="mobile phone")
@@ -183,11 +194,16 @@ class TestEShop(TestCase):
         prices = seller.generate_prices(product_mi8, client_city, client_type)
         self.assertEqual([Decimal('115.61'), 150], prices)
 
+        # а много у вас осталось Mi8 сейчас?
+        quantity = seller.check_quantity_for_sale(product_mi8)
+        self.assertEqual(8, quantity)
+
+
         #Вова решил купить Ми8 за цену 115.61, оформляет заказ.
         #Предлодить вове места ддля получнеия телефона
         #Когда он выберет метсто рассчитать дату и время когда он то сможет забрать
-        #если все устраивает резериватьвать товар и перемещать на пункт выдачи
-        #когда вова за ним придет выдать товар офрмить чек.
+        #если все устраивает и пришла оплата, резериватьвать товар и перемещать на пункт выдачи
+        #когда вова за ним придет выдать товар офрмить чек, и начислить балы в системе лояльности.
 
 
     #def test_list_shop_for_session(self):

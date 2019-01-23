@@ -33,6 +33,12 @@ class Storage(models.Model):
     #def stocks_by_product(self, product):
     #    return Stock.objects.filter(product=product)
 
+    def check_quantity(self, product):
+        quantity = 0
+        for stock in Stock.objects.filter(storage=self, product=product):
+            quantity += stock.quantity
+        return quantity
+
     def get_purchase_cost_for_product(self, product):
         purchase_costs = set()
         #for stock in self.stocks_by_product(product):
@@ -67,6 +73,13 @@ class Stock(models.Model):
     storage = models.ForeignKey(Storage)
     purchase_cost = models.DecimalField(u"стоимость закупки одной штуки", decimal_places=2, max_digits=7)
     currency = models.CharField(u"Валюта", max_length=5)
+
+class Reserve(models.Model):
+    product = models.ForeignKey(Product)
+    quantity = models.IntegerField(u"Количество")
+    storage = models.ForeignKey(Storage)
+    #purchase_cost = models.DecimalField(u"стоимость закупки одной штуки", decimal_places=2, max_digits=7)
+    #currency = models.CharField(u"Валюта", max_length=5)
 
 class Order(models.Model):
     text = models.CharField(max_length=200)
@@ -240,6 +253,17 @@ class Seller(models.Model):
 
     price_policies = models.ManyToManyField(PricePolicy) # политики которые может использовать данный продавец ему назанчаются свыше
 
+    def check_quantity_for_sale(self, product):
+        storages = self.shop.allow_storages()
+        quantity = 0
+        for storage in storages:
+            quantity += storage.check_quantity(product)
+            for reserve in Reserve.objects.filter(storage=storage, product=product):
+                quantity -= reserve.quantity
+                if quantity < 0:
+                    raise ValidationError(u"Не коректное количество остатоков. Хотя приконкурентном взаимодействии могут продать больше чем есть в наличии, и тогда такая ситуация возможна")
+        return quantity
+
     def __price_factories_allow_for_situation_one_product(self, product, storage, pickup_point):
         quantity = 1
         price_factories = []
@@ -315,6 +339,11 @@ class Seller(models.Model):
             for product in storage.list_product():
                 products.add(product)
         return list(products)
+
+    def reserve_product_on_storage(self, product, quantity, storage, info_text):
+        reserve = Reserve(product=product, quantity=quantity, storage=storage)
+        reserve.save()
+
 
 # Фабрики офферов, офферы, фильтры офферов.
 
