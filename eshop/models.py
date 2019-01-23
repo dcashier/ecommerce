@@ -29,6 +29,19 @@ class Product(models.Model):
 
 class Storage(models.Model):
     title = models.CharField(max_length=200)
+    
+    def stocks_by_product(self, product):
+        return Stock.objects.filter(product=product)
+
+    def get_purchase_cost_for_product(self, product):
+        purchase_costs = set()
+        for stock in self.stocks_by_product(product):
+            purchase_costs.add(stock.purchase_cost)
+
+        if not len(purchase_costs) == 1:
+            raise ValidationError(u"Не допусимое количество цен закупки для одного склада")
+
+        return list(purchase_costs)[0]
 
 class Stock(models.Model):
     product = models.ForeignKey(Product)
@@ -125,28 +138,34 @@ class Shop(models.Model):
         return self.__list_storage_for_user_with_pickup_in_city_with_order(user, pickup_in_city, order)
 
 
+class PriceFactoryPartPurchaseCost(models.Model):
+    precent = models.IntegerField(u"Процент")
+
+    def generate(self, purchase_cost, product, storage):
+        return purchase_cost * self.precent
+
 class PriceFactoryPartPurchaseCostFromStock(models.Model):
     """
     Наценка на любой продукт : самый простой подход создаем наценку на в 10% от закупочной цены на все продукты.
     """
     precent = models.IntegerField(u"Процент, цена зависит от цены закупки которая указана в остатках склада, на которм лежит продукт")
 
-    def generate_from_purchase_cost(self, purchase_cost):
-        return purchase_cost * self.precent
-
-    def generate_for_product_on_storage(self, product, storage):
+    def generate(self, purchase_cost, product, storage):
         purchase_costs = set()
-        for stock in storage.stocks_by_product():
+        for stock in storage.stocks_by_product(product):
             purchase_costs.add(stock.purchase_cost)
 
         if not len(purchase_costs) == 1:
             raise ValidationError(u"Не допусимое количество цен закупки для одного склада")
 
-        return purchase_costs[0] * self.precent
+        return list(purchase_costs)[0] * (100 + self.precent) / 100
 
 class PriceFactoryFix(models.Model):
     price = models.IntegerField(u"Цена")
     currency = models.CharField(u"Валюта", max_length=5)
+
+    def generate(self, purchase_cost, product, storage):
+        return self.price
 
 class FilterProduct(object):
     pass
@@ -174,16 +193,20 @@ class PricePolicy(models.Model):
     filter_storage = models.ManyToManyField(FilterStorageId)
     filter_pickup_point = models.ManyToManyField(FilterPickupPointIdCity)
 
+    price_factory_part_purchase_cost = models.ManyToManyField(PriceFactoryPartPurchaseCost)
     price_factory_part_purchase_cost_from_stock = models.ManyToManyField(PriceFactoryPartPurchaseCostFromStock)
     price_factory_fix = models.ManyToManyField(PriceFactoryFix)
 
-    def allow_price_factory(product, quantity, storage, pickup_point):
+    def is_allow_product_quantity_storage_pickup_point(self, product, quantity, storage, pickup_point):
+        return True
+
+    def allow_price_factory(self, product, quantity, storage, pickup_point):
         price_factories = []
-        if price_policy.is_allow_product_quantity_storage_pickup_point(product, quantity, storage, pickup_point):
-            for price_factory in self.factory_price_part_purchase_cost_from_stock.all():
-                price_factories.append(factory)
-            for price_factory in self.factory_price_fix.all():
-                price_factories.append(factory)
+        if self.is_allow_product_quantity_storage_pickup_point(product, quantity, storage, pickup_point):
+            for price_factory in self.price_factory_part_purchase_cost_from_stock.all():
+                price_factories.append(price_factory)
+            for price_factory in self.price_factory_fix.all():
+                price_factories.append(price_factory)
         return price_factories
 
 
@@ -218,6 +241,19 @@ class Seller(models.Model):
                     })
         return link_price_factory_product_storage_pickup_point
 
+    def __link_price_product_storage_pickup_point(self, product, storages, pickup_points):
+        link_price_product_storage_pickup_point = []
+        for storage in storages:
+            for pickup_point in pickup_points:
+                for price_factory in self.__price_factories_allow_for_situation_one_product(product, storages, pickup_points):
+                    purchase_cost = storage.get_purchase_cost_for_product(product)
+                    link_price_product_storage_pickup_point.append({
+                        'product': product,
+                        'storage': storage,
+                        'pickup_point': pickup_point,
+                        'price': price_factory.generate(purchase_cost, product, storage),
+                    })
+        return link_price_product_storage_pickup_point
 
     def generate_prices(self, product, client_city, client_type):
         pickup_points = self.shop.pickup_points_in_city(client_city)
@@ -235,13 +271,19 @@ class Seller(models.Model):
         #    price = price_factory.generate_for_product_on_storage(product, storage)
         #    prices.add(price)
 
-        link_price_factory_product_storage_pickup_point = self.__link_price_factory_product_storage_pickup_point(product, storages, pickup_points)
-        prices = set()
-        for link in link_price_factory_product_storage_pickup_point:
-            price = link['price_factory'].generate_for_product_on_storage(link['product'], link['storage'])
-            prices.add()
+        #link_price_factory_product_storage_pickup_point = self.__link_price_factory_product_storage_pickup_point(product, storages, pickup_points)
+        #prices = set()
+        #for link in link_price_factory_product_storage_pickup_point:
+        #    price = link['price_factory'].generate_for_product_on_storage(link['product'], link['storage'])
+        #    prices.add()
 
-        return prices
+        link_price_product_storage_pickup_point = self.__link_price_product_storage_pickup_point(product, storages, pickup_points)
+        prices = set()
+        for link in link_price_product_storage_pickup_point:
+            price = link['price']
+            prices.add(price)
+
+        return sorted(list(prices))
 
     #def get_factory_allow_for_situation_many_diffirent_stocks(self, [{product, quantity, storage], {}], pickup_point):
     #    pass
