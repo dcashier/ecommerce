@@ -135,13 +135,17 @@ class TestEShop(TestCase):
 
         session = Session(user=user_vova, city=city_moscow)
 
-        brand = Brand()
-        brand.save()
-        product = Product(brand=brand)
-        product.save()
+        brand_xiaomy = Brand(title="Xiaomy")
+        brand_xiaomy.save()
+        product_mi8 = Product(brand=brand_xiaomy)
+        product_mi8.save()
 
-        stock_1 = Stock(product=product, quantity=10, storage=storage_1, purchase_cost=105.1, currency="RUR")
-        stock_1.save()
+        #stock_1 = Stock(product=product_mi8, quantity=10, storage=storage_1, purchase_cost=105.1, currency="RUR")
+        #stock_1.save()
+        quantity_mi8 = 10
+        purchase_cost_mi8 = 105.1
+        currency_mi8 = "USD"
+        storage_1.load(product_mi8, quantity_mi8, purchase_cost_mi8, currency_mi8)
 
 	filter_produce_1 = FilterProductCrossIdCategoryBrand()
         filter_produce_1.save()
@@ -170,8 +174,20 @@ class TestEShop(TestCase):
 	seller.price_policies.add(price_policy_1)
 	#seller.price_policies.add(price_policy_2)
 
-        prices = seller.generate_prices(product, client_city, client_type)
+        #Какие модели телефонов есть в вашем магазине?
+        products = seller.list_product(category="mobile phone")
+        self.assertEqual([product_mi8], products)
+
+        # Из всего списка Вове понравился только Mi8
+        # Вова спрашивает у продавца какая цна на Mi8, если он придет на одну из Московских точек самовывоза?
+        prices = seller.generate_prices(product_mi8, client_city, client_type)
         self.assertEqual([Decimal('115.61'), 150], prices)
+
+        #Вова решил купить Ми8 за цену 115.61, оформляет заказ.
+        #Предлодить вове места ддля получнеия телефона
+        #Когда он выберет метсто рассчитать дату и время когда он то сможет забрать
+        #если все устраивает резериватьвать товар и перемещать на пункт выдачи
+        #когда вова за ним придет выдать товар офрмить чек.
 
 
     #def test_list_shop_for_session(self):

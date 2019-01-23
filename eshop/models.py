@@ -17,7 +17,7 @@ class Building(models.Model):
     address = models.CharField(max_length=200)
 
 class Brand(models.Model):
-    text = models.CharField(max_length=200)
+    title = models.CharField(max_length=200)
 
 class Category(models.Model):
     text = models.CharField(max_length=200)
@@ -30,18 +30,36 @@ class Product(models.Model):
 class Storage(models.Model):
     title = models.CharField(max_length=200)
     
-    def stocks_by_product(self, product):
-        return Stock.objects.filter(product=product)
+    #def stocks_by_product(self, product):
+    #    return Stock.objects.filter(product=product)
 
     def get_purchase_cost_for_product(self, product):
         purchase_costs = set()
-        for stock in self.stocks_by_product(product):
+        #for stock in self.stocks_by_product(product):
+        for stock in Stock.objects.filter(storage=self, product=product):
             purchase_costs.add(stock.purchase_cost)
 
         if not len(purchase_costs) == 1:
             raise ValidationError(u"Не допусимое количество цен закупки для одного склада")
 
         return list(purchase_costs)[0]
+
+    def list_product(self):
+        products = set()
+        for stock in Stock.objects.filter(storage=self):
+            products.add(stock.product)
+        return list(products)
+
+    def list_purchase_cost_for_product(self, product):
+        purchase_costs = set()
+        for stock in Stock.objects.filter(storage=self, product=product):
+            purchase_costs.add(stock.purchase_cost)
+        return list(purchase_costs)
+
+    def load(self, product, quantity, purchase_cost, currency):
+        stock = Stock(product=product, quantity=quantity, storage=self, purchase_cost=purchase_cost, currency=currency)
+        stock.save()
+
 
 class Stock(models.Model):
     product = models.ForeignKey(Product)
@@ -152,8 +170,10 @@ class PriceFactoryPartPurchaseCostFromStock(models.Model):
 
     def generate(self, purchase_cost, product, storage):
         purchase_costs = set()
-        for stock in storage.stocks_by_product(product):
-            purchase_costs.add(stock.purchase_cost)
+        #for stock in storage.stocks_by_product(product):
+        #    purchase_costs.add(stock.purchase_cost)
+        for purchase_cost in storage.list_purchase_cost_for_product(product):
+            purchase_costs.add(purchase_cost)
 
         if not len(purchase_costs) == 1:
             raise ValidationError(u"Не допусимое количество цен закупки для одного склада")
@@ -288,6 +308,13 @@ class Seller(models.Model):
     #def get_factory_allow_for_situation_many_diffirent_stocks(self, [{product, quantity, storage], {}], pickup_point):
     #    pass
 
+    def list_product(self, category):
+        storages = self.shop.allow_storages()
+        products = set()
+        for storage in storages:
+            for product in storage.list_product():
+                products.add(product)
+        return list(products)
 
 # Фабрики офферов, офферы, фильтры офферов.
 
