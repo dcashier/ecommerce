@@ -322,32 +322,3 @@ class TestEShop(TestCase):
         #list_pickup = shop.list_pickup(session, order)
         list_pickup_point = shop.list_pickup_for_user_with_pickup_in_city_with_order(user_vova, city_moscow, order)
         self.assertEqual([pickup_point_1], list_pickup_point)
-
-
-
-
-
-
-
-        #customer_record = Entity(title=u"Клиет с улицы")
-        #customer_record.save()
-
-        #executor_record = Entity(title=u"Магазин - И.П.")
-        #executor_record.save()
-
-        #storage_record_1 = Storage(
-        #    title=u"Склад 1",
-        #    owner=executor_record
-        #)
-        #storage_record_1.save()
-
-        #product_record_1 = Product(title=u"pr - 1")
-        #product_record_1.save()
-
-        #offer_record_1 = OfferRecord(
-        #    storage_depart=storage_record_1,
-        #    product=product_record_1,
-        #    quantity=1,
-        #    price=1100,
-        #    datetime_ready_for_deaprt='2018-10-10 20:20:00',
-        #    )
