@@ -6,10 +6,7 @@ from django.db import models
 class City(models.Model):
     title = models.CharField(max_length=200)
 
-class Storage(models.Model):
-    title = models.CharField(max_length=200)
-
-class Pickup(models.Model):
+class PickupPoint(models.Model):
     title = models.CharField(max_length=200)
     city = models.ForeignKey(City)
 
@@ -19,8 +16,26 @@ class ZoneCourier(models.Model):
 class Building(models.Model):
     address = models.CharField(max_length=200)
 
+class Brand(models.Model):
+    text = models.CharField(max_length=200)
+
+class Category(models.Model):
+    text = models.CharField(max_length=200)
+
 class Product(models.Model):
     text = models.CharField(max_length=200)
+    categories = models.ManyToManyField(Category)
+    brand = models.ForeignKey(Brand)
+
+class Storage(models.Model):
+    title = models.CharField(max_length=200)
+
+class Stock(models.Model):
+    product = models.ForeignKey(Product)
+    quantity = models.IntegerField(u"Количество")
+    storage = models.ForeignKey(Storage)
+    purchase_cost = models.DecimalField(u"стоимость закупки одной штуки", decimal_places=2, max_digits=7)
+    currency = models.CharField(u"Валюта", max_length=5)
 
 class Order(models.Model):
     text = models.CharField(max_length=200)
@@ -34,7 +49,7 @@ class Seller(models.Model):
 
 class Shop(models.Model):
     title = models.CharField(max_length=200)
-    pickup_points = models.ManyToManyField(Pickup)
+    pickup_points = models.ManyToManyField(PickupPoint)
     storages = models.ManyToManyField(Storage)
     sellers = models.ManyToManyField(Seller)
     #offers = models.ManyToManyField(Offer)
@@ -66,12 +81,17 @@ class Shop(models.Model):
                 return True
         return False
 
+    def is_allow_storage(self, storage):
+        if storage in self.storages.all():
+            return True
+        return False
+
     #def list_offer(self, session):
     def list_offer_for_user_with_pickup_in_city(self, user, pickup_in_city):
         #return sorted(list(self.offers.all()), key=lambda x : x.id)
         offers = []
         #for offer in self.offers.all():
-        for offer in OfferProductPriceStoragePickuppoint.objects.all():
+        for offer in RepositoryOfferProductPriceStoragePickuppoint.objects.all():
             #if self.is_offer_pickup_in_city(offer, pickup_in_city):
             #   offers.append(offer)
             #order = Order()
@@ -99,6 +119,101 @@ class Shop(models.Model):
         return self.__list_storage_for_user_with_pickup_in_city_with_order(user, pickup_in_city, order)
 
 
+class PriceFactoryPartPurchaseCostFromStock(models.Model):
+    """
+    Наценка на любой продукт : самый простой подход создаем наценку на в 10% от закупочной цены на все продукты.
+    """
+    precent = models.IntegerField(u"Процент, цена зависит от цены закупки которая указана в остатках склада, на которм лежит продукт")
+
+    def generate_from_purchase_cost(self, purchase_cost):
+        return purchase_cost * self.precent
+
+    def generate_for_product_on_storage(self, product, storage):
+        purchase_costs = set()
+        for stock in storage.stocks_by_product():
+            purchase_costs.add(stock.purchase_cost)
+
+        if not len(purchase_costs) == 1:
+            raise ValidationError(u"Не допусимое количество цен закупки для одного склада")
+
+        return purchase_costs[0] * self.precent
+
+class PriceFactoryFix(models.Model):
+    price = models.IntegerField(u"Цена")
+    currency = models.CharField(u"Валюта", max_length=5)
+
+class FilterProduct(object):
+    pass
+
+class FilterProductCrossIdCategoryBrand(models.Model, FilterProduct):
+    products = models.ManyToManyField(Product)
+    categories = models.ManyToManyField(Category)
+    brands = models.ManyToManyField(Brand)
+
+class FilterPickupPoint(object):
+    pass
+
+class FilterPickupPointIdCity(models.Model, FilterPickupPoint):
+    pickup_points = models.ManyToManyField(PickupPoint)
+    cities = models.ManyToManyField(City)
+
+class FilterStorage(object):
+    pass
+
+class FilterStorageId(models.Model, FilterStorage):
+    storages = models.ManyToManyField(Storage)
+
+
+class Saler(models.Model):
+    """
+    Продавец решает какую политику формирования цены применить в данном случае
+    product, purchase cost, client(type), shop, storage, pickup point, seler
+    """
+    title = models.CharField(max_length=100)
+    shop = models.ForeignKey(Shop)
+
+    filter_produce = models.ManyToManyField(FilterProductCrossIdCategoryBrand)
+    filter_storage = models.ManyToManyField(FilterStorageId)
+    filter_pickup_point = models.ManyToManyField(FilterPickupPointIdCity)
+
+    factory_price_part_purchase_cost_from_stock = models.ManyToManyField(PriceFactoryPartPurchaseCostFromStock)
+    factory_price_fix = models.ManyToManyField(PriceFactoryFix)
+
+    def __get_price_factories_allow_for_situation_one_product(self, product, storage, pickup_point):
+        quantity = 1
+        factories = []
+        if self.__is_allow_product_quantity_storage_pickup_point(product, quantity, storage, pickup_point):
+            for factory in self.factory_price_part_purchase_cost_from_stock.all():
+                factories.append(factory)
+            for factory in self.factory_price_fix.all():
+                factories.append(factory)
+        return factories
+
+    def generate_prices(self, product, client_city, client_type):
+        pickup_points = self.shop.pickup_points_in_city(client_city)
+        storages = self.shop.allow_storages()
+        quantity = 1
+
+        price_factories = set()
+        for storage in storages:
+            for pickup_point in pickup_points:
+                price_factories_allow = self.__get_price_factories_allow_for_situation_one_product(product, storage, pickup_point)
+                for price_factory in price_factories_allow:
+                    price_factories.add(price_factory)
+
+        prices = set()
+        for price_factory in price_factories:
+            price = price_factory.generate_for_product_on_storage(product, storage)
+            prices.add(price)
+
+        return prices
+
+    #def get_factory_allow_for_situation_many_diffirent_stocks(self, [{product, quantity, storage], {}], pickup_point):
+    #    pass
+
+
+# Фабрики офферов, офферы, фильтры офферов.
+
 
 # Офферы могут быть разных типов, но им следует действовать в соответствии с одним интрефейсом
 class Offer(object):
@@ -114,7 +229,24 @@ class Offer(object):
     def is_allow_for_seller(self, seller):
         return True
 
-class OfferProductPrice(models.Model, Offer):
+class FactoryOfferPrecentfrompurchasecost(models.Model, Offer):
+    """
+    Наценка на любой продукт : самый простой подход создаем наценку на в 10% от закупочной цены на все продукты.
+    """
+    text = models.CharField(max_length=200)
+    precent_from_purchase_cost = models.IntegerField(u"Процент от цена закупки на указаном складе")
+    shop = models.ForeignKey(Shop)
+
+class FactoryOfferCategoriesPrecentfrompurchasecost(models.Model, Offer):
+    """
+    Наценка на любой продукт из списка категорий : самый простой подход создаем наценку на в 10% от закупочной цены на все продукты.
+    """
+    text = models.CharField(max_length=200)
+    categories = models.ManyToManyField(Category)
+    precent_from_purchase_cost = models.IntegerField(u"Процент от цена закупки на указаном складе")
+    shop = models.ForeignKey(Shop)
+
+class RepositoryOfferProductPrice(models.Model, Offer):
     """
     самый простой цена и продукт
     """
@@ -124,7 +256,7 @@ class OfferProductPrice(models.Model, Offer):
     currency = models.CharField(u"Валюта", max_length=5)
     shop = models.ForeignKey(Shop)
 
-class OfferProductPriceQuantity(models.Model, Offer):
+class RepositoryOfferProductPriceQuantity(models.Model, Offer):
     """
     для отовиков, за единоверменную покупку 10 штук суммарно заплатите на 5% меньше.
     """
@@ -135,7 +267,7 @@ class OfferProductPriceQuantity(models.Model, Offer):
     quantity = models.IntegerField(u"Штук")
     shop = models.ForeignKey(Shop)
 
-class OfferProductPricePickupcity(models.Model, Offer):
+class RepositoryOfferProductPricePickupcity(models.Model, Offer):
     """
     если товар забирут в определнном городе. Так как на сахалине мало предложений то хотим продавать там дороже.
     """
@@ -156,7 +288,7 @@ class OfferProductPricePickupcity(models.Model, Offer):
             return True
         return False
 
-class OfferProductPricePickuppoint(models.Model, Offer):
+class RepositoryOfferProductPricePickuppoint(models.Model, Offer):
     """
     Хотим разрекламировать новый магазин и там слали специальные цены.
     """
@@ -164,7 +296,7 @@ class OfferProductPricePickuppoint(models.Model, Offer):
     product = models.ForeignKey(Product)
     price = models.IntegerField(u"Цена")
     currency = models.CharField(u"Валюта", max_length=5)
-    pickup_point = models.ForeignKey(Pickup) # для данной точки получения
+    pickup_point = models.ForeignKey(PickupPoint) # для данной точки получения
     shop = models.ForeignKey(Shop)
 
     def is_allow_for_pickup_point(self, pickup_point):
@@ -177,7 +309,7 @@ class OfferProductPricePickuppoint(models.Model, Offer):
             return True
         return False
 
-class OfferProductPriceStorage(models.Model, Offer):
+class RepositoryOfferProductPriceStorage(models.Model, Offer):
     """
     если товар едет с этого склада то на него действет такая цена
     """
@@ -193,7 +325,7 @@ class OfferProductPriceStorage(models.Model, Offer):
             return True
         return False
 
-class OfferProductPriceStoragePickuppoint(models.Model, Offer):
+class RepositoryOfferProductPriceStoragePickuppoint(models.Model, Offer):
     """
     Для точки получения в Москве если товар едет с московского склада цена одна, а если точка получения на Сахалинее и товар едет также с московского скалада то цена будет другой.
     """
@@ -202,7 +334,7 @@ class OfferProductPriceStoragePickuppoint(models.Model, Offer):
     price = models.IntegerField(u"Цена")
     currency = models.CharField(u"Валюта", max_length=5)
     storage = models.ForeignKey(Storage) # для всех точек pickup в этом городе
-    pickup_point = models.ForeignKey(Pickup) # для данной точки получения
+    pickup_point = models.ForeignKey(PickupPoint) # для данной точки получения
     shop = models.ForeignKey(Shop)
 
     def is_allow_for_pickup_point(self, pickup_point):
@@ -220,7 +352,7 @@ class OfferProductPriceStoragePickuppoint(models.Model, Offer):
             return True
         return False
 
-class OfferProductPrecentfrompurchasecostStoragePickuppoint(models.Model, Offer):
+class RepositoryOfferProductPrecentfrompurchasecostStoragePickuppoint(models.Model, Offer):
     """
     Для точеки получения на Сахалинее, если товар едет с московского скалада то цена будет на 10% процентов выше по сравнению с ценой закупки(у товара на складе в этом случае должна быть цена закупки), а если точка получения в Москве то всего на 3%.
     """
@@ -228,7 +360,7 @@ class OfferProductPrecentfrompurchasecostStoragePickuppoint(models.Model, Offer)
     product = models.ForeignKey(Product)
     precent_from_purchase_cost = models.IntegerField(u"Процент от цена закупки на указаном складе")
     storage = models.ForeignKey(Storage) # для всех точек pickup в этом городе
-    pickup_point = models.ForeignKey(Pickup) # для данной точки получения
+    pickup_point = models.ForeignKey(PickupPoint) # для данной точки получения
     shop = models.ForeignKey(Shop)
 
     def is_allow_for_pickup_point(self, pickup_point):
@@ -246,7 +378,7 @@ class OfferProductPrecentfrompurchasecostStoragePickuppoint(models.Model, Offer)
             return True
         return False
 
-class OfferProductsPrice(models.Model, Offer):
+class RepositoryOfferProductsPrice(models.Model, Offer):
     """
     Берешь телефон вместе с чехол за 101000.
     При том что по одиночке телефон стоит 100000, а чехол 5000.

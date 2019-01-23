@@ -119,11 +119,11 @@ class TestEShop(TestCase):
 
         session = Session(user=user_vova, city=city_moscow)
 
-        pickup_1 = Pickup(title=u"pickup 1", city=city_moscow)
+        pickup_1 = PickupPoint(title=u"pickup 1", city=city_moscow)
         pickup_1.save()
-        pickup_2 = Pickup(title=u"pickup 2", city=city_moscow)
+        pickup_2 = PickupPoint(title=u"pickup 2", city=city_moscow)
         pickup_2.save()
-        pickup_3 = Pickup(title=u"pickup 3", city=city_spb)
+        pickup_3 = PickupPoint(title=u"pickup 3", city=city_spb)
         pickup_3.save()
 
         shop_1 = Shop(title=u"main shop")
@@ -165,11 +165,11 @@ class TestEShop(TestCase):
         storage_1 = Storage(title=u"main storage")
         storage_1.save()
 
-        pickup_point_1 = Pickup(title=u"pickup 1", city=city_moscow)
+        pickup_point_1 = PickupPoint(title=u"pickup 1", city=city_moscow)
         pickup_point_1.save()
-        pickup_point_2 = Pickup(title=u"pickup 2", city=city_moscow)
+        pickup_point_2 = PickupPoint(title=u"pickup 2", city=city_moscow)
         pickup_point_2.save()
-        pickup_point_3 = Pickup(title=u"pickup 3", city=city_spb)
+        pickup_point_3 = PickupPoint(title=u"pickup 3", city=city_spb)
         pickup_point_3.save()
 
         shop_1 = Shop(title=u"main shop")
@@ -185,14 +185,16 @@ class TestEShop(TestCase):
 
         session = Session(user=user_vova, city=city_moscow)
 
-        product = Product()
+        brand = Brand()
+        brand.save()
+        product = Product(brand=brand)
         product.save()
 
-        shop = Shop(title=u"main shop")
-        shop.save()
+        #shop = Shop(title=u"main shop")
+        #shop.save()
 
-        offer_1 = OfferProductPriceStoragePickuppoint(
-            shop=shop,
+        factory_offer_1 = RepositoryOfferProductPriceStoragePickuppoint(
+            shop=shop_1,
             text=u"offer 1 price 1 product 1 quantity 1 storage pickup_point",
             product=product,
             price=100000,
@@ -203,122 +205,31 @@ class TestEShop(TestCase):
             #city_for_pickup=city_moscow, # город, для которого нужно взять все точки получения
             #filter_pickup_points=... # както сформированное множество точек получения 
             )
-        offer_1.save()
-        offer_2 = OfferProductPriceStoragePickuppoint(
-            shop=shop,
+        factory_offer_1.save()
+        factory_offer_2 = RepositoryOfferProductPriceStoragePickuppoint(
+            shop=shop_1,
             text=u"offer 2 price 2 product 2 quantity 2 storage pickup_point",
             product=product,
             price=100000,
             storage=storage_1,
             pickup_point=pickup_point_1,
             )
-        offer_2.save()
+        factory_offer_2.save()
 
         #shop.add_offer_for_user_with_pickup_in_city(offer_1, city_moscow)
         #shop.add_offer_for_user_with_pickup_in_city(offer_2, city_spb)
 
         #offers = shop.list_offer(session)
-        offers = shop.list_offer_for_user_with_pickup_in_city(user_vova, city_moscow)
-        self.assertEqual([offer_1, offer_2], offers)
+        offers = shop_1.list_offer_for_user_with_pickup_in_city(user_vova, city_moscow)
+        self.assertEqual([factory_offer_1, factory_offer_2], offers)
 
-    #def test_list_storage_from_shop_for_session_with_order(self):
-    def test_list_storage_from_shop_for_user_with_pickup_in_city_with_order(self):
-        city_moscow = City(title=u"Moscow")
-        city_moscow.save()
-        city_spb = City(title=u"SPB")
-        city_spb.save()
-
-        user_vova = User(first_name=u"Vova")
-
-        session = Session(user=user_vova, city=city_moscow)
-
-        storage_1 = Storage(title=u"main storage")
-        storage_1.save()
-        storage_2 = Storage(title=u"storage 2")
-        storage_2.save()
-
-        shop = Shop(title=u"main shop")
-        shop.save()
-        shop.add_storage(storage_1)
-
-        product = Product()
-        product.save()
-
-        pickup_point_1 = Pickup(title=u"pickup 1", city=city_moscow)
-        pickup_point_1.save()
-        pickup_point_2 = Pickup(title=u"pickup 2", city=city_moscow)
-        pickup_point_2.save()
-        pickup_point_3 = Pickup(title=u"pickup 3", city=city_spb)
-        pickup_point_3.save()
-
-        offer_1 = OfferProductPriceStoragePickuppoint(
-            text=u"offer 1 price 1 product 1 quantity 1",
-            shop=shop,
-            product=product,
-            price=100000,
-            storage=storage_1,
-            pickup_point=pickup_point_1,
-        )
-        offer_2 = OfferProductPriceStoragePickuppoint(
-            text=u"offer 2 price 2 product 2 quantity 2",
-            shop=shop,
-            product=product,
-            price=100000,
-            storage=storage_1,
-            pickup_point=pickup_point_1,
-        )
         order = Order()
-        order.add_offer(offer_1)
-        order.add_offer(offer_2)
-        list_storage = shop.test_list_storage_for_user_with_pickup_in_city_with_order(user_vova, city_moscow, order)
+
+        shop_1.add_storage(storage_1)
+        list_storage = shop_1.test_list_storage_for_user_with_pickup_in_city_with_order(user_vova, city_moscow, order)
         self.assertEqual([storage_1], list_storage)
 
-    #def test_list_pickup_from_shop_for_session_with_order(self):
-    def test_list_pickup_from_shop_for_user_with_pickup_in_city_with_order(self):
-        city_moscow = City(title=u"Moscow")
-        city_moscow.save()
-        city_spb = City(title=u"SPB")
-        city_spb.save()
-
-        user_vova = User(first_name=u"Vova")
-
-        session = Session(user=user_vova, city=city_moscow)
-
-        pickup_point_1 = Pickup(title=u"pickup 1", city=city_moscow)
-        pickup_point_1.save()
-        pickup_point_2 = Pickup(title=u"pickup 2", city=city_moscow)
-        pickup_point_2.save()
-
-        shop = Shop(title=u"main shop")
-        shop.save()
-        #shop.add_pickup_for_user_with_pickup_in_city(pickup_1, city_moscow)
-        shop.add_pickup(pickup_point_1)
-
-        product = Product()
-        product.save()
-
-        storage_1 = Storage(title=u"main storage")
-        storage_1.save()
-
-        offer_1 = OfferProductPriceStoragePickuppoint(
-            text=u"offer 1 price 1 product 1 quantity 1",
-            shop=shop,
-            product=product,
-            price=100000,
-            storage=storage_1,
-            pickup_point=pickup_point_1,
-        )
-        offer_2 = OfferProductPriceStoragePickuppoint(
-            text=u"offer 2 price 2 product 2 quantity 2",
-            shop=shop,
-            product=product,
-            price=100000,
-            storage=storage_1,
-            pickup_point=pickup_point_1,
-        )
-        order = Order()
-        order.add_offer(offer_1)
-        order.add_offer(offer_2)
-        #list_pickup = shop.list_pickup(session, order)
-        list_pickup_point = shop.list_pickup_for_user_with_pickup_in_city_with_order(user_vova, city_moscow, order)
+        shop_1.add_pickup(pickup_point_1)
+        list_pickup_point = shop_1.list_pickup_for_user_with_pickup_in_city_with_order(user_vova, city_moscow, order)
         self.assertEqual([pickup_point_1], list_pickup_point)
+
