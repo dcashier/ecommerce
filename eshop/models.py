@@ -44,14 +44,14 @@ class Order(models.Model):
     def add_offer(self, offer):
         self.offers.append(offer)
 
-class Seller(models.Model):
-    text = models.CharField(max_length=200)
+#class Seller(models.Model):
+#    text = models.CharField(max_length=200)
 
 class Shop(models.Model):
     title = models.CharField(max_length=200)
     pickup_points = models.ManyToManyField(PickupPoint)
     storages = models.ManyToManyField(Storage)
-    sellers = models.ManyToManyField(Seller)
+    #sellers = models.ManyToManyField(Seller)
     #offers = models.ManyToManyField(Offer)
 
     #def add_offer_for_user_with_pickup_in_city(self, offer, pickup_in_city):
@@ -163,31 +163,41 @@ class FilterStorage(object):
 class FilterStorageId(models.Model, FilterStorage):
     storages = models.ManyToManyField(Storage)
 
-
-class Saler(models.Model):
-    """
-    Продавец решает какую политику формирования цены применить в данном случае
-    product, purchase cost, client(type), shop, storage, pickup point, seler
-    """
-    title = models.CharField(max_length=100)
-    shop = models.ForeignKey(Shop)
-
+class PricePolicy(models.Model):
     filter_produce = models.ManyToManyField(FilterProductCrossIdCategoryBrand)
     filter_storage = models.ManyToManyField(FilterStorageId)
     filter_pickup_point = models.ManyToManyField(FilterPickupPointIdCity)
 
-    factory_price_part_purchase_cost_from_stock = models.ManyToManyField(PriceFactoryPartPurchaseCostFromStock)
-    factory_price_fix = models.ManyToManyField(PriceFactoryFix)
+    price_factory_part_purchase_cost_from_stock = models.ManyToManyField(PriceFactoryPartPurchaseCostFromStock)
+    price_factory_fix = models.ManyToManyField(PriceFactoryFix)
+
+    def allow_price_factory(product, quantity, storage, pickup_point):
+        price_factories = []
+        if price_policy.is_allow_product_quantity_storage_pickup_point(product, quantity, storage, pickup_point):
+            for price_factory in self.factory_price_part_purchase_cost_from_stock.all():
+                price_factories.append(factory)
+            for price_factory in self.factory_price_fix.all():
+                price_factories.append(factory)
+        return price_factories
+
+
+class Seller(models.Model):
+    """
+    Продавец решает какую политику формирования цены применить в данном случае
+    product, purchase cost, client(type), shop, storage, pickup point, seller
+    """
+    title = models.CharField(max_length=100)
+    shop = models.ForeignKey(Shop)
+
+    price_policies = models.ManyToManyField(PricePolicy)
 
     def __get_price_factories_allow_for_situation_one_product(self, product, storage, pickup_point):
         quantity = 1
-        factories = []
-        if self.__is_allow_product_quantity_storage_pickup_point(product, quantity, storage, pickup_point):
-            for factory in self.factory_price_part_purchase_cost_from_stock.all():
-                factories.append(factory)
-            for factory in self.factory_price_fix.all():
-                factories.append(factory)
-        return factories
+        price_factories = []
+        for price_policy in self.price_policies.all():
+            for price_factory in price_policy.allow_price_factory(product, quantity, storage, pickup_point):
+                price_factories.append(price_factory)
+        return price_factories
 
     def generate_prices(self, product, client_city, client_type):
         pickup_points = self.shop.pickup_points_in_city(client_city)
@@ -197,8 +207,7 @@ class Saler(models.Model):
         price_factories = set()
         for storage in storages:
             for pickup_point in pickup_points:
-                price_factories_allow = self.__get_price_factories_allow_for_situation_one_product(product, storage, pickup_point)
-                for price_factory in price_factories_allow:
+                for price_factory in self.__get_price_factories_allow_for_situation_one_product(product, storage, pickup_point):
                     price_factories.add(price_factory)
 
         prices = set()
