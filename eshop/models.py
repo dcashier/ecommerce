@@ -66,6 +66,9 @@ class Shop(models.Model):
     def add_storage(self, storage):
         self.storages.add(storage)
 
+    def allow_storages(self):
+        return self.__list_storage_for_user_with_pickup_in_city_with_order(None, None, None)
+
     def is_offer_pickup_in_city(self, offer, pickup_in_city):
         return True
 
@@ -114,6 +117,9 @@ class Shop(models.Model):
     #def list_storage(self, session, order):
     def __list_storage_for_user_with_pickup_in_city_with_order(self, user, pickup_in_city, order):
         return sorted(list(self.storages.all()), key=lambda x : x.id)
+
+    def pickup_points_in_city(self, pickup_city):
+        return self.list_pickup_for_user_with_pickup_in_city_with_order(None, pickup_city, None)
 
     def test_list_storage_for_user_with_pickup_in_city_with_order(self, user, pickup_in_city, order):
         return self.__list_storage_for_user_with_pickup_in_city_with_order(user, pickup_in_city, order)
@@ -189,9 +195,9 @@ class Seller(models.Model):
     title = models.CharField(max_length=100)
     shop = models.ForeignKey(Shop)
 
-    price_policies = models.ManyToManyField(PricePolicy)
+    price_policies = models.ManyToManyField(PricePolicy) # политики которые может использовать данный продавец ему назанчаются свыше
 
-    def __get_price_factories_allow_for_situation_one_product(self, product, storage, pickup_point):
+    def __price_factories_allow_for_situation_one_product(self, product, storage, pickup_point):
         quantity = 1
         price_factories = []
         for price_policy in self.price_policies.all():
@@ -199,21 +205,41 @@ class Seller(models.Model):
                 price_factories.append(price_factory)
         return price_factories
 
+    def __link_price_factory_product_storage_pickup_point(self, product, storages, pickup_points):
+        link_price_factory_product_storage_pickup_point = []
+        for storage in storages:
+            for pickup_point in pickup_points:
+                for price_factory in self.__price_factories_allow_for_situation_one_product(product, storages, pickup_points):
+                    link_price_factory_product_storage_pickup_point.append({
+                        'product': product,
+                        'storage': storage,
+                        'pickup_point': pickup_point,
+                        'price_factory': price_factory,
+                    })
+        return link_price_factory_product_storage_pickup_point
+
+
     def generate_prices(self, product, client_city, client_type):
         pickup_points = self.shop.pickup_points_in_city(client_city)
         storages = self.shop.allow_storages()
         quantity = 1
 
-        price_factories = set()
-        for storage in storages:
-            for pickup_point in pickup_points:
-                for price_factory in self.__get_price_factories_allow_for_situation_one_product(product, storage, pickup_point):
-                    price_factories.add(price_factory)
+        #price_factories = set()
+        #for storage in storages:
+        #    for pickup_point in pickup_points:
+        #        for price_factory in self.__price_factories_allow_for_situation_one_product(product, storage, pickup_point):
+        #            price_factories.add(price_factory)
 
+        #prices = set()
+        #for price_factory in price_factories:
+        #    price = price_factory.generate_for_product_on_storage(product, storage)
+        #    prices.add(price)
+
+        link_price_factory_product_storage_pickup_point = self.__link_price_factory_product_storage_pickup_point(product, storages, pickup_points)
         prices = set()
-        for price_factory in price_factories:
-            price = price_factory.generate_for_product_on_storage(product, storage)
-            prices.add(price)
+        for link in link_price_factory_product_storage_pickup_point:
+            price = link['price_factory'].generate_for_product_on_storage(link['product'], link['storage'])
+            prices.add()
 
         return prices
 

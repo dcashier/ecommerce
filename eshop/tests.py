@@ -103,6 +103,73 @@ class TestEShop(TestCase):
         """
         pass
 
+    def test_seller(self):
+        city_moscow = City(title=u"Moscow")
+        city_moscow.save()
+        city_spb = City(title=u"SPB")
+        city_spb.save()
+
+        storage_1 = Storage(title=u"main storage")
+        storage_1.save()
+
+        pickup_point_1 = PickupPoint(title=u"pickup 1", city=city_moscow)
+        pickup_point_1.save()
+        pickup_point_2 = PickupPoint(title=u"pickup 2", city=city_moscow)
+        pickup_point_2.save()
+        pickup_point_3 = PickupPoint(title=u"pickup 3", city=city_spb)
+        pickup_point_3.save()
+
+        shop_1 = Shop(title=u"main shop")
+        shop_1.save()
+        shop_2 = Shop(title=u"next shop")
+        shop_2.save()
+
+        shop_1.add_pickup(pickup_point_1)
+        shop_1.add_pickup(pickup_point_2)
+        shop_1.add_pickup(pickup_point_3)
+
+        user_vova = User(first_name=u"Vova")
+
+        session = Session(user=user_vova, city=city_moscow)
+
+        brand = Brand()
+        brand.save()
+        product = Product(brand=brand)
+        product.save()
+
+        stock = Stock(product=product, quantity=10, storage=storage_1, purchase_cost=105.1, currency="RUR")
+
+	filter_produce_1 = FilterProductCrossIdCategoryBrand()
+        filter_produce_1.save()
+	filter_storage_1 = FilterStorageId()
+        filter_storage_1.save()
+	filter_pickup_point_1 = FilterPickupPointIdCity()
+        filter_pickup_point_1.save()
+	price_factory_part_purchase_cost_from_stock_1 = PriceFactoryPartPurchaseCostFromStock(precent=10)
+        price_factory_part_purchase_cost_from_stock_1.save()
+	#price_factory_fix_1 = PriceFactoryFix()
+        #price_factory_fix_1.save()
+
+	price_policy_1 = PricePolicy()
+        price_policy_1.save()
+	price_policy_1.filter_produce.add(filter_produce_1)
+	price_policy_1.filter_storage.add(filter_storage_1)
+	price_policy_1.filter_pickup_point.add(filter_pickup_point_1)
+	price_policy_1.price_factory_part_purchase_cost_from_stock.add(price_factory_part_purchase_cost_from_stock_1)
+	#price_policy_1.price_factory_fix.add(price_factory_fix_1)
+
+        client_city = city_moscow
+        client_type = 'onliner'
+
+        seller = Seller(shop=shop_1)
+	seller.save()
+	seller.price_policies.add(price_policy_1)
+	#seller.price_policies.add(price_policy_2)
+
+        prices = seller.generate_prices(product, client_city, client_type)
+        self.assertEqual([100, 150], prices)
+
+
     #def test_list_shop_for_session(self):
     def test_list_shop_for_user_with_pickup_in_city(self):
         """
