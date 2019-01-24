@@ -62,24 +62,79 @@ class Storage(models.Model):
             purchase_costs.add(stock.purchase_cost)
         return list(purchase_costs)
 
-    def load(self, product, quantity, purchase_cost, currency):
-        stock = Stock(product=product, quantity=quantity, storage=self, purchase_cost=purchase_cost, currency=currency)
+    def load(self, product, quantity, purchase_cost, purchase_currency):
+        #stock = Stock(product=product, quantity=quantity, storage=self, purchase_cost=purchase_cost, purchase_currency=purchase_currency)
+        stock = Stock(product=product, quantity=quantity, storage=self, purchase_cost=purchase_cost, purchase_currency=purchase_currency)
         stock.save()
 
-
 class Stock(models.Model):
+    product = models.ForeignKey(Product)
+
+    quantity = models.IntegerField(u"Количество")
+
+    storage = models.ForeignKey(Storage)
+
+    purchase_cost = models.DecimalField(u"стоимость закупки одной штуки", decimal_places=2, max_digits=7)
+    purchase_currency = models.CharField(u"Валюта", max_length=5)
+
+    sale_cost = models.DecimalField(u"стоимость продажи одной штуки", decimal_places=2, max_digits=7, null=True, blank=True)
+    sale_currency = models.CharField(u"Валюта", max_length=5, null=True, blank=True)
+
+class Reserve(models.Model):
+    """
+    Для чего нужен резерв, чтобы данный товар не смоги продать другому агенту.
+    Важно что приналичии 2-х и более складов товар должен остаться не задействованным только на оперделенном складе.
+    Т.е. появляется понятие СВОБОДНЫЙ остаток.
+    А также является ли система резервирования частью склада или нет?
+
+    Надо поянть привзан ли резерв к остатку, и если привязан то:
+        1. Каким образом они связаны?
+        2. При перемещении остатков резер тоже должен перемещаться?
+    Важно чтобы резервировался товар с опредененной ценой закупки? Да.
+    """
     product = models.ForeignKey(Product)
     quantity = models.IntegerField(u"Количество")
     storage = models.ForeignKey(Storage)
     purchase_cost = models.DecimalField(u"стоимость закупки одной штуки", decimal_places=2, max_digits=7)
-    currency = models.CharField(u"Валюта", max_length=5)
+    purchase_currency = models.CharField(u"Валюта", max_length=5)
 
-class Reserve(models.Model):
-    product = models.ForeignKey(Product)
+class Logistic(object):
+    """
+    Обект который может перевозить грузы между складами
+    Мы можем перемещать товар но надо не забыть что к какой то его части может быть привязан резерв.
+    """
+    def transfer_product(self, storage_depart, datetime_depart, storage_arrival, datetime_arrival, cargo):
+        """
+        cargo = [{product, quantity, purchase_cost, currency, reserve, ...}, {}, ...]
+        """
+        pass
+
+class SystemPurchase(models.Model):
+    pass
+
+class ElemetPurchase(models.Model):
+    system_purchase = models.ForeignKey(SystemPurchase)
+
     quantity = models.IntegerField(u"Количество")
-    storage = models.ForeignKey(Storage)
-    #purchase_cost = models.DecimalField(u"стоимость закупки одной штуки", decimal_places=2, max_digits=7)
-    #currency = models.CharField(u"Валюта", max_length=5)
+
+    product = models.ForeignKey(Product)
+
+    purchase_cost = models.DecimalField(u"стоимость закупки одной штуки", decimal_places=2, max_digits=7)
+    purchase_currency = models.CharField(u"Валюта", max_length=5)
+
+class SystemSale(models.Model):
+    pass
+
+class ElementSale(models.Model):
+    system_sale= models.ForeignKey(SystemSale)
+
+    quantity = models.IntegerField(u"Количество")
+
+    product = models.ForeignKey(Product)
+
+    sale_cost = models.DecimalField(u"стоимость продажи одной штуки", decimal_places=2, max_digits=7)
+    sale_currency = models.CharField(u"Валюта", max_length=5)
+
 
 class Order(models.Model):
     text = models.CharField(max_length=200)
@@ -354,7 +409,8 @@ class Seller(models.Model):
         return list(products)
 
     def reserve_product_on_storage(self, product, quantity, storage, info_text):
-        reserve = Reserve(product=product, quantity=quantity, storage=storage)
+        #reserve = Reserve(product=product, quantity=quantity, storage=storage)
+        reserve = Reserve(product=product, quantity=quantity, storage=storage, purchase_cost=100, purchase_currency="rur")
         reserve.save()
 
 
