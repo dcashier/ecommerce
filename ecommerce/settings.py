@@ -50,6 +50,7 @@ INSTALLED_APPS = (
     'epurchase',
     'esale',
     'eseller',
+    'eloyalty',
 )
 
 MIDDLEWARE_CLASSES = (
