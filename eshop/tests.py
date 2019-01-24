@@ -140,12 +140,23 @@ class TestEShop(TestCase):
         product_mi8 = Product(brand=brand_xiaomy)
         product_mi8.save()
 
+        # Закупка пратии Mi8
         #stock_1 = Stock(product=product_mi8, quantity=10, storage=storage_1, purchase_cost=105.1, currency="RUR")
         #stock_1.save()
         quantity_mi8 = 10
         purchase_cost_mi8 = 105.1
         currency_mi8 = "USD"
-        storage_1.load(product_mi8, quantity_mi8, purchase_cost_mi8, currency_mi8)
+
+        part_number = PartNumber()
+        part_number.save()
+
+        system_purchase = SystemPurchase()
+        system_purchase.save()
+        element_purchase = ElemetPurchase(system_purchase=system_purchase, quantity=quantity_mi8, product=product_mi8, part_number=part_number, purchase_cost=purchase_cost_mi8, purchase_currency=currency_mi8)
+        element_purchase.save()
+
+        #storage_1.load(product_mi8, quantity_mi8, purchase_cost_mi8, currency_mi8)
+        storage_1.load(product_mi8, quantity_mi8, part_number)
 
         seller = Seller(shop=shop_1)
 	seller.save()
@@ -153,9 +164,12 @@ class TestEShop(TestCase):
         quantity = seller.check_quantity_for_sale(product_mi8)
         self.assertEqual(10, quantity)
 
+        # закупка прошла успешно
+
         info_text = u"продавца попросили зарезервирвать для большиз босов"
         reserve_for_big_boss_quantity = 2
-        seller.reserve_product_on_storage(product_mi8, reserve_for_big_boss_quantity, storage_1, info_text)
+        #seller.reserve_product_on_storage(product_mi8, reserve_for_big_boss_quantity, storage_1, info_text)
+        seller.reserve_product_on_storage(product_mi8, reserve_for_big_boss_quantity, storage_1, info_text, part_number)
         quantity = seller.check_quantity_for_sale(product_mi8)
         self.assertEqual(8, quantity)
 

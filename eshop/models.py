@@ -43,10 +43,13 @@ class Storage(models.Model):
         purchase_costs = set()
         #for stock in self.stocks_by_product(product):
         for stock in Stock.objects.filter(storage=self, product=product):
-            purchase_costs.add(stock.purchase_cost)
+            #purchase_costs.add(stock.purchase_cost)
+            #for element_purchase in ElemetPurchase.objects.filter(product=product, part_number=part_number):
+            for element_purchase in ElemetPurchase.objects.filter(product=product, part_number=stock.part_number):
+                purchase_costs.add(element_purchase.purchase_cost)
 
         if not len(purchase_costs) == 1:
-            raise ValidationError(u"Не допусимое количество цен закупки для одного склада")
+            raise ValidationError(u"Не допусимое количество цен закупки для одного склада = %s" % len(purchase_costs))
 
         return list(purchase_costs)[0]
 
@@ -59,26 +62,37 @@ class Storage(models.Model):
     def list_purchase_cost_for_product(self, product):
         purchase_costs = set()
         for stock in Stock.objects.filter(storage=self, product=product):
-            purchase_costs.add(stock.purchase_cost)
+            #purchase_costs.add(stock.purchase_cost)
+            for element_purchase in ElemetPurchase.objects.filter(product=product, part_number=stock.part_number):
+                purchase_costs.add(element_purchase.purchase_cost)
         return list(purchase_costs)
 
-    def load(self, product, quantity, purchase_cost, purchase_currency):
-        #stock = Stock(product=product, quantity=quantity, storage=self, purchase_cost=purchase_cost, purchase_currency=purchase_currency)
-        stock = Stock(product=product, quantity=quantity, storage=self, purchase_cost=purchase_cost, purchase_currency=purchase_currency)
+    #def load(self, product, quantity, purchase_cost, purchase_currency):
+    #    #stock = Stock(product=product, quantity=quantity, storage=self, purchase_cost=purchase_cost, purchase_currency=purchase_currency)
+    #    stock = Stock(product=product, quantity=quantity, storage=self, purchase_cost=purchase_cost, purchase_currency=purchase_currency)
+    #    stock.save()
+
+    def load(self, product, quantity, part_number):
+        stock = Stock(product=product, quantity=quantity, storage=self, part_number=part_number)
         stock.save()
+
+
+class PartNumber(models.Model):
+    pass
 
 class Stock(models.Model):
     product = models.ForeignKey(Product)
-
     quantity = models.IntegerField(u"Количество")
 
     storage = models.ForeignKey(Storage)
 
-    purchase_cost = models.DecimalField(u"стоимость закупки одной штуки", decimal_places=2, max_digits=7)
-    purchase_currency = models.CharField(u"Валюта", max_length=5)
+    part_number = models.ForeignKey(PartNumber)
 
-    sale_cost = models.DecimalField(u"стоимость продажи одной штуки", decimal_places=2, max_digits=7, null=True, blank=True)
-    sale_currency = models.CharField(u"Валюта", max_length=5, null=True, blank=True)
+    #purchase_cost = models.DecimalField(u"стоимость закупки одной штуки", decimal_places=2, max_digits=7)
+    #purchase_currency = models.CharField(u"Валюта", max_length=5)
+
+    #sale_cost = models.DecimalField(u"стоимость продажи одной штуки", decimal_places=2, max_digits=7, null=True, blank=True)
+    #sale_currency = models.CharField(u"Валюта", max_length=5, null=True, blank=True)
 
 class Reserve(models.Model):
     """
@@ -94,9 +108,13 @@ class Reserve(models.Model):
     """
     product = models.ForeignKey(Product)
     quantity = models.IntegerField(u"Количество")
+
     storage = models.ForeignKey(Storage)
-    purchase_cost = models.DecimalField(u"стоимость закупки одной штуки", decimal_places=2, max_digits=7)
-    purchase_currency = models.CharField(u"Валюта", max_length=5)
+
+    part_number = models.ForeignKey(PartNumber)
+
+    #purchase_cost = models.DecimalField(u"стоимость закупки одной штуки", decimal_places=2, max_digits=7)
+    #purchase_currency = models.CharField(u"Валюта", max_length=5)
 
 class Logistic(object):
     """
@@ -116,8 +134,9 @@ class ElemetPurchase(models.Model):
     system_purchase = models.ForeignKey(SystemPurchase)
 
     quantity = models.IntegerField(u"Количество")
-
     product = models.ForeignKey(Product)
+
+    part_number = models.ForeignKey(PartNumber)
 
     purchase_cost = models.DecimalField(u"стоимость закупки одной штуки", decimal_places=2, max_digits=7)
     purchase_currency = models.CharField(u"Валюта", max_length=5)
@@ -129,8 +148,9 @@ class ElementSale(models.Model):
     system_sale= models.ForeignKey(SystemSale)
 
     quantity = models.IntegerField(u"Количество")
-
     product = models.ForeignKey(Product)
+
+    part_number = models.ForeignKey(PartNumber)
 
     sale_cost = models.DecimalField(u"стоимость продажи одной штуки", decimal_places=2, max_digits=7)
     sale_currency = models.CharField(u"Валюта", max_length=5)
@@ -302,6 +322,7 @@ class Seller(models.Model):
     """
     Продавец решает какую политику формирования цены применить в данном случае
     product, purchase cost, client(type), shop, storage, pickup point, seller
+    Продавец это может быть и человек в магазине на улице, и сайт, и телеграм бот, и человек в кол центре
     """
     title = models.CharField(max_length=100)
     shop = models.ForeignKey(Shop)
@@ -408,9 +429,13 @@ class Seller(models.Model):
                 products.add(product)
         return list(products)
 
-    def reserve_product_on_storage(self, product, quantity, storage, info_text):
-        #reserve = Reserve(product=product, quantity=quantity, storage=storage)
-        reserve = Reserve(product=product, quantity=quantity, storage=storage, purchase_cost=100, purchase_currency="rur")
+    #def reserve_product_on_storage(self, product, quantity, storage, info_text):
+    #    #reserve = Reserve(product=product, quantity=quantity, storage=storage)
+    #    reserve = Reserve(product=product, quantity=quantity, storage=storage, purchase_cost=100, purchase_currency="rur")
+    #    reserve.save()
+
+    def reserve_product_on_storage(self, product, quantity, storage, info_text, part_number):
+        reserve = Reserve(product=product, quantity=quantity, storage=storage, part_number=part_number)
         reserve.save()
 
 
