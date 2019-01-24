@@ -152,43 +152,31 @@ class TestEShop(TestCase):
         quantity_mi8 = 10
         purchase_cost_mi8 = 105.1
         currency_mi8 = "USD"
-
         part_number_1 = PartNumber()
         part_number_1.save()
-
         element_purchase = ElemetPurchase(system_purchase=system_purchase, quantity=quantity_mi8, product=product_mi8, part_number=part_number_1, purchase_cost=purchase_cost_mi8, purchase_currency=currency_mi8)
         element_purchase.save()
-
         #storage_1.load(product_mi8, quantity_mi8, purchase_cost_mi8, currency_mi8)
         storage_1.load(product_mi8, quantity_mi8, part_number_1)
-
         quantity = seller.check_quantity_for_sale(product_mi8)
         self.assertEqual(10, quantity)
-
         # закупка прошла успешно
 
         # Через несколько дней планируя высокий обем спроса на Ми8, закупили еще Mi8 но по чуть большей цене
-
         quantity_mi8_2 = 20
         purchase_cost_mi8_2 = 120
         currency_mi8_2 = "USD"
-
         part_number_2 = PartNumber()
         part_number_2.save()
-
         system_purchase = SystemPurchase()
         system_purchase.save()
         element_purchase = ElemetPurchase(system_purchase=system_purchase, quantity=quantity_mi8_2, product=product_mi8, part_number=part_number_2, purchase_cost=purchase_cost_mi8_2, purchase_currency=currency_mi8_2)
         element_purchase.save()
-
         storage_1.load(product_mi8, quantity_mi8_2, part_number_2)
-
         quantity = seller.check_quantity_for_sale(product_mi8)
         # с учетом предыдущих 10 ми8 суммарно получили 30
         self.assertEqual(30, quantity)
-
         # закупка прошла успешно
-
 
         info_text = u"продавца попросили зарезервирвать для большиз босов"
         reserve_for_big_boss_quantity = 2
@@ -196,7 +184,7 @@ class TestEShop(TestCase):
         seller.reserve_product_on_storage(product_mi8, reserve_for_big_boss_quantity, storage_1, info_text, part_number_1)
         quantity = seller.check_quantity_for_sale(product_mi8)
         self.assertEqual(28, quantity)
-
+        # Зарезервировали
 
 	filter_produce_1 = FilterProductCrossIdCategoryBrand()
         filter_produce_1.save()
