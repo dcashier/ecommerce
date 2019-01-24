@@ -1,7 +1,7 @@
 #!-*-coding: utf-8 -*-
 from django.test import TestCase
 
-from eshop.models import *
+from eseller.models import *
 from django.test.client import Client
 import json
 import sys
@@ -120,11 +120,11 @@ class TestEShop(TestCase):
         shop_2 = Shop(title=u"next shop")
         shop_2.save()
 
-        shop_1.add_pickup(pickup_point_1)
-        shop_1.add_pickup(pickup_point_2)
-        shop_1.add_pickup(pickup_point_3)
+        shop_1.pickup_points.add(pickup_point_1)
+        shop_1.pickup_points.add(pickup_point_2)
+        shop_1.pickup_points.add(pickup_point_3)
 
-        shop_1.add_storage(storage_1)
+        shop_1.storages.add(storage_1)
 
         brand_xiaomy = Brand(title="Xiaomy")
         brand_xiaomy.save()

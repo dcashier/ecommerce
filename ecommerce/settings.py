@@ -40,7 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'eshop', #code
+    'eshop',
     'eproduct',
     'estorage',
     'epartnumber',
@@ -49,6 +49,7 @@ INSTALLED_APPS = (
     #'eoffer',
     'epurchase',
     'esale',
+    'eseller',
 )
 
 MIDDLEWARE_CLASSES = (
