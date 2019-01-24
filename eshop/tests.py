@@ -9,15 +9,10 @@ import time
 import pprint
 from decimal import Decimal
 
-# Create your tests here.
-
 class TestEShop(TestCase):
     def setUp(self):
         print "SETUP DATA FOR ..."
         self.assertEqual.__self__.maxDiff = None
-
-        #catalog_shops = CatalogShops(title=u"main catalog")
-        #catalog_shops.save()
 
     def test_1(self):
         """
@@ -131,10 +126,6 @@ class TestEShop(TestCase):
 
         shop_1.add_storage(storage_1)
 
-#        user_vova = User(first_name=u"Vova")
-#
-#        session = Session(user=user_vova, city=city_moscow)
-
         brand_xiaomy = Brand(title="Xiaomy")
         brand_xiaomy.save()
         product_mi8 = Product(brand=brand_xiaomy)
@@ -234,141 +225,21 @@ class TestEShop(TestCase):
         quantity = seller.check_quantity_for_sale(product_mi8)
         self.assertEqual(28, quantity)
 
-
         #Вова решил купить Ми8 за цену 115.61, оформляет заказ.
         #Предлодить вове места ддля получнеия телефона
         #Когда он выберет метсто рассчитать дату и время когда он то сможет забрать
         #если все устраивает и пришла оплата, резериватьвать товар и перемещать на пункт выдачи
         #когда вова за ним придет выдать товар офрмить чек, и начислить балы в системе лояльности.
 
-
-#    #def test_list_shop_for_session(self):
 #    def test_list_shop_for_user_with_pickup_in_city(self):
 #        """
 #        Получить список разрешенных магазинов в определнном городе для пользователя.
 #        К примеру с обычными пользователями не будут работать оптовые магазины.
 #        А соответсвенно нет необходимости получать от них офферы.
 #        """
-#        city_moscow = City(title=u"Moscow")
-#        city_moscow.save()
-#        city_spb = City(title=u"SPB")
-#        city_spb.save()
-#
-#        user_vova = User(first_name=u"Vova")
-#
-#        session = Session(user=user_vova, city=city_moscow)
-#
-#        pickup_1 = PickupPoint(title=u"pickup 1", city=city_moscow)
-#        pickup_1.save()
-#        pickup_2 = PickupPoint(title=u"pickup 2", city=city_moscow)
-#        pickup_2.save()
-#        pickup_3 = PickupPoint(title=u"pickup 3", city=city_spb)
-#        pickup_3.save()
-#
-#        shop_1 = Shop(title=u"main shop")
-#        shop_1.save()
-#        shop_2 = Shop(title=u"next shop")
-#        shop_2.save()
-#
-#        shop_1.add_pickup(pickup_1)
-#        shop_1.add_pickup(pickup_2)
-#        shop_1.add_pickup(pickup_3)
-#        shop_2.add_pickup(pickup_1)
-#
-#        catalog_shops = CatalogShops(title=u"main catalog")
-#        catalog_shops.save()
-#        #catalog_shops.add_shop_for_user_with_pickup_in_city(shop_1, city_moscow)
-#        #catalog_shops.add_shop_for_user_with_pickup_in_city(shop_2, city_spb)
-#        catalog_shops.add_shop(shop_1)
-#        catalog_shops.add_shop(shop_2)
-#
-#        #shops = catalog_shops.allow_shops_for_session(session)
-#        shops = catalog_shops.allow_shops_for_user_with_pickup_in_city(user_vova, city_moscow)
-#        self.assertEqual([shop_1, shop_2], shops)
-#
-#        shops = catalog_shops.allow_shops_for_user_with_pickup_in_city(user_vova, city_spb)
-#        self.assertEqual([shop_1], shops)
 
-
-#    #def test_list_offer_from_shop_for_session(self):
 #    def test_list_offer_from_shop_for_user_with_pickup_in_city(self):
 #        """
 #        Получить список офферов которые он может забрать в городе у выбранного магазина для пользователя.
 #        Айфоны в рознице, по причине политической, не продаем во всех городах Крыма .
 #        """
-#        city_moscow = City(title=u"Moscow")
-#        city_moscow.save()
-#        city_spb = City(title=u"SPB")
-#        city_spb.save()
-#
-#        storage_1 = Storage(title=u"main storage")
-#        storage_1.save()
-#
-#        pickup_point_1 = PickupPoint(title=u"pickup 1", city=city_moscow)
-#        pickup_point_1.save()
-#        pickup_point_2 = PickupPoint(title=u"pickup 2", city=city_moscow)
-#        pickup_point_2.save()
-#        pickup_point_3 = PickupPoint(title=u"pickup 3", city=city_spb)
-#        pickup_point_3.save()
-#
-#        shop_1 = Shop(title=u"main shop")
-#        shop_1.save()
-#        shop_2 = Shop(title=u"next shop")
-#        shop_2.save()
-#
-#        shop_1.add_pickup(pickup_point_1)
-#        shop_1.add_pickup(pickup_point_2)
-#        shop_1.add_pickup(pickup_point_3)
-#
-#        user_vova = User(first_name=u"Vova")
-#
-#        session = Session(user=user_vova, city=city_moscow)
-#
-#        brand = Brand()
-#        brand.save()
-#        product = Product(brand=brand)
-#        product.save()
-#
-#        #shop = Shop(title=u"main shop")
-#        #shop.save()
-#
-#        factory_offer_1 = RepositoryOfferProductPriceStoragePickuppoint(
-#            shop=shop_1,
-#            text=u"offer 1 price 1 product 1 quantity 1 storage pickup_point",
-#            product=product,
-#            price=100000,
-#            #quantity=1,
-#            storage=storage_1,
-#            pickup_point=pickup_point_1, # конкретная точка получения
-#            #pickup_points=[pickup_point_1, pickup_point_2, pickup_point_3, ...] # множество точек получения
-#            #city_for_pickup=city_moscow, # город, для которого нужно взять все точки получения
-#            #filter_pickup_points=... # както сформированное множество точек получения 
-#            )
-#        factory_offer_1.save()
-#        factory_offer_2 = RepositoryOfferProductPriceStoragePickuppoint(
-#            shop=shop_1,
-#            text=u"offer 2 price 2 product 2 quantity 2 storage pickup_point",
-#            product=product,
-#            price=100000,
-#            storage=storage_1,
-#            pickup_point=pickup_point_1,
-#            )
-#        factory_offer_2.save()
-#
-#        #shop.add_offer_for_user_with_pickup_in_city(offer_1, city_moscow)
-#        #shop.add_offer_for_user_with_pickup_in_city(offer_2, city_spb)
-#
-#        #offers = shop.list_offer(session)
-#        offers = shop_1.list_offer_for_user_with_pickup_in_city(user_vova, city_moscow)
-#        self.assertEqual([factory_offer_1, factory_offer_2], offers)
-#
-#        order = Order()
-#
-#        shop_1.add_storage(storage_1)
-#        list_storage = shop_1.test_list_storage_for_user_with_pickup_in_city_with_order(user_vova, city_moscow, order)
-#        self.assertEqual([storage_1], list_storage)
-#
-#        shop_1.add_pickup(pickup_point_1)
-#        list_pickup_point = shop_1.list_pickup_for_user_with_pickup_in_city_with_order(user_vova, city_moscow, order)
-#        self.assertEqual([pickup_point_1], list_pickup_point)
-
