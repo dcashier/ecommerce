@@ -21,11 +21,11 @@ class Seller(models.Model):
     shop = models.ForeignKey(Shop)
     price_policies = models.ManyToManyField(PricePolicy) # политики которые может использовать данный продавец ему назанчаются свыше
 
-    def check_quantity_for_sale(self, product):
+    def quantity_for_sale(self, product):
         storages = self.shop.storages.all()
         quantity = 0
         for storage in storages:
-            quantity += storage.check_quantity(product)
+            quantity += storage.quantity(product)
             for reserve in Reserve.objects.filter(storage=storage, product=product):
                 quantity -= reserve.quantity
                 if quantity < 0:

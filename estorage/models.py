@@ -13,7 +13,7 @@ class City(models.Model):
 class Storage(models.Model):
     title = models.CharField(max_length=200)
 
-    def check_quantity(self, product):
+    def quantity(self, product):
         quantity = 0
         for stock in Stock.objects.filter(storage=self, product=product):
             quantity += stock.quantity

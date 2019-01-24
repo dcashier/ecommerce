@@ -149,7 +149,7 @@ class TestEShop(TestCase):
         element_purchase.save()
         #storage_1.load(product_mi8, quantity_mi8, purchase_cost_mi8, currency_mi8)
         storage_1.load(product_mi8, quantity_mi8, part_number_1)
-        quantity = seller.check_quantity_for_sale(product_mi8)
+        quantity = seller.quantity_for_sale(product_mi8)
         self.assertEqual(10, quantity)
         # закупка прошла успешно
 
@@ -164,7 +164,7 @@ class TestEShop(TestCase):
         element_purchase = ElemetPurchase(system_purchase=system_purchase, quantity=quantity_mi8_2, product=product_mi8, part_number=part_number_2, purchase_cost=purchase_cost_mi8_2, purchase_currency=currency_mi8_2)
         element_purchase.save()
         storage_1.load(product_mi8, quantity_mi8_2, part_number_2)
-        quantity = seller.check_quantity_for_sale(product_mi8)
+        quantity = seller.quantity_for_sale(product_mi8)
         # с учетом предыдущих 10 ми8 суммарно получили 30
         self.assertEqual(30, quantity)
         # закупка прошла успешно
@@ -173,7 +173,7 @@ class TestEShop(TestCase):
         reserve_for_big_boss_quantity = 2
         #seller.reserve_product_on_storage(product_mi8, reserve_for_big_boss_quantity, storage_1, info_text)
         seller.reserve_product_on_storage(product_mi8, reserve_for_big_boss_quantity, storage_1, info_text, part_number_1)
-        quantity = seller.check_quantity_for_sale(product_mi8)
+        quantity = seller.quantity_for_sale(product_mi8)
         self.assertEqual(28, quantity)
         # Зарезервировали
 
@@ -222,7 +222,7 @@ class TestEShop(TestCase):
         self.assertEqual([Decimal('115.61'), Decimal('132.00'), 150], prices)
 
         # а много у вас осталось Mi8 сейчас?
-        quantity = seller.check_quantity_for_sale(product_mi8)
+        quantity = seller.quantity_for_sale(product_mi8)
         self.assertEqual(28, quantity)
 
         #Вова решил купить Ми8 за цену 115.61, оформляет заказ.
