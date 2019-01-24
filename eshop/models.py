@@ -1,5 +1,6 @@
 #!-*-coding: utf-8 -*-
 from django.db import models
+from django.core.exceptions import ValidationError
 
 # Create your models here.
 
@@ -29,7 +30,7 @@ class Product(models.Model):
 
 class Storage(models.Model):
     title = models.CharField(max_length=200)
-    
+
     #def stocks_by_product(self, product):
     #    return Stock.objects.filter(product=product)
 
@@ -39,19 +40,19 @@ class Storage(models.Model):
             quantity += stock.quantity
         return quantity
 
-    def get_purchase_cost_for_product(self, product):
-        purchase_costs = set()
-        #for stock in self.stocks_by_product(product):
-        for stock in Stock.objects.filter(storage=self, product=product):
-            #purchase_costs.add(stock.purchase_cost)
-            #for element_purchase in ElemetPurchase.objects.filter(product=product, part_number=part_number):
-            for element_purchase in ElemetPurchase.objects.filter(product=product, part_number=stock.part_number):
-                purchase_costs.add(element_purchase.purchase_cost)
+    #def get_purchase_cost_for_product(self, product):
+    #    purchase_costs = set()
+    #    #for stock in self.stocks_by_product(product):
+    #    for stock in Stock.objects.filter(storage=self, product=product):
+    #        #purchase_costs.add(stock.purchase_cost)
+    #        #for element_purchase in ElemetPurchase.objects.filter(product=product, part_number=part_number):
+    #        for element_purchase in ElemetPurchase.objects.filter(product=product, part_number=stock.part_number):
+    #            purchase_costs.add(element_purchase.purchase_cost)
 
-        if not len(purchase_costs) == 1:
-            raise ValidationError(u"Не допусимое количество цен закупки для одного склада = %s" % len(purchase_costs))
+    #    if not len(purchase_costs) == 1:
+    #        raise ValidationError(u"Не допусимое количество цен закупки для одного склада = %s" % len(purchase_costs))
 
-        return list(purchase_costs)[0]
+    #    return list(purchase_costs)[0]
 
     def list_product(self):
         products = set()
@@ -248,7 +249,7 @@ class PriceFactoryPartPurchaseCost(models.Model):
     precent = models.IntegerField(u"Процент")
 
     def generate(self, purchase_cost, product, storage):
-        return purchase_cost * self.precent
+        return purchase_cost * (100 + self.precent) / 100
 
 class PriceFactoryPartPurchaseCostFromStock(models.Model):
     """
@@ -311,6 +312,8 @@ class PricePolicy(models.Model):
     def allow_price_factory(self, product, quantity, storage, pickup_point):
         price_factories = []
         if self.is_allow_product_quantity_storage_pickup_point(product, quantity, storage, pickup_point):
+            for price_factory in self.price_factory_part_purchase_cost.all():
+                price_factories.append(price_factory)
             for price_factory in self.price_factory_part_purchase_cost_from_stock.all():
                 price_factories.append(price_factory)
             for price_factory in self.price_factory_fix.all():
@@ -372,13 +375,14 @@ class Seller(models.Model):
         for storage in storages:
             for pickup_point in pickup_points:
                 for price_factory in self.__price_factories_allow_for_situation_one_product(product, storages, pickup_points):
-                    purchase_cost = storage.get_purchase_cost_for_product(product)
-                    link_price_product_storage_pickup_point.append({
-                        'product': product,
-                        'storage': storage,
-                        'pickup_point': pickup_point,
-                        'price': price_factory.generate(purchase_cost, product, storage),
-                    })
+                    #purchase_cost = storage.get_purchase_cost_for_product(product)
+                    for purchase_cost in storage.list_purchase_cost_for_product(product):
+                        link_price_product_storage_pickup_point.append({
+                            'product': product,
+                            'storage': storage,
+                            'pickup_point': pickup_point,
+                            'price': price_factory.generate(purchase_cost, product, storage),
+                        })
         return link_price_product_storage_pickup_point
 
     def generate_prices(self, product, client_city, client_type):

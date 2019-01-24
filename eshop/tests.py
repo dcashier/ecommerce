@@ -140,6 +140,12 @@ class TestEShop(TestCase):
         product_mi8 = Product(brand=brand_xiaomy)
         product_mi8.save()
 
+        system_purchase = SystemPurchase()
+        system_purchase.save()
+
+        seller = Seller(shop=shop_1)
+	seller.save()
+
         # Закупка пратии Mi8
         #stock_1 = Stock(product=product_mi8, quantity=10, storage=storage_1, purchase_cost=105.1, currency="RUR")
         #stock_1.save()
@@ -147,31 +153,49 @@ class TestEShop(TestCase):
         purchase_cost_mi8 = 105.1
         currency_mi8 = "USD"
 
-        part_number = PartNumber()
-        part_number.save()
+        part_number_1 = PartNumber()
+        part_number_1.save()
 
-        system_purchase = SystemPurchase()
-        system_purchase.save()
-        element_purchase = ElemetPurchase(system_purchase=system_purchase, quantity=quantity_mi8, product=product_mi8, part_number=part_number, purchase_cost=purchase_cost_mi8, purchase_currency=currency_mi8)
+        element_purchase = ElemetPurchase(system_purchase=system_purchase, quantity=quantity_mi8, product=product_mi8, part_number=part_number_1, purchase_cost=purchase_cost_mi8, purchase_currency=currency_mi8)
         element_purchase.save()
 
         #storage_1.load(product_mi8, quantity_mi8, purchase_cost_mi8, currency_mi8)
-        storage_1.load(product_mi8, quantity_mi8, part_number)
-
-        seller = Seller(shop=shop_1)
-	seller.save()
+        storage_1.load(product_mi8, quantity_mi8, part_number_1)
 
         quantity = seller.check_quantity_for_sale(product_mi8)
         self.assertEqual(10, quantity)
 
         # закупка прошла успешно
 
+        # Через несколько дней планируя высокий обем спроса на Ми8, закупили еще Mi8 но по чуть большей цене
+
+        quantity_mi8_2 = 20
+        purchase_cost_mi8_2 = 120
+        currency_mi8_2 = "USD"
+
+        part_number_2 = PartNumber()
+        part_number_2.save()
+
+        system_purchase = SystemPurchase()
+        system_purchase.save()
+        element_purchase = ElemetPurchase(system_purchase=system_purchase, quantity=quantity_mi8_2, product=product_mi8, part_number=part_number_2, purchase_cost=purchase_cost_mi8_2, purchase_currency=currency_mi8_2)
+        element_purchase.save()
+
+        storage_1.load(product_mi8, quantity_mi8_2, part_number_2)
+
+        quantity = seller.check_quantity_for_sale(product_mi8)
+        # с учетом предыдущих 10 ми8 суммарно получили 30
+        self.assertEqual(30, quantity)
+
+        # закупка прошла успешно
+
+
         info_text = u"продавца попросили зарезервирвать для большиз босов"
         reserve_for_big_boss_quantity = 2
         #seller.reserve_product_on_storage(product_mi8, reserve_for_big_boss_quantity, storage_1, info_text)
-        seller.reserve_product_on_storage(product_mi8, reserve_for_big_boss_quantity, storage_1, info_text, part_number)
+        seller.reserve_product_on_storage(product_mi8, reserve_for_big_boss_quantity, storage_1, info_text, part_number_1)
         quantity = seller.check_quantity_for_sale(product_mi8)
-        self.assertEqual(8, quantity)
+        self.assertEqual(28, quantity)
 
 
 	filter_produce_1 = FilterProductCrossIdCategoryBrand()
@@ -180,8 +204,10 @@ class TestEShop(TestCase):
         filter_storage_1.save()
 	filter_pickup_point_1 = FilterPickupPointIdCity()
         filter_pickup_point_1.save()
-	price_factory_part_purchase_cost_from_stock_1 = PriceFactoryPartPurchaseCostFromStock(precent=10)
-        price_factory_part_purchase_cost_from_stock_1.save()
+	#price_factory_part_purchase_cost_from_stock_1 = PriceFactoryPartPurchaseCostFromStock(precent=10)
+        #price_factory_part_purchase_cost_from_stock_1.save()
+	price_factory_part_purchase_cost_1 = PriceFactoryPartPurchaseCost(precent=10)
+        price_factory_part_purchase_cost_1.save()
 	price_factory_fix_1 = PriceFactoryFix(price=150)
         price_factory_fix_1.save()
 
@@ -190,7 +216,8 @@ class TestEShop(TestCase):
 	price_policy_1.filter_produce.add(filter_produce_1)
 	price_policy_1.filter_storage.add(filter_storage_1)
 	price_policy_1.filter_pickup_point.add(filter_pickup_point_1)
-	price_policy_1.price_factory_part_purchase_cost_from_stock.add(price_factory_part_purchase_cost_from_stock_1)
+	#price_policy_1.price_factory_part_purchase_cost_from_stock.add(price_factory_part_purchase_cost_from_stock_1)
+	price_policy_1.price_factory_part_purchase_cost.add(price_factory_part_purchase_cost_1)
         price_policy_1.price_factory_fix.add(price_factory_fix_1)
 
 	seller.price_policies.add(price_policy_1)
@@ -213,11 +240,11 @@ class TestEShop(TestCase):
         # Из всего списка Вове понравился только Mi8
         # Вова спрашивает у продавца какая цна на Mi8, если он придет на одну из Московских точек самовывоза?
         prices = seller.generate_prices(product_mi8, client_city, client_type)
-        self.assertEqual([Decimal('115.61'), 150], prices)
+        self.assertEqual([Decimal('115.61'), Decimal('132.00'), 150], prices)
 
         # а много у вас осталось Mi8 сейчас?
         quantity = seller.check_quantity_for_sale(product_mi8)
-        self.assertEqual(8, quantity)
+        self.assertEqual(28, quantity)
 
 
         #Вова решил купить Ми8 за цену 115.61, оформляет заказ.
