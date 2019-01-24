@@ -2,8 +2,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 
-# Create your models here.
-
 class City(models.Model):
     title = models.CharField(max_length=200)
 
@@ -27,6 +25,12 @@ class Product(models.Model):
     text = models.CharField(max_length=200)
     categories = models.ManyToManyField(Category)
     brand = models.ForeignKey(Brand)
+
+class PartNumber(models.Model):
+    """
+    В рамках одной партии на один товар может быть только одна цена закупки.
+    """
+    pass
 
 class Storage(models.Model):
     title = models.CharField(max_length=200)
@@ -60,13 +64,19 @@ class Storage(models.Model):
             products.add(stock.product)
         return list(products)
 
-    def list_purchase_cost_for_product(self, product):
-        purchase_costs = set()
+    def list_part_number_for_product(self, product):
+        part_numbers = set()
         for stock in Stock.objects.filter(storage=self, product=product):
-            #purchase_costs.add(stock.purchase_cost)
-            for element_purchase in ElemetPurchase.objects.filter(product=product, part_number=stock.part_number):
-                purchase_costs.add(element_purchase.purchase_cost)
-        return list(purchase_costs)
+            part_numbers.add(stock.part_number)
+        return list(part_numbers)
+
+    #def list_purchase_cost_for_product(self, product):
+    #    purchase_costs = set()
+    #    for stock in Stock.objects.filter(storage=self, product=product):
+    #        #purchase_costs.add(stock.purchase_cost)
+    #        for element_purchase in ElemetPurchase.objects.filter(product=product, part_number=stock.part_number):
+    #            purchase_costs.add(element_purchase.purchase_cost)
+    #    return list(purchase_costs)
 
     #def load(self, product, quantity, purchase_cost, purchase_currency):
     #    #stock = Stock(product=product, quantity=quantity, storage=self, purchase_cost=purchase_cost, purchase_currency=purchase_currency)
@@ -77,12 +87,6 @@ class Storage(models.Model):
         stock = Stock(product=product, quantity=quantity, storage=self, part_number=part_number)
         stock.save()
 
-
-class PartNumber(models.Model):
-    """
-    В рамках одной партии на один товар может быть только одна цена закупки.
-    """
-    pass
 
 class Stock(models.Model):
     product = models.ForeignKey(Product)
@@ -378,14 +382,24 @@ class Seller(models.Model):
         for storage in storages:
             for pickup_point in pickup_points:
                 for price_factory in self.__price_factories_allow_for_situation_one_product(product, storages, pickup_points):
-                    #purchase_cost = storage.get_purchase_cost_for_product(product)
-                    for purchase_cost in storage.list_purchase_cost_for_product(product):
-                        link_price_product_storage_pickup_point.append({
-                            'product': product,
-                            'storage': storage,
-                            'pickup_point': pickup_point,
-                            'price': price_factory.generate(purchase_cost, product, storage),
-                        })
+                    ##purchase_cost = storage.get_purchase_cost_for_product(product)
+                    #for purchase_cost in storage.list_purchase_cost_for_product(product):
+                    #    link_price_product_storage_pickup_point.append({
+                    #        'product': product,
+                    #        'storage': storage,
+                    #        'pickup_point': pickup_point,
+                    #        'price': price_factory.generate(purchase_cost, product, storage),
+                    #    })
+                    for part_number in storage.list_part_number_for_product(product):
+                        purchase_costs = set()
+                        for element_purchase in ElemetPurchase.objects.filter(product=product, part_number=part_number):
+                            link_price_product_storage_pickup_point.append({
+                                'product': product,
+                                'storage': storage,
+                                'pickup_point': pickup_point,
+                                'part_number': part_number,
+                                'price': price_factory.generate(element_purchase.purchase_cost, product, storage),
+                            })
         return link_price_product_storage_pickup_point
 
     def generate_prices(self, product, client_city, client_type):
