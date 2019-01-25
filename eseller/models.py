@@ -76,7 +76,7 @@ class Seller(models.Model):
                             })
         return link_price_product_storage_pickup_point
 
-    def generate_prices(self, product, client_city, client_type):
+    def prices(self, product, client_city, client_type):
         pickup_points = self.shop.pickup_points.all()
         storages = self.shop.storages.all()
         quantity = 1

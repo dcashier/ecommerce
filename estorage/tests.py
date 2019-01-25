@@ -9,7 +9,7 @@ import time
 import pprint
 from decimal import Decimal
 
-class TestEShop(TestCase):
+class TestEStorage(TestCase):
     def setUp(self):
         print "SETUP DATA FOR ..."
         self.assertEqual.__self__.maxDiff = None

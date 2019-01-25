@@ -9,7 +9,7 @@ import time
 import pprint
 from decimal import Decimal
 
-class TestEShop(TestCase):
+class TestESeller(TestCase):
     def setUp(self):
         print "SETUP DATA FOR ..."
         self.assertEqual.__self__.maxDiff = None
@@ -220,7 +220,7 @@ class TestEShop(TestCase):
 
         # Из всего списка Вове понравился только Mi8
         # Вова спрашивает у продавца какая цна на Mi8, если он придет на одну из Московских точек самовывоза?
-        prices = seller.generate_prices(product_mi8, client_city, client_type)
+        prices = seller.prices(product_mi8, client_city, client_type)
         self.assertEqual([Decimal('115.61'), Decimal('132.00'), 150], prices)
 
         # а много у вас осталось Mi8 сейчас?
