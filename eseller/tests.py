@@ -144,7 +144,7 @@ class TestESeller(TestCase):
         #stock_1 = Stock(product=product_mi8, quantity=10, storage=storage_1, purchase_cost=105.1, currency="RUR")
         #stock_1.save()
         quantity_mi8 = 10
-        purchase_cost_mi8 = 105.1
+        purchase_cost_mi8 = Decimal('105.1')
         currency_mi8 = "USD"
         part_number_1 = PartNumber()
         part_number_1.save()
@@ -158,7 +158,7 @@ class TestESeller(TestCase):
 
         # Через несколько дней планируя высокий обем спроса на Ми8, закупили еще Mi8 но по чуть большей цене
         quantity_mi8_2 = 20
-        purchase_cost_mi8_2 = 120
+        purchase_cost_mi8_2 = Decimal('120')
         currency_mi8_2 = "USD"
         part_number_2 = PartNumber()
         part_number_2.save()
@@ -209,8 +209,8 @@ class TestESeller(TestCase):
         client_city = city_moscow
         client_type = 'onliner'
 
-        #Какие модели телефонов есть в вашем магазине?
-        products = seller.list_product(category="mobile phone")
+        #Какие модели телефонов есть в вашем магазине на остатках?
+        products = seller.list_product_in_stock(category="mobile phone")
         self.assertEqual([product_mi8], products)
 
         # Так как для покупателей из разных городов матрицы у нас разные
@@ -228,6 +228,18 @@ class TestESeller(TestCase):
         # а много у вас осталось Mi8 сейчас?
         quantity = seller.quantity_for_sale(product_mi8)
         self.assertEqual(28, quantity)
+
+        #Предлодить вове места ддля получнеия телефона
+        params_basket = [
+            {
+                'product': product_mi8,
+                'quantity': 1,
+                'price': Decimal('115.61'),
+                'currency': "USD",
+            },
+        ]
+        pickup_points = seller.pickup_points(params_basket, client_city, client_type)
+        self.assertEqual([pickup_point_1, pickup_point_2], pickup_points)
 
         #Вова решил купить Ми8 за цену 115.61, оформляет заказ.
         interval = [datetime.datetime(2000, 01, 01, 12, 30, 00), datetime.datetime(2000, 01, 01, 20, 00, 00)]
@@ -291,7 +303,7 @@ class TestESeller(TestCase):
         system_purchase_3.save()
 
         quantity_case_noname = 1000
-        purchase_cost_case_noname = 5
+        purchase_cost_case_noname = Decimal('5.00')
         currency_case_noname = "USD"
         part_number_3 = PartNumber()
         part_number_3.save()
@@ -325,10 +337,11 @@ class TestESeller(TestCase):
 
         prices = seller.prices(product_case_noname, client_city, client_type)
         self.assertEqual([Decimal('10.00')], prices)
+        # Правило отработало и вернуло допустимую цену
 
+        # Теперь заказа с такими параметрами создать возможно
         self.assertTrue(seller.is_allow_order(order_params))
 
-        #Предлодить вове места ддля получнеия телефона
         #Когда он выберет метсто рассчитать дату и время когда он то сможет забрать
         #если все устраивает и пришла оплата, резериватьвать товар и перемещать на пункт выдачи
         #когда вова за ним придет выдать товар офрмить чек, и начислить балы в системе лояльности.

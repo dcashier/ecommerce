@@ -92,7 +92,7 @@ class Seller(models.Model):
     def is_allow_order(self, order_params):
         error = self.__error_by_order(order_params)
         if error:
-            print error
+            #print error
             return False
         return True
 
@@ -100,6 +100,11 @@ class Seller(models.Model):
         print 'check Rule'
         print 'check Delivery'
         print 'check Quantity for Sale'
+        return True
+
+    def is_delivery(self, product, storage, point_pickup):
+        #if point_pickup.id == 2:
+        #    return False
         return True
 
     def __link_price_factory_product_storage_pickup_point(self, product, storages, pickup_points):
@@ -139,13 +144,43 @@ class Seller(models.Model):
                 allow_products.append(product)
         return allow_products
 
-    def list_product(self, category):
+    def list_product_in_stock(self, category):
         storages = self.shop.storages.all()
         products = set()
         for storage in storages:
             for product in storage.list_product():
                 products.add(product)
         return list(products)
+
+    def pickup_points(self, params_basket, client_city, client_type):
+        """
+        Попробуем доставить с каждого возможного склада на каждую возможную точку выдачи,
+            столько сколько есть в наличии на складе.
+        И посчитаем сколько товаров из корзины смогли доставить на каждую точку.
+        Если количество доставленных совпадает с количеством в корзине то данная точка подходит.
+        """
+        pickup_points_and_count_product_was_delivery = {}
+        for element in params_basket:
+            product = element['product']
+            quantity = element['quantity']
+            for point_pickup in filter(lambda pp : pp.city == client_city, self.shop.pickup_points.all()):
+                quantity_was_delivery = 0
+                for storage in self.shop.storages.all():
+                    if quantity <= quantity_was_delivery:
+                        break
+                    if self.is_delivery(product, storage, point_pickup):
+                        quantity_was_delivery += self.__quantity_for_sale_on_storage(product, storage)
+
+                if quantity <= quantity_was_delivery:
+                    pickup_points_and_count_product_was_delivery.setdefault(point_pickup, 0)
+                    pickup_points_and_count_product_was_delivery[point_pickup] += 1
+
+        pickup_points_allow_for_basket = []
+        for pickup_point, count in pickup_points_and_count_product_was_delivery.items():
+            if len(params_basket) == count:
+                pickup_points_allow_for_basket.append(pickup_point)
+
+        return pickup_points_allow_for_basket
 
     def __price_factories_allow_for_situation_one_product(self, product, storage, pickup_point):
         quantity = 1
@@ -170,11 +205,15 @@ class Seller(models.Model):
         storages = self.shop.storages.all()
         quantity = 0
         for storage in storages:
-            quantity += storage.quantity(product)
-            for reserve in Reserve.objects.filter(storage=storage, product=product):
-                quantity -= reserve.quantity
-                if quantity < 0:
-                    raise ValidationError(u"Не коректное количество остатоков. Хотя приконкурентном взаимодействии могут продать больше чем есть в наличии, и тогда такая ситуация возможна")
+            quantity += self.__quantity_for_sale_on_storage(product, storage)
+        return quantity
+
+    def __quantity_for_sale_on_storage(self, product, storage):
+        quantity = storage.quantity(product)
+        for reserve in Reserve.objects.filter(storage=storage, product=product):
+            quantity -= reserve.quantity
+            if quantity < 0:
+                raise ValidationError(u"Не коректное количество остатоков. Хотя приконкурентном взаимодействии могут продать больше чем есть в наличии, и тогда такая ситуация возможна")
         return quantity
 
     def reserve_product_on_storage(self, product, quantity, storage, info_text, part_number):
