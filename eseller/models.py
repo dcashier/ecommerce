@@ -21,7 +21,7 @@ class Seller(models.Model):
     shop = models.ForeignKey(Shop)
     price_policies = models.ManyToManyField(PricePolicy) # политики которые может использовать данный продавец ему назанчаются свыше
 
-    def create_order(cls, parmas):
+    def create_order(self, parmas):
         """
         Следует указать:
             что
@@ -38,17 +38,62 @@ class Seller(models.Model):
         """
         pass
 
-    def is_allow_order(cls, params):
+    def __error_by_order(self, order_params):
         """
-        Проверить что цены на позиции в заказе установлены верно(не продаем товары за рубль хотя его реальная стомость миллион).
-        Проверить возможность продажи всех товаров из заказа в данном регионе, в городе, на точке самовывоза.
         Проверить наличие доступных остатков во всей сети.
         Проверить наличие доступных остатков для данных параметров заказа.
             А при создании заказа надо еще и зараезрвировать их чтобы они не ушли под другой заказ.
+        Проверить что цены на позиции в заказе установлены верно(не продаем товары за рубль хотя его реальная стомость миллион).
+        Проверить возможность продажи всех товаров из заказа в данном регионе, в городе, на точке самовывоза.
         Проверить что все позиции по данному заказу каким либо образом можно доставить на точку самовывоза.
         Проверить что весь заказ будет точке самовывоза в установелнный срок.
         Проверить что лимит на такие заказы не привышен.
+
+        order_params = {
+            'version': 'v1',
+            'basket': [
+                {
+                    'product'
+                    'quantity'
+                    'price'
+                    'currency'
+                },
+                {},
+            ],
+            'pickup': {
+                'point'
+                'interval'
+            },
+            'seller'
+            'client'
+        }
+
+        Провести тест когда в корзине один и тотже товар присутствует несколько раз но с разным колличеством.
+            Проверить что не только колличество разное но и цена.
         """
+        #order_params - переписать на объект который используется для проверики и создания заказов разных версий.
+        products = [element['product'] for element in order_params['basket']]
+        prices_products = [[element['price'], element['product']] for element in order_params['basket']]
+        quantity_products = [[element['quantity'], element['product']] for element in order_params['basket']]
+        #client = order_params['client']
+        client_city = order_params['pickup']['point'].get_city()
+        client_type = None
+
+        for quantity_product in quantity_products:
+            if quantity_product[0] > self.quantity_for_sale(quantity_product[1]):
+                return 'Error : Not find allow quantity %s for sale product %s' % (quantity_product[0], quantity_product[1])
+        for price_product in prices_products:
+            if not price_product[0] in self.prices(price_product[1], client_city, client_type):
+                return 'Error : Price %s not allow for product %s.' % (price_product[0], price_product[1])
+        if not len(products) == len(self.list_allow_product_for_client(products, client_city, client_type)):
+            return 'Error : Same product not allow for sale'
+        return None
+
+    def is_allow_order(self, order_params):
+        error = self.__error_by_order(order_params)
+        if error:
+            print error
+            return False
         return True
 
     def __is_allow_product_for_client(self, product, client_city, client_type):

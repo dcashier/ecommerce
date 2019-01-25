@@ -92,6 +92,8 @@ class Order(models.Model):
             },
             ...
         ]
+        seller
+        client
     }
     """
     client_title = models.CharField(u"Название клиента", max_length=128)

@@ -60,6 +60,9 @@ class PickupPoint(models.Model):
     title = models.CharField(max_length=200)
     city = models.ForeignKey(City)
 
+    def get_city(self):
+        return self.city
+
 class FilterPickupPointIdCity(models.Model):
     pickup_points = models.ManyToManyField(PickupPoint)
     cities = models.ManyToManyField(City)

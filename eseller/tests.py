@@ -8,6 +8,7 @@ import sys
 import time
 import pprint
 from decimal import Decimal
+import datetime
 
 class TestESeller(TestCase):
     def setUp(self):
@@ -130,7 +131,7 @@ class TestESeller(TestCase):
 
         brand_xiaomy = Brand(title="Xiaomy")
         brand_xiaomy.save()
-        product_mi8 = Product(brand=brand_xiaomy)
+        product_mi8 = Product(title='Mi 8', brand=brand_xiaomy)
         product_mi8.save()
 
         system_purchase = SystemPurchase()
@@ -181,6 +182,7 @@ class TestESeller(TestCase):
 
 	filter_produce_1 = FilterProductCrossIdCategoryBrand()
         filter_produce_1.save()
+        filter_produce_1.products.add(product_mi8)
 	filter_storage_1 = FilterStorageId()
         filter_storage_1.save()
 	filter_pickup_point_1 = FilterPickupPointIdCity()
@@ -228,6 +230,104 @@ class TestESeller(TestCase):
         self.assertEqual(28, quantity)
 
         #Вова решил купить Ми8 за цену 115.61, оформляет заказ.
+        interval = [datetime.datetime(2000, 01, 01, 12, 30, 00), datetime.datetime(2000, 01, 01, 20, 00, 00)]
+        order_params = {
+            'version': 'v1',
+            'basket': [
+                {
+                    'product': product_mi8,
+                    'quantity': 1,
+                    'price': Decimal('115.61'),
+                    'currency': "USD",
+                },
+            ],
+            'pickup': {
+                'point': pickup_point_1,
+                'interval': interval,
+            },
+            'seller': None,
+            'client': None,
+        }
+        self.assertTrue(seller.is_allow_order(order_params))
+
+        # Потом Вова подмал и решил купить Ми8 вместе с чехлом Noname производителя по акции.
+        brand_noname = Brand(title="Noname")
+        brand_noname.save()
+        product_case_noname = Product(title="Case simple", brand=brand_noname)
+        product_case_noname.save()
+
+        order_params = {
+            'version': 'v1',
+            'basket': [
+                {
+                    'product': product_mi8,
+                    'quantity': 1,
+                    'price': Decimal('132.00'),
+                    'currency': "USD",
+                },
+                {
+                    'product': product_case_noname,
+                    'quantity': 1,
+                    'price': Decimal('10.00'),
+                    'currency': "USD",
+                },
+            ],
+            'pickup': {
+                'point': pickup_point_1,
+                'interval': interval,
+            },
+            'seller': None,
+            'client': None,
+        }
+        # Но мы еще не приняли на доступные склады нужное количество чехлов
+        #TODO проверить возращаемы ощибки
+        self.assertFalse(seller.is_allow_order(order_params))
+
+        quantity = seller.quantity_for_sale(product_case_noname)
+        self.assertEqual(0, quantity)
+
+        # Закупка пратии чехлов нонейм
+        system_purchase_3 = SystemPurchase()
+        system_purchase_3.save()
+
+        quantity_case_noname = 1000
+        purchase_cost_case_noname = 5
+        currency_case_noname = "USD"
+        part_number_3 = PartNumber()
+        part_number_3.save()
+        element_purchase_3 = ElemetPurchase(system_purchase=system_purchase_3, quantity=quantity_case_noname, product=product_case_noname, part_number=part_number_3, purchase_cost=purchase_cost_case_noname, purchase_currency=currency_case_noname)
+        element_purchase_3.save()
+        storage_1.load(product_case_noname, quantity_case_noname, part_number_3)
+        quantity = seller.quantity_for_sale(product_case_noname)
+        self.assertEqual(1000, quantity)
+        # закупка прошла успешно
+
+        # Но мы еще не создали правило для продажи чехлов
+        self.assertFalse(seller.is_allow_order(order_params))
+
+        prices = seller.prices(product_case_noname, client_city, client_type)
+        self.assertEqual([], prices)
+
+        # Создаем правило для продажи чехлов
+	filter_produce_2 = FilterProductCrossIdCategoryBrand()
+        filter_produce_2.save()
+        filter_produce_2.brands.add(brand_noname)
+
+	price_factory_part_purchase_cost_2 = PriceFactoryPartPurchaseCost(precent=100)
+        price_factory_part_purchase_cost_2.save()
+
+	price_policy_2 = PricePolicy()
+        price_policy_2.save()
+	price_policy_2.filter_produce.add(filter_produce_2)
+	price_policy_2.price_factory_part_purchase_cost.add(price_factory_part_purchase_cost_2)
+
+	seller.price_policies.add(price_policy_2)
+
+        prices = seller.prices(product_case_noname, client_city, client_type)
+        self.assertEqual([Decimal('10.00')], prices)
+
+        self.assertTrue(seller.is_allow_order(order_params))
+
         #Предлодить вове места ддля получнеия телефона
         #Когда он выберет метсто рассчитать дату и время когда он то сможет забрать
         #если все устраивает и пришла оплата, резериватьвать товар и перемещать на пункт выдачи

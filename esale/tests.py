@@ -57,6 +57,8 @@ class TestESale(TestCase):
                 'point': pickup_point_in_moscow,
                 'interval': interval,
             },
+            'seller': None,
+            'client': None,
         }
         #self.assertTrue(Order.is_allow_order(order_params))
         #order = Order.create_order(order_params)

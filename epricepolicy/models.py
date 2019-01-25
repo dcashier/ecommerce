@@ -44,6 +44,9 @@ class PricePolicy(models.Model):
     price_factory_fix = models.ManyToManyField(PriceFactoryFix)
 
     def is_allow_product_quantity_storage_pickup_point(self, product, quantity, storage, pickup_point):
+        for filter_produce in self.filter_produce.all():
+            if not filter_produce.has(product):
+                return False
         return True
 
     def allow_price_factory(self, product, quantity, storage, pickup_point):
