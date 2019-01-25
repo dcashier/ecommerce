@@ -21,30 +21,41 @@ class Seller(models.Model):
     shop = models.ForeignKey(Shop)
     price_policies = models.ManyToManyField(PricePolicy) # политики которые может использовать данный продавец ему назанчаются свыше
 
-    def quantity_for_sale(self, product):
-        storages = self.shop.storages.all()
-        quantity = 0
-        for storage in storages:
-            quantity += storage.quantity(product)
-            for reserve in Reserve.objects.filter(storage=storage, product=product):
-                quantity -= reserve.quantity
-                if quantity < 0:
-                    raise ValidationError(u"Не коректное количество остатоков. Хотя приконкурентном взаимодействии могут продать больше чем есть в наличии, и тогда такая ситуация возможна")
-        return quantity
+    def create_order(cls, parmas):
+        """
+        Следует указать:
+            что
+            из какой партии
+            в каком количекстве
+            с каких складов
+            на кокие наточки выдачи
+            за какую сумму реализуются позиции
+            на основе каких ценовых политик была сформирована цена реализации
+            в какой срок будет доставлен весь товар на указанные точки выдачи
+            для какого контрагента
+
+        Т.е. заказ это некий набор обьедиенных действий!
+        """
+        pass
+
+    def is_allow_order(cls, params):
+        """
+        Проверить что цены на позиции в заказе установлены верно(не продаем товары за рубль хотя его реальная стомость миллион).
+        Проверить возможность продажи всех товаров из заказа в данном регионе, в городе, на точке самовывоза.
+        Проверить наличие доступных остатков во всей сети.
+        Проверить наличие доступных остатков для данных параметров заказа.
+            А при создании заказа надо еще и зараезрвировать их чтобы они не ушли под другой заказ.
+        Проверить что все позиции по данному заказу каким либо образом можно доставить на точку самовывоза.
+        Проверить что весь заказ будет точке самовывоза в установелнный срок.
+        Проверить что лимит на такие заказы не привышен.
+        """
+        return True
 
     def __is_allow_product_for_client(self, product, client_city, client_type):
         print 'check Rule'
         print 'check Delivery'
         print 'check Quantity for Sale'
         return True
-
-    def __price_factories_allow_for_situation_one_product(self, product, storage, pickup_point):
-        quantity = 1
-        price_factories = []
-        for price_policy in self.price_policies.all():
-            for price_factory in price_policy.allow_price_factory(product, quantity, storage, pickup_point):
-                price_factories.append(price_factory)
-        return price_factories
 
     def __link_price_factory_product_storage_pickup_point(self, product, storages, pickup_points):
         link_price_factory_product_storage_pickup_point = []
@@ -76,17 +87,6 @@ class Seller(models.Model):
                             })
         return link_price_product_storage_pickup_point
 
-    def prices(self, product, client_city, client_type):
-        pickup_points = self.shop.pickup_points.all()
-        storages = self.shop.storages.all()
-        quantity = 1
-        link_price_product_storage_pickup_point = self.__link_price_product_storage_pickup_point(product, storages, pickup_points)
-        prices = set()
-        for link in link_price_product_storage_pickup_point:
-            price = link['price']
-            prices.add(price)
-        return sorted(list(prices))
-
     def list_allow_product_for_client(self, products, client_city, client_type):
         allow_products = []
         for product in products:
@@ -102,38 +102,39 @@ class Seller(models.Model):
                 products.add(product)
         return list(products)
 
+    def __price_factories_allow_for_situation_one_product(self, product, storage, pickup_point):
+        quantity = 1
+        price_factories = []
+        for price_policy in self.price_policies.all():
+            for price_factory in price_policy.allow_price_factory(product, quantity, storage, pickup_point):
+                price_factories.append(price_factory)
+        return price_factories
+
+    def prices(self, product, client_city, client_type):
+        pickup_points = self.shop.pickup_points.all()
+        storages = self.shop.storages.all()
+        quantity = 1
+        link_price_product_storage_pickup_point = self.__link_price_product_storage_pickup_point(product, storages, pickup_points)
+        prices = set()
+        for link in link_price_product_storage_pickup_point:
+            price = link['price']
+            prices.add(price)
+        return sorted(list(prices))
+
+    def quantity_for_sale(self, product):
+        storages = self.shop.storages.all()
+        quantity = 0
+        for storage in storages:
+            quantity += storage.quantity(product)
+            for reserve in Reserve.objects.filter(storage=storage, product=product):
+                quantity -= reserve.quantity
+                if quantity < 0:
+                    raise ValidationError(u"Не коректное количество остатоков. Хотя приконкурентном взаимодействии могут продать больше чем есть в наличии, и тогда такая ситуация возможна")
+        return quantity
+
     def reserve_product_on_storage(self, product, quantity, storage, info_text, part_number):
         reserve = Reserve(product=product, quantity=quantity, storage=storage, part_number=part_number)
         reserve.save()
 
-    def create_order(cls, parmas):
-        """
-        Следует указать:
-            что
-            из какой партии
-            в каком количекстве
-            с каких складов
-            на кокие наточки выдачи
-            за какую сумму реализуются позиции
-            на основе каких ценовых политик была сформирована цена реализации
-            в какой срок будет доставлен весь товар на указанные точки выдачи
-            для какого контрагента
-
-        Т.е. заказ это некий набор обьедиенных действий!
-        """
-        pass
-
-    def is_allow_order(cls, params):
-        """
-        Проверить что цены на позиции в заказе установлены верно(не продаем товары за рубль хотя его реальная стомость миллион).
-        Проверить возможность продажи всех товаров из заказа в данном регионе, в городе, на точке самовывоза.
-        Проверить наличие доступных остатков во всей сети.
-        Проверить наличие доступных остатков для данных параметров заказа.
-            А при создании заказа надо еще и зараезрвировать их чтобы они не ушли под другой заказ.
-        Проверить что все позиции по данному заказу каким либо образом можно доставить на точку самовывоза.
-        Проверить что весь заказ будет точке самовывоза в установелнный срок.
-        Проверить что лимит на такие заказы не привышен.
-        """
-        return True
 
 
