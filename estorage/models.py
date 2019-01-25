@@ -3,10 +3,20 @@ from django.db import models
 from eproduct.models import *
 from epartnumber.models import *
 
+#### Region
+
+class Region(models.Model):
+    title = models.CharField(max_length=200)
+
 #### City
 
 class City(models.Model):
     title = models.CharField(max_length=200)
+    region = models.ForeignKey(Region)
+
+class FilterCityIdRegion(models.Model):
+    pickup_points = models.ManyToManyField(City)
+    regions = models.ManyToManyField(Region)
 
 #### Storage
 

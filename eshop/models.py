@@ -3,6 +3,11 @@ from django.db import models
 from estorage.models import *
 
 class Shop(models.Model):
+    """
+    Точка продажи товара поккупателю. Это может быть розничный магазин, сайт, телегрма бот.
+        Вопрос когда на сайте пользователь выбирает город, то для Москвы будет один магазин для Питера другой, для все России третий, а для Всего мира четвертый:
+            Независимо от этого по у продавцов будет своя настройка цен для клиентов в разных городах.
+    """
     # поставщик / получатель
     title = models.CharField(verbose_name=u'Название Ип / ооо / оао', max_length=254, null=True, blank=True)
     pickup_points = models.ManyToManyField(PickupPoint)

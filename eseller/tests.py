@@ -100,9 +100,11 @@ class TestEShop(TestCase):
         pass
 
     def test_seller(self):
-        city_moscow = City(title=u"Moscow")
+        region_center = Region(title=u"Центральный")
+        region_center.save()
+        city_moscow = City(title=u"Moscow", region=region_center)
         city_moscow.save()
-        city_spb = City(title=u"SPB")
+        city_spb = City(title=u"SPB", region=region_center)
         city_spb.save()
 
         storage_1 = Storage(title=u"main storage")
