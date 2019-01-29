@@ -1,6 +1,10 @@
 #!-*-coding: utf-8 -*-
 from django.db import models
+from django.core.exceptions import ValidationError
 from eshop.models import *
+import datetime
+from django.utils import timezone
+
 
 class Loyalty(object):
     # Пока не понятно что делать с просроченными балами, как их списывать?
@@ -18,7 +22,8 @@ class Loyalty(object):
         return count
 
     def __create_account_for_samebody(self, samebody):
-        entity_record = samebody.get_record()
+        #entity_record = samebody.get_record()
+        entity_record = samebody
         account_record = LoyaltyAccountRecord(owner=entity_record, loyalty=self.__record)
         account_record.save()
 
@@ -26,7 +31,8 @@ class Loyalty(object):
         return [0, int(cost * self.__record.max_percent / 100)]
 
     def __get_account_for_samebody(self, samebody):
-        entity_record = samebody.get_record()
+        #entity_record = samebody.get_record()
+        entity_record = samebody
         account_record = LoyaltyAccountRecord.objects.get(owner=entity_record, loyalty=self.__record)
         return account_record
 
@@ -65,7 +71,8 @@ class Loyalty(object):
         return self.__record.title
 
     def __has_account_for_samebody(self, samebody):
-        entity_record = samebody.get_record()
+        #entity_record = samebody.get_record()
+        entity_record = samebody
         if LoyaltyAccountRecord.objects.filter(owner=entity_record, loyalty=self.__record).count() > 0:
             return True
         return False
@@ -162,7 +169,7 @@ class Loyalty(object):
         available_day = 30
         self.__register_in_loyalty_customer(actor, customer, executor, hello_ball, available_day)
 
-    def register_in_loyalty_hello_1000(self, actor, executor, customer):
+    def register_in_loyalty_hello_1000(self, actor, customer, executor):
         if self.is_registration(actor, customer):
             print 'Error : customer is already registration in loyalty'
             assert False
@@ -205,6 +212,7 @@ class Loyalty(object):
         transaction_record.is_ok = True
         transaction_record.save()
         # закрыли транзакцию
+        print 'Info : transfer_ball is OK'
 
     def __unicode__(self):
         return u"Loyalty : %s" % (self.__record.title)
@@ -213,22 +221,31 @@ class Loyalty(object):
 class ServiceRepositoryLoyalty(object):
     @classmethod
     def create_loyalty(cls, actor, executor, title, max_percent, start_ball, start_ball_available_day, reward_percent, available_day, is_need_auth):
-        executor_record = executor.get_record()
+        #executor_record = executor.get_record()
+        executor_record = executor
         loyalty_record = LoyaltyRecord(title=title, max_percent=max_percent, start_ball=start_ball, owner=executor_record, is_need_auth=is_need_auth)
         loyalty_record.save()
         loyalty = Loyalty(loyalty_record)
         loyalty.register_in_loyalty_executor(executor, reward_percent, available_day, start_ball, start_ball_available_day)
 
     @classmethod
-    def has_loyalty_for_owner(cls, owner):
-        if cls.list_loyalty_for_owner(owner):
+    def has_loyalty_for_owner(cls, client, owner):
+        if cls.list_loyalty_for_owner(client, owner):
             return True
         return False
 
     @classmethod
-    def list_loyalty_for_owner(cls, owner):
+    def list_loyalty_for_owner(cls, client, owner):
+        """
+        Список систем лояльности в которых учатсвует данный магазин.
+            а вообще данному клиенту позволено видеть все системы данного миагазина или только часть.
+        """
+        if not owner.is_allow_all_loyalty_for_client(client):
+            raise u""
+            print 'Error : list_loyalty_for_owner'
         loyalties = []
-        for loyalty_record in LoyaltyRecord.objects.filter(owner=owner.get_record()):
+        #for loyalty_record in LoyaltyRecord.objects.filter(owner=owner.get_record()):
+        for loyalty_record in LoyaltyRecord.objects.filter(owner=owner):
             loyalties.append(Loyalty(loyalty_record))
         return loyalties
 
@@ -238,7 +255,7 @@ class ServiceRepositoryLoyalty(object):
 
 
 class LoyaltyRecord(models.Model):
-    owner = models.ForeignKey(Shop)
+    owner = models.ForeignKey(Shop, null=True, blank=True)
     title = models.CharField(verbose_name=u'Название', max_length=128, null=True, blank=True)
     max_percent = models.IntegerField(u'Максимальный процент от суммы заказа для оплаты балами')
     start_ball = models.IntegerField(u'Стартовые былы')

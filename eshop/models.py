@@ -21,3 +21,30 @@ class Shop(models.Model):
     fio = models.CharField(verbose_name=u'Ф.И.О.', max_length=128, null=True, blank=True)
 
 
+    def __has_link_with_actor(self, actor):
+	print 'Nead fix __has_link_with_actor'
+	return True
+        #for l in EntityLinkActor.objects.filter(actor=actor.get_record(), entity=self.get_record()):
+        #    return True
+        return False
+
+    def is_allow_all_loyalty_for_client(self, client):
+        return True
+
+    #def is_allow_list_transaction_this(self, actor):
+    #    return self.__is_owner(actor)
+
+    def is_allow_send_ball_this(self, actor):
+        return self.__is_owner(actor) or self.__has_link_with_actor(actor)
+
+    def __is_owner(self, actor):
+	print 'Nead fix __is_owner'
+	return True
+        if self.__entity == actor.get_record():
+            return True
+        return False
+
+    def __unicode__(self):
+        return u"%s: %s - %s (%s)" % (self.id, self.title, self.phone_number, self.fio)
+
+

@@ -21,6 +21,17 @@ class Seller(models.Model):
     shop = models.ForeignKey(Shop)
     price_policies = models.ManyToManyField(PricePolicy) # политики которые может использовать данный продавец ему назанчаются свыше
 
+    def calculate_revards_balls_for_last_order(self):
+        print 'Alert : Not work calculate_revards_balls_for_last_order'
+        return 3000
+
+    def change_status_for_last_order(self, status):
+        print 'Alert : Not work change_status_for_last_order'
+
+    def check_payment_for_last_order(self):
+        print 'Alert : Not work check_payment_for_last_order'
+        return True
+
     def create_order(self, parmas):
         """
         Следует указать:
@@ -37,6 +48,13 @@ class Seller(models.Model):
         Т.е. заказ это некий набор обьедиенных действий!
         """
         pass
+
+    def create_payemnt_link_for_last_order(self):
+        print 'Alert : Not work create_payemnt_link_for_last_order'
+
+    def create_price_last_order(self):
+        print 'Alert : Not work create_price_last_order'
+
 
     def __error_by_order(self, order_params):
         """
@@ -221,4 +239,13 @@ class Seller(models.Model):
         reserve.save()
 
 
+
+
+
+class Customer(object):
+    def set_payment_balls_for_last_order(self, balls):
+        pass
+
+    def pay_by(self, link_for_payment):
+        pass
 
