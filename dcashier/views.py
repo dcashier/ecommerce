@@ -7,4 +7,4 @@ class MyView(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'dcashier/static/index.html')
         #return render(request, 'static/index.html')
-        #return HttpResponse('Hello, World!')
+        #return HttpResponse('Hello, enother World!')
