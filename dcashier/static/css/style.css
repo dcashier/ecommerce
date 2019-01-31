@@ -1,0 +1,314 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+
+
+body{
+	font-family: 'Open Sans', sans-serif;
+	font-size: 14px;
+	font-weight: 400;
+	color: #f4f4f4;
+	background-color: #181818;
+}
+
+.displayBlock{display: block;}
+
+.mt10{margin-top: 10px !important}
+.mt20{margin-top: 20px !important}
+.mt30{margin-top: 30px !important}
+.mt40{margin-top: 40px !important}
+.mt60{margin-top: 60px !important}
+.mt80{margin-top: 80px !important}
+.mt100{margin-top: 100px !important}
+
+.colorRed{color: #ff3333;}
+
+
+h1{
+	font-size: 26px;
+	font-weight: 400;
+	line-height:1;
+	color: #f4f4f4;
+}
+
+h2{
+	font-size: 20px;
+	font-weight: 300;
+	line-height:1;
+	color: #f4f4f4;
+}
+
+a{
+	color: #f4f4f4;	
+}
+
+.invisible {
+	display: none;
+}
+
+
+.container {
+	width: auto;
+}
+
+.logo{
+	padding-top: 60px;
+	margin-bottom: 90px;
+	text-align: center;	
+}
+
+.logo h1{
+	font-size: 28px;
+	font-weight: 600;	
+}
+
+
+.toolbar {
+	height: 10vh;
+}
+
+.toolbar a{
+	text-decoration: none;
+}
+
+.toolbar h1{
+	margin-top: 17px;
+	font-size: 20px;
+	font-weight: 600;
+	text-align: left;
+	display: inline-block;
+	color: gray;
+	text-align: center;
+	width: 80%;
+}
+
+.toolbar_complexTitle{
+	width: 80%;
+	margin-top: 17px;
+	margin-left: 20px;
+	display: inline-block;
+}
+
+.toolbar_complexTitle h1{
+	margin: 0;
+	font-size: 24px;
+	font-weight: 600;
+	text-align: left;
+	color: #f4f4f4;
+}
+
+.toolbar_complexTitle h2{
+	margin: 0;	
+	font-size: 18px;
+	font-weight: 400;
+	text-align: left;
+	color: gray;
+}
+
+
+.toolbar__backButton{
+	float: left;
+	margin-top: 10px;
+	margin-left: 10px;
+	text-align: center;
+	font-size: 28px;
+	color: #676767;
+}
+
+.toolbar_backButton:active{
+	background-color: red;
+}
+
+
+.toolbar__backButton:before{
+	font-family:'Material Icons';
+	content: 'arrow_back';	
+}
+
+
+
+.toolbar__exitButton{
+	float:right;
+	margin-top: 10px;
+	margin-right: 10px;
+	text-align: center;
+	font-size: 33px;
+	color: #676767;	
+}
+
+.toolbar__exitButton:before{
+	font-family:'Material Icons';
+	content: 'exit_to_app';	
+}
+
+
+.toolbar__title{
+	width: auto;
+	margin: 0 auto;
+	font-size: 24px;	
+	text-align: center;
+}
+
+
+.workSection{
+}
+
+.workSection form{
+	width: 80%;
+	margin: 0 auto;	
+}
+
+.controlSection{
+	margin-bottom: 5px;
+	width: 100%;
+	bottom: 0;
+	position: absolute;
+}
+
+.controlSection__buttonsVertical{
+	width: 80%;
+	margin: 0 auto;
+}
+
+
+
+.input{
+	width: 100%;
+	display: block;
+	height: 46px;
+	border-style:solid;
+	border-width: 1px;
+	border-radius: 5px;
+	border-color: gray;
+	padding: 3px 3px 3px 3px;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 18px;
+	font-weight: 400;
+	color: #f4f4f4;
+	background-color: #181818;
+	box-sizing: border-box;
+}
+
+.button{
+	display: block;
+	height: 33px;
+	border-style:solid;
+	border-width: 1px;
+	border-radius: 5px;
+	border-color: #ffdb4d;
+	padding: 8px 3px 3px 3px;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 18px;
+	font-weight: 400;
+	color: #181818;
+	background-color: #ffdb4d;
+	text-decoration: none;
+	text-align: center;
+}
+
+.button:active{
+	border-color: #ffdb4d;
+	color: #ffdb4d;
+	background-color: #181818;
+}
+
+
+
+.inverseButton{
+	display: block;
+	height: 33px;
+	border-style:solid;
+	border-width: 1px;
+	border-radius: 5px;
+	border-color: #f4f4f4;
+	padding: 8px 3px 3px 3px;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 18px;
+	font-weight: 400;
+	color: #f4f4f4;
+	background-color: #181818;
+	text-decoration: none;
+	text-align: center;
+}
+
+.inverseButton:active{
+	border-color: #f4f4f4;
+	color: #181818;
+	background-color: #f4f4f4;
+}
+
+
+.listView{
+	border-style: solid;
+	border-width: 1px 0 0 0;
+	border-color: #464646;
+}
+
+.listView a{
+	text-decoration: none;
+}
+
+
+.listView__item{
+	border-style: solid;
+	border-width: 0 0 1px 0;
+	border-color: #464646;
+	height: 56px;
+	width: 100%;
+}
+
+.listView__item:active{
+	background-color: #2b2b2b;
+}
+
+
+.listView__item__title{
+	font-size: 18px;
+	margin-top: 3px;
+	margin-left: 15px;
+	width: 70%;
+	font-weight: 600;
+ 	white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis 	
+}
+
+.listView__item__detail{
+	margin-left: 15px;
+	width: 70%;
+	font-weight: 400;
+	font-size: 13px;
+	color: gray;
+ 	white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis 	
+
+}
+
+.listView__item__moreButton{
+	
+	text-align: center;
+	font-size: 38px;
+	color: #676767;
+	float: right;
+	margin-right: 5px;
+}
+
+.listView__item__moreButton:before{
+	font-family:'Material Icons';
+	content: 'navigate_next';	
+}
+
+
+
+
+
+
+
+/*
+*{
+	border:1px solid yellow;
+}
+
+*/

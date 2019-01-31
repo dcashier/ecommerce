@@ -1,0 +1,24 @@
+@media screen and (min-width: 500px) {
+
+body{
+	background-color: #282828;
+}
+
+.container {
+	width: 500px;
+	height: 100vh;
+	background-color: #181818;	
+	margin: 0 auto;
+}
+
+
+@media screen and (max-height: 320px) {
+
+.container {
+	height: 500px;
+}
+
+
+}
+
+
