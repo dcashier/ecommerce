@@ -1,2 +1,2 @@
 # ecommerce
-e-commerce
+e-commerce is a chance for survival
