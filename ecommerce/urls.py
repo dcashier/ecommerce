@@ -16,12 +16,17 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
-
-from dcashier.views import MyView
+from dcashier.views import MyView, AuthPage, Login, Logout, index
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
 
-    url(r'^$', MyView.as_view(), name='my-view'),
+    #url(r'^$', MyView.as_view(), name='my-view'),
     url(r'^index.html/$', MyView.as_view(), name='my-view'),
+    url(r'^$', index, name='my-view'),
+    url(r'^authPage.html$', AuthPage.as_view(), name='my-view'),
+
+
+    url(r'^login/$', Login.as_view(), name='login'),
+    url(r'^logout/$', Logout.as_view(), name='my-view'),
 ]
