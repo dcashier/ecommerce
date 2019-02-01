@@ -15,7 +15,6 @@ class MyView(View):
 
 def index(request):
 
-    print '==='
     answer = {}
     if request.session.get('actor_id'):
         auth_system = AuthSystem()
@@ -24,9 +23,6 @@ def index(request):
         answer['is_login'] = True
     else:
         answer['is_login'] = False
-        answer['test'] = 'TESTTT'
-
-    print '--'
     template = loader.get_template('dcashier/static/index.html')
     context = RequestContext(request, answer)
     return HttpResponse(template.render(context))

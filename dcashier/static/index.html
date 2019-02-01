@@ -21,12 +21,9 @@
 		<div class="workSection">
 			<div class="listView">
                 {% if is_login %}
-                    is login
-
+                    is login : {{ actor.title }}
                 {% else %}
                     not login
-                    {{ test }}
-                    
                 {% endif %}
 
 				<a href="authPage.html">
