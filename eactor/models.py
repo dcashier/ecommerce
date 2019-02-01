@@ -21,11 +21,17 @@ class Actor(models.Model):
 	return True
 
     def set_password(self, password):
-        make_password(password):
+        make_password(password)
         self.password = password
         self.save()
 
     def __unicode__(self):
         return u"%s: [%s] %s - %s (%s)" % (self.id, 'Man' if self.is_person else 'Robot', self.title, self.phone_number, self.fio)
 
+class AuthSystem(object):
 
+    def has_actor_by_phone_numnber_password(self, phone_number, password):
+        return True
+
+    def get_actor_by_phone_numnber_password(self, phone_number, password):
+        return Actor.objects.get(id=1)
