@@ -20,6 +20,14 @@
 		
 		<div class="workSection">
 			<div class="listView">
+                {% if is_login %}
+                    is login
+
+                {% else %}
+                    not login
+                    {{ test }}
+                    
+                {% endif %}
 
 				<a href="authPage.html">
 					<div class="listView__item">
