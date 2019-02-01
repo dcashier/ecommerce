@@ -34,4 +34,4 @@ class AuthSystem(object):
         return True
 
     def get_actor_by_phone_numnber_password(self, phone_number, password):
-        return Actor.objects.get(id=1)
+        return Actor.objects.get(id=2)
