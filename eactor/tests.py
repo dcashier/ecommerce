@@ -38,7 +38,6 @@ class TestEActor(TestCase):
         actor_2.save()
         actor_2.set_password(password_2)
 
-
         self.assertTrue(auth_system.has_actor_by_phone_numnber_password(phone_number_2, password_2))
         self.assertEqual(actor_2, auth_system.get_actor_by_phone_numnber_password(phone_number_2, password_2))
 
