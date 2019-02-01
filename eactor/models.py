@@ -46,3 +46,6 @@ class AuthSystem(object):
 
     def get_actor_by_phone_numnber_password(self, phone_number, password):
         return Actor.objects.filter(phone_number=phone_number, password_hash=Actor.make_password_hash(password))[0]
+
+    def get_actor_by_id(self, actor_id):
+        return Actor.objects.get(id=actor_id)
