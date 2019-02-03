@@ -12,7 +12,8 @@ body{
 	background-color: #181818;
 }
 
-.displayBlock{display: block;}
+.displayBlock{display: block !important;}
+
 
 .mt10{margin-top: 10px !important}
 .mt20{margin-top: 20px !important}
@@ -21,6 +22,14 @@ body{
 .mt60{margin-top: 60px !important}
 .mt80{margin-top: 80px !important}
 .mt100{margin-top: 100px !important}
+
+.ml10{margin-left: 10px !important}
+.ml20{margin-left: 20px !important}
+
+.w50p{width: 50%}
+
+.textAlignCenter{text-align: center}
+.textAlignLeft{text-align: left}
 
 .colorRed{color: #ff3333;}
 
@@ -49,7 +58,7 @@ a{
 
 
 .container {
-	width: auto;
+	width: 100%;
 }
 
 .logo{
@@ -64,72 +73,58 @@ a{
 }
 
 
+/* Toolbar                                   */
+/*-------------------------------------------*/
 .toolbar {
-	height: 10vh;
+	height: 48px;	
+	display: flex;
 }
 
 .toolbar a{
 	text-decoration: none;
 }
 
-.toolbar h1{
-	margin-top: 17px;
-	font-size: 20px;
-	font-weight: 600;
-	text-align: left;
-	display: inline-block;
-	color: gray;
-	text-align: center;
-	width: 80%;
-}
-
-.toolbar_complexTitle{
-	width: 80%;
-	margin-top: 17px;
-	margin-left: 20px;
-	display: inline-block;
-}
-
-.toolbar_complexTitle h1{
-	margin: 0;
-	font-size: 24px;
-	font-weight: 600;
-	text-align: left;
-	color: #f4f4f4;
-}
-
-.toolbar_complexTitle h2{
-	margin: 0;	
-	font-size: 18px;
-	font-weight: 400;
-	text-align: left;
-	color: gray;
-}
-
-
 .toolbar__backButton{
-	float: left;
 	margin-top: 10px;
 	margin-left: 10px;
 	text-align: center;
 	font-size: 28px;
-	color: #676767;
+	color: #676767;	
 }
 
 .toolbar_backButton:active{
 	background-color: red;
 }
 
+.toolbar__title{	
+	margin-top: 10px;
+	width: 90%;
+}
+
+.toolbar__title h1{
+	font-size: 20px;
+	font-weight: 600;
+	color: #E1E1E1;
+}
+
+
+.toolbar__title h2{
+	font-size: 16px;
+	font-weight: 400;
+	text-align: left;
+	color: gray;
+}
+
 
 .toolbar__backButton:before{
 	font-family:'Material Icons';
-	content: 'arrow_back';	
+	content: 'arrow_back_ios';	
 }
 
 
 
 .toolbar__exitButton{
-	float:right;
+	float: right;
 	margin-top: 10px;
 	margin-right: 10px;
 	text-align: center;
@@ -143,12 +138,10 @@ a{
 }
 
 
-.toolbar__title{
-	width: auto;
-	margin: 0 auto;
-	font-size: 24px;	
-	text-align: center;
-}
+
+/* Work section                              */
+/*-------------------------------------------*/
+
 
 
 .workSection{
@@ -159,9 +152,62 @@ a{
 	margin: 0 auto;	
 }
 
+
+/* Total section                           */
+/*-------------------------------------------*/
+
+.totalSection{
+	width: inherit;
+	bottom: 60px;
+	position: absolute;
+}
+
+
+.totalSection__leftPart{
+	width: 60%;
+	display: inline-block;
+	margin-left: 15px;	
+	height: 33px;
+}
+
+.totalSection__leftPart__title{
+	font-size: 24px;
+	width: 100%;
+	font-weight: 400;
+ 	white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.totalSection__leftPart__detail{
+	width: 100%;
+	font-weight: 400;
+	font-size: 13px;
+	color: gray;
+ 	white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.totalSection__rightPart{
+	display: inline-block;
+	margin-top: 5px;	
+	margin-right: 10px;
+	float:right;
+	height: 33px;
+	font-weight: 400;
+	font-size: 18px;
+}
+
+
+
+/* Control section                           */
+/*-------------------------------------------*/
+
 .controlSection{
 	margin-bottom: 5px;
-	width: 100%;
+	width: inherit;
 	bottom: 0;
 	position: absolute;
 }
@@ -171,6 +217,15 @@ a{
 	margin: 0 auto;
 }
 
+.controlSection__buttonsHorizontally{
+	display:flex;
+	align-items: stretch;
+}
+
+
+
+/* Controls                                  */
+/*-------------------------------------------*/
 
 
 .input{
@@ -229,7 +284,7 @@ a{
 	color: #f4f4f4;
 	background-color: #181818;
 	text-decoration: none;
-	text-align: center;
+	text-align: center;	
 }
 
 .inverseButton:active{
@@ -238,6 +293,9 @@ a{
 	background-color: #f4f4f4;
 }
 
+
+/* List View                                */
+/*------------------------------------------*/
 
 .listView{
 	border-style: solid;
@@ -263,36 +321,53 @@ a{
 }
 
 
-.listView__item__title{
-	font-size: 18px;
-	margin-top: 3px;
-	margin-left: 15px;
+.listView__item__leftPart{
 	width: 70%;
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 15px;	
+	height: 44px;
+
+}
+
+.listView__item__leftPart__title{
+	font-size: 18px;
+	width: 100%;
 	font-weight: 600;
  	white-space: nowrap; 
     overflow: hidden;
-    text-overflow: ellipsis 	
+    text-overflow: ellipsis;
 }
 
-.listView__item__detail{
-	margin-left: 15px;
-	width: 70%;
+.listView__item__leftPart__detail{
+	width: 100%;
 	font-weight: 400;
 	font-size: 13px;
 	color: gray;
  	white-space: nowrap; 
     overflow: hidden;
     text-overflow: ellipsis 	
+}
 
+.listView__item__rightPart{
+	display: inline-block;	
+	margin-top: 5px;
+	margin-right: 	10px;
+	float:right;
+	height: 44px;	
+}
+
+.listView__item__rightPart__detail{
+	font-size: 18px;
+	display: inline-block;	
+	float:right;
+	height: 44px;	
 }
 
 .listView__item__moreButton{
-	
-	text-align: center;
 	font-size: 38px;
 	color: #676767;
 	float: right;
-	margin-right: 5px;
 }
 
 .listView__item__moreButton:before{
@@ -301,14 +376,3 @@ a{
 }
 
 
-
-
-
-
-
-/*
-*{
-	border:1px solid yellow;
-}
-
-*/
