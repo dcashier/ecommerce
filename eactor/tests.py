@@ -19,12 +19,19 @@ class TestEActor(TestCase):
         """
         Login
         """
+
         auth_system = AuthSystem()
+
+        shop_1 = Shop(title=u"main shop")
+        shop_1.save()
+
+        seller = Seller(shop=shop_1)
+        seller.save()
 
         phone_number_1 = '+79161111111'
         password_1 = '11111'
 
-        actor_1 = Actor(phone_number=phone_number_1, is_person=True)
+        actor_1 = Actor(phone_number=phone_number_1, is_person=True, seller=seller)
         actor_1.save()
         actor_1.set_password(password_1)
 
@@ -34,10 +41,9 @@ class TestEActor(TestCase):
         phone_number_2 = '+79165432112'
         password_2 = '12345'
 
-        actor_2 = Actor(phone_number=phone_number_2, is_person=True)
+        actor_2 = Actor(phone_number=phone_number_2, is_person=True, seller=seller)
         actor_2.save()
         actor_2.set_password(password_2)
-
 
         self.assertTrue(auth_system.has_actor_by_phone_numnber_password(phone_number_2, password_2))
         self.assertEqual(actor_2, auth_system.get_actor_by_phone_numnber_password(phone_number_2, password_2))
