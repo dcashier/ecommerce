@@ -28,6 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'malvina8.fvds.ru',
+    '0.0.0.0',
 ]
 
 

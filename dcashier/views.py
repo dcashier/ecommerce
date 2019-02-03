@@ -25,11 +25,13 @@ def index(request):
     else:
         answer['is_login'] = False
         answer['test'] = 'TESTTT'
+        answer['actor'] = 'actor'
 
     print '--'
     template = loader.get_template('dcashier/static/index.html')
     context = RequestContext(request, answer)
-    return HttpResponse(template.render(context))
+    #return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context.flatten()))
 
 class ActorNone(object):
     def shops(self):
