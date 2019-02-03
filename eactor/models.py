@@ -2,6 +2,7 @@
 from django.db import models
 from estorage.models import *
 from django.contrib.auth.hashers import make_password
+from eseller.models import *
 
 class Actor(models.Model):
     """
@@ -15,6 +16,7 @@ class Actor(models.Model):
     phone_m_type = models.CharField(verbose_name=u'Тип номера мобильного', max_length=128, null=True, blank=True)
     fio = models.CharField(verbose_name=u'Ф.И.О.', max_length=128, null=True, blank=True)
     password_hash = models.CharField(verbose_name=u'Хеш пароля', max_length=128, null=True, blank=True)
+    seller = models.ForeignKey(Seller)
 
     def __has_link_with_actor(self, actor):
 	print 'Nead fix __has_link_with_actor'
@@ -27,12 +29,19 @@ class Actor(models.Model):
 
     @staticmethod
     def make_password_hash(password):
-        return make_password(password, 'ttt', 'md5')
+        #return make_password(password, 'ttt', 'md5') # не проходят тесты в docker
+        return make_password(password, 'ttt')
 
     def set_password(self, password):
         password_hash = Actor.make_password_hash(password)
         self.password_hash = password_hash
         self.save()
+
+    def shops(self):
+        """
+        Список магазинов которыми может управлять продавец ассоцированный с данной учетной записью
+        """
+        return self.seller.shops()
 
     def __unicode__(self):
         return u"%s: [%s] %s - %s (%s)" % (self.id, 'Man' if self.is_person else 'Robot', self.title, self.phone_number, self.fio)
