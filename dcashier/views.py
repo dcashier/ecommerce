@@ -31,10 +31,20 @@ def index(request):
     context = RequestContext(request, answer)
     return HttpResponse(template.render(context))
 
+class ActorNone(object):
+    def shops(self):
+        return []
 
 class AuthPage(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'dcashier/static/authPage.html')
+
+def __get_actor_for_request_if_login(request):
+    if request.session.get('actor_id'):
+        auth_system = AuthSystem()
+        actor = auth_system.get_actor_by_id(request.session.get('actor_id'))
+        return actor
+    return ActorNone()
 
 class Login(View):
     def post(self, request, *args, **kwargs):
@@ -56,3 +66,9 @@ class Logout(View):
         except KeyError:
             pass
         return HttpResponse("You're logged out. <a href=\"/\">main</a>")
+
+class SelectShopPage(View):
+    def get(self, request, *args, **kwargs):
+        actor = self.__get_actor_for_request_if_login(request)
+        shops = actor.shops()
+        pass
