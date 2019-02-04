@@ -401,6 +401,34 @@ class TestESeller(TestCase):
         self.assertTrue(seller_2_2.has_shop_client(shop_2, client))
         self.assertEqual(client_phone_number, seller_2_2.get_client_shop_with_phone_number(shop_2, client_phone_number).get_phone_number())
 
+        # создадим заказ
+        brand_my = Brand(title=u"Реализация заказа")
+        brand_my.save()
+        product_my = Product(title="Позиция для списывания суммы", brand=brand_my)
+        product_my.save()
+        quantity = 1
+        price = Decimal('5.00')
+        currency = "USD"
+
+        # клиент просит продавца положить в корзину колиенту товар
+        self.assertFalse(seller_2_1.has_basket_for_client_in_shop(client, shop_2))
+        purchaser = Purchaser.get_purchaser_with_phone_number_for_client(client_phone_number, client)
+        seller_2_1.create_basket_for_client_in_shop(client, shop_2, purchaser)
+        self.assertTrue(seller_2_1.has_basket_for_client_in_shop(client, shop_2))
+        client_basket = seller_2_1.get_basket_for_client_in_shop(client, shop_2)
+
+        seller_2_1.add_product_in_basket(client_basket, product_my, quantity, price, currency)
+
+        region_center = Region(title=u"Центральный")
+        region_center.save()
+        city_moscow = City(title=u"Moscow", region=region_center)
+        city_moscow.save()
+        pickup_point = PickupPoint(title=u"pickup 1", city=city_moscow)
+        pickup_point.save()
+
+        seller_2_1.create_order_from_busket_and_pickup_point(client_basket, pickup_point)
+
+ 
 
 #    def test_list_shop_for_user_with_pickup_in_city(self):
 #        """
