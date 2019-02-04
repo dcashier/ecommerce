@@ -346,6 +346,44 @@ class TestESeller(TestCase):
         #если все устраивает и пришла оплата, резериватьвать товар и перемещать на пункт выдачи
         #когда вова за ним придет выдать товар офрмить чек, и начислить балы в системе лояльности.
 
+    def test_create_client(self):
+        shop_1 = Shop(title=u"main shop")
+        shop_1.save()
+
+        seller_1 = Seller(shop=shop_1)
+        seller_1.save()
+
+        client_phone_number = '+71002003040'
+        self.assertTrue(seller_1.is_work_in_shop(shop_1))
+        self.assertFalse(seller_1.has_shop_client_with_phone_number(shop_1, client_phone_number))
+
+        shop_2 = Shop(title=u"shop two")
+        shop_2.save()
+
+        seller_2 = Seller(shop=shop_2)
+        seller_2.save()
+
+        self.assertTrue(seller_2.is_work_in_shop(shop_2))
+        self.assertFalse(seller_2.has_shop_client_with_phone_number(shop_2, client_phone_number))
+        seller_2.create_client_shop_with_phone_number(shop_2, client_phone_number)
+
+        client = seller_2.get_client_shop_with_phone_number(shop_2, client_phone_number)
+        self.assertEqual(client_phone_number, client.get_phone_number())
+
+        self.assertFalse(seller_1.has_shop_client_with_phone_number(shop_1, client_phone_number))
+        self.assertTrue(seller_2.has_shop_client_with_phone_number(shop_2, client_phone_number))
+
+        self.assertFalse(seller_1.has_shop_client(shop_1, client))
+        self.assertTrue(seller_2.has_shop_client(shop_2, client))
+
+        seller_3 = Seller(shop=shop_2)
+        seller_3.save()
+
+        self.assertTrue(seller_3.is_work_in_shop(shop_2))
+        self.assertTrue(seller_3.has_shop_client_with_phone_number(shop_2, client_phone_number))
+        self.assertTrue(seller_3.has_shop_client(shop_2, client))
+
+
 #    def test_list_shop_for_user_with_pickup_in_city(self):
 #        """
 #        Получить список разрешенных магазинов в определнном городе для пользователя.

@@ -113,14 +113,14 @@ class Seller(models.Model):
         return None
 
     def get_client_shop_with_phone_number(self, shop, phone_number):
-        if not self.__is_seller_work_in_shop(shop):
+        if not self.is_work_in_shop(shop):
             raise ValidationError(u"Выбранынй прожавец не работает в указханном магазине.")
         for client in Shop.objects.filter(phone_number=phone_number): # не безопасно
             return client
         raise ValidationError(u"У магазина ент клиента с таким телефоном.")
 
     def has_shop_client_with_phone_number(self, shop, phone_number):
-        if not self.__is_seller_work_in_shop(shop):
+        if not self.is_work_in_shop(shop):
             raise ValidationError(u"Выбранынй прожавец не работает в указханном магазине.")
         for client in Shop.objects.filter(phone_number=phone_number): # не безопасно
             if self.has_shop_client(shop, client):
@@ -128,14 +128,8 @@ class Seller(models.Model):
         return False
 
     def has_shop_client(self, shop, client):
-        print self.shop.clients.all()
-        print shop
-        print self.__is_seller_work_in_shop(shop)
-        print client
-        print '---'
-        if self.__is_seller_work_in_shop(shop) and client in self.shop.clients.all():
+        if self.is_work_in_shop(shop) and client in self.shop.clients.all():
             return True
-        print 'FFF'
         return False
 
     def is_allow_order(self, order_params):
@@ -156,7 +150,7 @@ class Seller(models.Model):
         #    return False
         return True
 
-    def __is_seller_work_in_shop(self, shop):
+    def is_work_in_shop(self, shop):
         if self.shop and self.shop == shop:
             return True
         return False

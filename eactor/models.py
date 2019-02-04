@@ -20,7 +20,6 @@ class Actor(models.Model):
 
     def create_client_shop_with_phone_number(self, shop, phone_number):
         self.seller.create_client_shop_with_phone_number(shop, phone_number)
-        pass
 
     def get_client_shop_with_phone_number(self, shop, phone_number):
         return self.seller.get_client_shop_with_phone_number(shop, phone_number)
@@ -47,7 +46,7 @@ class Actor(models.Model):
         return False
 
     def is_seller_shop(self, shop):
-        if self.seller and self.seller.shop == shop:
+        if self.seller and self.seller.is_work_in_shop(shop):
             return True
         return False
 
