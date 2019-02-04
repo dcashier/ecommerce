@@ -360,12 +360,12 @@ class TestESeller(TestCase):
         shop_2 = Shop(title=u"shop two")
         shop_2.save()
 
-        seller_2 = Seller(shop=shop_2)
-        seller_2.save()
+        seller_2_1 = Seller(shop=shop_2)
+        seller_2_1.save()
 
-        self.assertTrue(seller_2.is_work_in_shop(shop_2))
+        self.assertTrue(seller_2_1.is_work_in_shop(shop_2))
         self.assertFalse(seller_1.is_work_in_shop(shop_2))
-        self.assertFalse(seller_2.is_work_in_shop(shop_1))
+        self.assertFalse(seller_2_1.is_work_in_shop(shop_1))
         try:
             seller_1.has_shop_client_with_phone_number(shop_2, client_phone_number)
         except:
@@ -380,25 +380,26 @@ class TestESeller(TestCase):
         else:
             # Если появилось исключение значит права нарушены
             self.assertFalse(True)
-        self.assertFalse(seller_2.has_shop_client_with_phone_number(shop_2, client_phone_number))
-        seller_2.create_client_shop_with_phone_number(shop_2, client_phone_number)
+        self.assertFalse(seller_2_1.has_shop_client_with_phone_number(shop_2, client_phone_number))
+        seller_2_1.create_client_shop_with_phone_number(shop_2, client_phone_number)
 
-        client = seller_2.get_client_shop_with_phone_number(shop_2, client_phone_number)
+        client = seller_2_1.get_client_shop_with_phone_number(shop_2, client_phone_number)
         self.assertEqual(client_phone_number, client.get_phone_number())
 
         self.assertFalse(seller_1.has_shop_client_with_phone_number(shop_1, client_phone_number))
-        self.assertTrue(seller_2.has_shop_client_with_phone_number(shop_2, client_phone_number))
+        self.assertTrue(seller_2_1.has_shop_client_with_phone_number(shop_2, client_phone_number))
 
         self.assertFalse(seller_1.has_shop_client(shop_1, client))
-        self.assertTrue(seller_2.has_shop_client(shop_2, client))
+        self.assertTrue(seller_2_1.has_shop_client(shop_2, client))
 
-        seller_3 = Seller(shop=shop_2)
-        seller_3.save()
+        seller_2_2 = Seller(shop=shop_2)
+        seller_2_2.save()
 
-        self.assertFalse(seller_3.is_work_in_shop(shop_1))
-        self.assertTrue(seller_3.is_work_in_shop(shop_2))
-        self.assertTrue(seller_3.has_shop_client_with_phone_number(shop_2, client_phone_number))
-        self.assertTrue(seller_3.has_shop_client(shop_2, client))
+        self.assertFalse(seller_2_2.is_work_in_shop(shop_1))
+        self.assertTrue(seller_2_2.is_work_in_shop(shop_2))
+        self.assertTrue(seller_2_2.has_shop_client_with_phone_number(shop_2, client_phone_number))
+        self.assertTrue(seller_2_2.has_shop_client(shop_2, client))
+        self.assertEqual(client_phone_number, seller_2_2.get_client_shop_with_phone_number(shop_2, client_phone_number).get_phone_number())
 
 
 #    def test_list_shop_for_user_with_pickup_in_city(self):
