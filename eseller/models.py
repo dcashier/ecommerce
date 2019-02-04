@@ -33,6 +33,8 @@ class Seller(models.Model):
         return True
 
     def create_client_shop_with_phone_number(self, shop, phone_number):
+        if not self.is_work_in_shop(shop):
+            raise ValidationError(u"Выбранный прожавец не работает в указханном магазине.")
         client = Shop(phone_number=phone_number)
         client.save()
         self.shop.clients.add(client)
@@ -114,14 +116,14 @@ class Seller(models.Model):
 
     def get_client_shop_with_phone_number(self, shop, phone_number):
         if not self.is_work_in_shop(shop):
-            raise ValidationError(u"Выбранынй прожавец не работает в указханном магазине.")
+            raise ValidationError(u"Выбранный прожавец не работает в указханном магазине.")
         for client in Shop.objects.filter(phone_number=phone_number): # не безопасно
             return client
         raise ValidationError(u"У магазина ент клиента с таким телефоном.")
 
     def has_shop_client_with_phone_number(self, shop, phone_number):
         if not self.is_work_in_shop(shop):
-            raise ValidationError(u"Выбранынй прожавец не работает в указханном магазине.")
+            raise ValidationError(u"Выбранный прожавец не работает в указханном магазине.")
         for client in Shop.objects.filter(phone_number=phone_number): # не безопасно
             if self.has_shop_client(shop, client):
                 return True

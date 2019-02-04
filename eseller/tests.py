@@ -364,6 +364,22 @@ class TestESeller(TestCase):
         seller_2.save()
 
         self.assertTrue(seller_2.is_work_in_shop(shop_2))
+        self.assertFalse(seller_1.is_work_in_shop(shop_2))
+        self.assertFalse(seller_2.is_work_in_shop(shop_1))
+        try:
+            seller_1.has_shop_client_with_phone_number(shop_2, client_phone_number)
+        except:
+            pass
+        else:
+            # Если появилось исключение значит права нарушены
+            self.assertFalse(True)
+        try:
+            seller_1.create_client_shop_with_phone_number(shop_2, client_phone_number)
+        except:
+            pass
+        else:
+            # Если появилось исключение значит права нарушены
+            self.assertFalse(True)
         self.assertFalse(seller_2.has_shop_client_with_phone_number(shop_2, client_phone_number))
         seller_2.create_client_shop_with_phone_number(shop_2, client_phone_number)
 
@@ -379,6 +395,7 @@ class TestESeller(TestCase):
         seller_3 = Seller(shop=shop_2)
         seller_3.save()
 
+        self.assertFalse(seller_3.is_work_in_shop(shop_1))
         self.assertTrue(seller_3.is_work_in_shop(shop_2))
         self.assertTrue(seller_3.has_shop_client_with_phone_number(shop_2, client_phone_number))
         self.assertTrue(seller_3.has_shop_client(shop_2, client))
