@@ -32,6 +32,11 @@ class Seller(models.Model):
         print 'Alert : Not work check_payment_for_last_order'
         return True
 
+    def create_client_shop_with_phone_number(self, shop, phone_number):
+        client = Shop(phone_number=phone_number)
+        client.save()
+        self.shop.clients.add(client)
+
     def create_order(self, parmas):
         """
         Следует указать:
@@ -107,6 +112,32 @@ class Seller(models.Model):
             return 'Error : Same product not allow for sale'
         return None
 
+    def get_client_shop_with_phone_number(self, shop, phone_number):
+        if not self.__is_seller_work_in_shop(shop):
+            raise ValidationError(u"Выбранынй прожавец не работает в указханном магазине.")
+        for client in Shop.objects.filter(phone_number=phone_number): # не безопасно
+            return client
+        raise ValidationError(u"У магазина ент клиента с таким телефоном.")
+
+    def has_shop_client_with_phone_number(self, shop, phone_number):
+        if not self.__is_seller_work_in_shop(shop):
+            raise ValidationError(u"Выбранынй прожавец не работает в указханном магазине.")
+        for client in Shop.objects.filter(phone_number=phone_number): # не безопасно
+            if self.has_shop_client(shop, client):
+                return True
+        return False
+
+    def has_shop_client(self, shop, client):
+        print self.shop.clients.all()
+        print shop
+        print self.__is_seller_work_in_shop(shop)
+        print client
+        print '---'
+        if self.__is_seller_work_in_shop(shop) and client in self.shop.clients.all():
+            return True
+        print 'FFF'
+        return False
+
     def is_allow_order(self, order_params):
         error = self.__error_by_order(order_params)
         if error:
@@ -124,6 +155,11 @@ class Seller(models.Model):
         #if point_pickup.id == 2:
         #    return False
         return True
+
+    def __is_seller_work_in_shop(self, shop):
+        if self.shop and self.shop == shop:
+            return True
+        return False
 
     def __link_price_factory_product_storage_pickup_point(self, product, storages, pickup_points):
         link_price_factory_product_storage_pickup_point = []
