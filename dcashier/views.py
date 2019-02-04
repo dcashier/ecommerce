@@ -73,4 +73,14 @@ class SelectShopPage(View):
     def get(self, request, *args, **kwargs):
         actor = self.__get_actor_for_request_if_login(request)
         shops = actor.shops()
-        pass
+
+class ShopPage(View):
+    def post(self, request, *args, **kwargs):
+        actor = self.__get_actor_for_request_if_login(request)
+        shops = actor.shops()
+        seller = actor.seller()
+        clent = get_client_by_phone(request.POST['phone_number'])
+        order = seller.create_order([get_default_product], clent)
+
+
+        
