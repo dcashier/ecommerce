@@ -426,7 +426,7 @@ class TestESeller(TestCase):
         pickup_point = PickupPoint(title=u"pickup 1", city=city_moscow)
         pickup_point.save()
 
-        seller_2_1.create_order_from_busket_and_pickup_point(client, basket_client, pickup_point)
+        seller_2_1.create_order_from_busket_and_pickup_point(client, shop_2, purchaser, basket_client, pickup_point)
         order_client = seller_2_1.get_last_order_client(client)
         ball = 1
         purchaser.pay_ball(order_client, ball)
