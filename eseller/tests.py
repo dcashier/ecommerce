@@ -415,9 +415,9 @@ class TestESeller(TestCase):
         purchaser = Purchaser.get_purchaser_with_phone_number_for_client(client_phone_number, client)
         seller_2_1.create_basket_for_client_in_shop(client, shop_2, purchaser)
         self.assertTrue(seller_2_1.has_basket_for_client_in_shop(client, shop_2))
-        client_basket = seller_2_1.get_basket_for_client_in_shop(client, shop_2)
+        basket_client = seller_2_1.get_basket_for_client_in_shop(client, shop_2)
 
-        seller_2_1.add_product_in_basket(client_basket, product_my, quantity, price, currency)
+        seller_2_1.add_product_in_basket(basket_client, product_my, quantity, price, currency)
 
         region_center = Region(title=u"Центральный")
         region_center.save()
@@ -426,9 +426,15 @@ class TestESeller(TestCase):
         pickup_point = PickupPoint(title=u"pickup 1", city=city_moscow)
         pickup_point.save()
 
-        seller_2_1.create_order_from_busket_and_pickup_point(client_basket, pickup_point)
+        seller_2_1.create_order_from_busket_and_pickup_point(client, basket_client, pickup_point)
+        order_client = seller_2_1.get_last_order_client(client)
+        ball = 1
+        purchaser.pay_ball(order_client, ball)
+        self.assertEqual(Decimal('4.00'), order_client.calculate_price())
 
- 
+
+        
+
 
 #    def test_list_shop_for_user_with_pickup_in_city(self):
 #        """

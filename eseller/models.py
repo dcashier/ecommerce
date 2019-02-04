@@ -13,12 +13,16 @@ from eshop.models import *
 
 
 class Purchaser(models.Model):
+    title = models.CharField(max_length=100)
     shop = models.ForeignKey(Shop)
     phone_number = models.CharField(verbose_name=u'Телефонный номер', max_length=128, null=True, blank=True)
 
     @classmethod
     def get_purchaser_with_phone_number_for_client(cls, phone_number, client):
         return Purchaser.objects.get(phone_number=phone_number, shop=client)
+
+    def pay_ball(self, order_client, ball):
+        print 'Alert : Not work pay_ball'
 
 class Seller(models.Model):
     """
@@ -54,7 +58,7 @@ class Seller(models.Model):
         client = Shop(phone_number=phone_number)
         client.save()
         self.shop.clients.add(client)
-        purchaser = Purchaser(shop=client, phone_number=phone_number)
+        purchaser = Purchaser(title=u"Default purchaser when Seller create Client.", shop=client, phone_number=phone_number)
         purchaser.save()
 
     def create_order(self, parmas):
@@ -74,8 +78,9 @@ class Seller(models.Model):
         """
         pass
 
-    def create_order_from_busket_and_pickup_point(self, basket, pickup_point):
+    def create_order_from_busket_and_pickup_point(self, client, basket, pickup_point):
         print 'Alert : Not work create_order_from_busket_and_pickup_point'
+        Order()
 
     def create_payemnt_link_for_last_order(self):
         print 'Alert : Not work create_payemnt_link_for_last_order'
@@ -146,6 +151,9 @@ class Seller(models.Model):
         for client in Shop.objects.filter(phone_number=phone_number): # не безопасно
             return client
         raise ValidationError(u"У магазина ент клиента с таким телефоном.")
+
+    def get_last_order_client(self, client):
+        return Order()
 
     def has_basket_for_client_in_shop(self, client, shop):
         for basket in Basket.objects.filter(customer=client, executor=shop):
