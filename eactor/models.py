@@ -64,7 +64,9 @@ class Actor(models.Model):
         """
         Список магазинов которыми может управлять продавец ассоцированный с данной учетной записью
         """
-        return self.seller.shops()
+        if self.seller:
+            return self.seller.shops()
+        return []
 
     def __unicode__(self):
         return u"%s: [%s] %s - %s (%s)" % (self.id, 'Man' if self.is_person else 'Robot', self.title, self.phone_number, self.fio)

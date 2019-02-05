@@ -16,7 +16,8 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
-from dcashier.views import MyView, AuthPage, Login, Logout, index
+#from dcashier.views import MyView, AuthPage, Login, Logout, index
+from dcashier.views import *
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -25,6 +26,9 @@ urlpatterns = [
     url(r'^index.html/$', MyView.as_view(), name='my-view'),
     url(r'^$', index, name='my-view'),
     url(r'^authPage.html$', AuthPage.as_view(), name='my-view'),
+    url(r'^selectShopPage.html$', SelectShopPage.as_view(), name='my-view'),
+    url(r'^shopPage.html$', ShopPage.as_view(), name='my-view'),
+    url(r'^newDealPage.html$', NewDealPage.as_view(), name='my-view'),
 
 
     url(r'^login/$', Login.as_view(), name='login'),

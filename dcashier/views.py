@@ -40,7 +40,7 @@ class AuthPage(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'dcashier/static/authPage.html')
 
-def __get_actor_for_request_if_login(request):
+def get_actor_for_request_if_login(request):
     if request.session.get('actor_id'):
         auth_system = AuthSystem()
         actor = auth_system.get_actor_by_id(request.session.get('actor_id'))
@@ -70,15 +70,42 @@ class Logout(View):
 
 class SelectShopPage(View):
     def get(self, request, *args, **kwargs):
-        actor = self.__get_actor_for_request_if_login(request)
+        actor = get_actor_for_request_if_login(request)
         shops = actor.shops()
 
+        answer = {}
+        answer['shops'] = shops
+        template = loader.get_template('dcashier/static/selectShopPage.html')
+        context = RequestContext(request, answer)
+        #return HttpResponse(template.render(context))
+        return HttpResponse(template.render(context.flatten()))
+
+
 class ShopPage(View):
-    def post(self, request, *args, **kwargs):
-        actor = self.__get_actor_for_request_if_login(request)
+    def get(self, request, *args, **kwargs):
+        actor = get_actor_for_request_if_login(request)
         shops = actor.shops()
-        seller = actor.seller()
-        clent = get_client_by_phone(request.POST['phone_number'])
-        order = seller.create_order([get_default_product], clent)
+        #seller = actor.seller()
+        #clent = get_client_by_phone(request.POST['phone_number'])
+        #order = seller.create_order([get_default_product], clent)
+
+        answer = {}
+        template = loader.get_template('dcashier/static/shopPage.html')
+        context = RequestContext(request, answer)
+        #return HttpResponse(template.render(context))
+        return HttpResponse(template.render(context.flatten()))
+
+
+class NewDealPage(View):
+    def get(self, request, *args, **kwargs):
+        actor = get_actor_for_request_if_login(request)
+        shops = actor.shops()
+
+        answer = {}
+        answer['shops'] = shops
+        template = loader.get_template('dcashier/static/newDealPage.html')
+        context = RequestContext(request, answer)
+        #return HttpResponse(template.render(context))
+        return HttpResponse(template.render(context.flatten()))
 
 
