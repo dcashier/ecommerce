@@ -250,7 +250,7 @@ class NewDealPage(View):
         if not seller.check_payment_for_last_order():
             return None
 
-        reward_ball = seller.calculate_revards_balls_for_last_order()
+        reward_ball = seller.calculate_revards_balls_for_last_order(loyalty, client)
         available_day = 90
         loyalty.transfer_ball(seller, shop, client, reward_ball, available_day)
 
