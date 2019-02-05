@@ -21,12 +21,17 @@ def index(request):
         actor = auth_system.get_actor_by_id(request.session.get('actor_id'))
         answer['actor'] = actor
         answer['is_login'] = True
+        if request.session.get('shop_id'):
+            shop_id = request.session.get('shop_id')
+            actor = get_actor_for_request_if_login(request)
+            shops = actor.shops()
+            for shop in shops:
+                if str(shop.id) == str(shop_id):
+                    answer['shop'] = shop
+                    break
     else:
         answer['is_login'] = False
-        answer['test'] = 'TESTTT'
-        answer['actor'] = 'actor'
 
-    print '--'
     template = loader.get_template('dcashier/static/index.html')
     context = RequestContext(request, answer)
     #return HttpResponse(template.render(context))
@@ -80,6 +85,15 @@ class SelectShopPage(View):
         #return HttpResponse(template.render(context))
         return HttpResponse(template.render(context.flatten()))
 
+    def post(self, request, *args, **kwargs):
+        shop_id = request.POST['shop_id']
+        actor = get_actor_for_request_if_login(request)
+        shops = actor.shops()
+        for shop in shops:
+            if str(shop.id) == str(shop_id):
+                request.session['shop_id'] = shop_id
+                return HttpResponse("You're select shop!")
+        return HttpResponse("You're select not good shop")
 
 class ShopPage(View):
     def get(self, request, *args, **kwargs):

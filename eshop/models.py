@@ -12,14 +12,14 @@ class Shop(models.Model):
     """
     # поставщик / получатель
     title = models.CharField(verbose_name=u'Название Ип / ооо / оао', max_length=254, null=True, blank=True)
-    pickup_points = models.ManyToManyField(PickupPoint)
-    storages = models.ManyToManyField(Storage)
+    pickup_points = models.ManyToManyField(PickupPoint, null=True, blank=True)
+    storages = models.ManyToManyField(Storage, null=True, blank=True)
     is_person = models.BooleanField(verbose_name=u'Персона или Юр. лицо', default=False)
     birthday = models.DateField(u'Дата рождения', null=True, blank=True)
     phone_number = models.CharField(verbose_name=u'Номер мобильного', max_length=128, null=True, blank=True)
     phone_m_type = models.CharField(verbose_name=u'Тип номера мобильного', max_length=128, null=True, blank=True)
     fio = models.CharField(verbose_name=u'Ф.И.О.', max_length=128, null=True, blank=True)
-    clients = models.ManyToManyField('self')
+    clients = models.ManyToManyField('self', null=True, blank=True)
 
     def get_phone_number(self):
         return self.phone_number

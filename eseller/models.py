@@ -34,7 +34,7 @@ class Seller(models.Model):
     """
     title = models.CharField(max_length=100)
     shop = models.ForeignKey(Shop)
-    price_policies = models.ManyToManyField(PricePolicy) # политики которые может использовать данный продавец ему назанчаются свыше
+    price_policies = models.ManyToManyField(PricePolicy, null=True, blank=True) # политики которые может использовать данный продавец ему назанчаются свыше
 
     def add_product_in_basket(self, basket, product, quantity, price, currency):
         basket.add(product, quantity, price, currency)
