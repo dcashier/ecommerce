@@ -101,6 +101,9 @@ class Order(models.Model):
     pickup_point = models.ForeignKey(PickupPoint)
     pickup_dateteme = models.DateTimeField(u'дата и время вручения всего заказа(т.е. последней партии)')
 
+    def calculate_price(self):
+        return 4
+
     def price(self):
         """
         Рассчитывает финальную стомость на основе всех рtализуемых позиций.

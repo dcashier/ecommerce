@@ -19,7 +19,10 @@ class Shop(models.Model):
     phone_number = models.CharField(verbose_name=u'Номер мобильного', max_length=128, null=True, blank=True)
     phone_m_type = models.CharField(verbose_name=u'Тип номера мобильного', max_length=128, null=True, blank=True)
     fio = models.CharField(verbose_name=u'Ф.И.О.', max_length=128, null=True, blank=True)
+    clients = models.ManyToManyField('self')
 
+    def get_phone_number(self):
+        return self.phone_number
 
     def __has_link_with_actor(self, actor):
 	print 'Nead fix __has_link_with_actor'

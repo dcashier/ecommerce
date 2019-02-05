@@ -48,7 +48,7 @@ INSTALLED_APPS = (
     'epricepolicy',
     #'eoffer',
     'epurchase',
-    'esale',
+    #'esale',
     'eseller',
     'eloyalty',
     'eactor',

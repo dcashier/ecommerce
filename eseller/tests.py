@@ -346,6 +346,96 @@ class TestESeller(TestCase):
         #если все устраивает и пришла оплата, резериватьвать товар и перемещать на пункт выдачи
         #когда вова за ним придет выдать товар офрмить чек, и начислить балы в системе лояльности.
 
+    def test_create_client(self):
+        shop_1 = Shop(title=u"main shop")
+        shop_1.save()
+
+        seller_1 = Seller(shop=shop_1)
+        seller_1.save()
+
+        client_phone_number = '+71002003040'
+        self.assertTrue(seller_1.is_work_in_shop(shop_1))
+        self.assertFalse(seller_1.has_shop_client_with_phone_number(shop_1, client_phone_number))
+
+        shop_2 = Shop(title=u"shop two")
+        shop_2.save()
+
+        seller_2_1 = Seller(shop=shop_2)
+        seller_2_1.save()
+
+        self.assertTrue(seller_2_1.is_work_in_shop(shop_2))
+        self.assertFalse(seller_1.is_work_in_shop(shop_2))
+        self.assertFalse(seller_2_1.is_work_in_shop(shop_1))
+        try:
+            seller_1.has_shop_client_with_phone_number(shop_2, client_phone_number)
+        except:
+            pass
+        else:
+            # Если появилось исключение значит права нарушены
+            self.assertFalse(True)
+        try:
+            seller_1.create_client_shop_with_phone_number(shop_2, client_phone_number)
+        except:
+            pass
+        else:
+            # Если появилось исключение значит права нарушены
+            self.assertFalse(True)
+        self.assertFalse(seller_2_1.has_shop_client_with_phone_number(shop_2, client_phone_number))
+        seller_2_1.create_client_shop_with_phone_number(shop_2, client_phone_number)
+
+        client = seller_2_1.get_client_shop_with_phone_number(shop_2, client_phone_number)
+        self.assertEqual(client_phone_number, client.get_phone_number())
+
+        self.assertFalse(seller_1.has_shop_client_with_phone_number(shop_1, client_phone_number))
+        self.assertTrue(seller_2_1.has_shop_client_with_phone_number(shop_2, client_phone_number))
+
+        self.assertFalse(seller_1.has_shop_client(shop_1, client))
+        self.assertTrue(seller_2_1.has_shop_client(shop_2, client))
+
+        seller_2_2 = Seller(shop=shop_2)
+        seller_2_2.save()
+
+        self.assertFalse(seller_2_2.is_work_in_shop(shop_1))
+        self.assertTrue(seller_2_2.is_work_in_shop(shop_2))
+        self.assertTrue(seller_2_2.has_shop_client_with_phone_number(shop_2, client_phone_number))
+        self.assertTrue(seller_2_2.has_shop_client(shop_2, client))
+        self.assertEqual(client_phone_number, seller_2_2.get_client_shop_with_phone_number(shop_2, client_phone_number).get_phone_number())
+
+        # создадим заказ
+        brand_my = Brand(title=u"Реализация заказа")
+        brand_my.save()
+        product_my = Product(title="Позиция для списывания суммы", brand=brand_my)
+        product_my.save()
+        quantity = 1
+        price = Decimal('5.00')
+        currency = "USD"
+
+        # клиент просит продавца положить в корзину колиенту товар
+        self.assertFalse(seller_2_1.has_basket_for_client_in_shop(client, shop_2))
+        purchaser = Purchaser.get_purchaser_with_phone_number_for_client(client_phone_number, client)
+        seller_2_1.create_basket_for_client_in_shop(client, shop_2, purchaser)
+        self.assertTrue(seller_2_1.has_basket_for_client_in_shop(client, shop_2))
+        basket_client = seller_2_1.get_basket_for_client_in_shop(client, shop_2)
+
+        seller_2_1.add_product_in_basket(basket_client, product_my, quantity, price, currency)
+
+        region_center = Region(title=u"Центральный")
+        region_center.save()
+        city_moscow = City(title=u"Moscow", region=region_center)
+        city_moscow.save()
+        pickup_point = PickupPoint(title=u"pickup 1", city=city_moscow)
+        pickup_point.save()
+
+        seller_2_1.create_order_from_busket_and_pickup_point(client, shop_2, purchaser, basket_client, pickup_point)
+        order_client = seller_2_1.get_last_order_client(client)
+        ball = 1
+        purchaser.pay_ball(order_client, ball)
+        self.assertEqual(Decimal('4.00'), order_client.calculate_price())
+
+
+        
+
+
 #    def test_list_shop_for_user_with_pickup_in_city(self):
 #        """
 #        Получить список разрешенных магазинов в определнном городе для пользователя.
