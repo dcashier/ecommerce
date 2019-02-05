@@ -238,8 +238,8 @@ class Seller(models.Model):
         reserve = Reserve(product=product, quantity=quantity, storage=storage, part_number=part_number)
         reserve.save()
 
-
-
+    def shops(self):
+        return [self.shop]
 
 
 class Customer(object):

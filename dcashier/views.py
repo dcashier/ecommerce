@@ -23,14 +23,29 @@ def index(request):
         answer['is_login'] = True
     else:
         answer['is_login'] = False
+        answer['test'] = 'TESTTT'
+        answer['actor'] = 'actor'
+
+    print '--'
     template = loader.get_template('dcashier/static/index.html')
     context = RequestContext(request, answer)
-    return HttpResponse(template.render(context))
+    #return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context.flatten()))
 
+class ActorNone(object):
+    def shops(self):
+        return []
 
 class AuthPage(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'dcashier/static/authPage.html')
+
+def __get_actor_for_request_if_login(request):
+    if request.session.get('actor_id'):
+        auth_system = AuthSystem()
+        actor = auth_system.get_actor_by_id(request.session.get('actor_id'))
+        return actor
+    return ActorNone()
 
 class Login(View):
     def post(self, request, *args, **kwargs):
@@ -52,3 +67,18 @@ class Logout(View):
         except KeyError:
             pass
         return HttpResponse("You're logged out. <a href=\"/\">main</a>")
+
+class SelectShopPage(View):
+    def get(self, request, *args, **kwargs):
+        actor = self.__get_actor_for_request_if_login(request)
+        shops = actor.shops()
+
+class ShopPage(View):
+    def post(self, request, *args, **kwargs):
+        actor = self.__get_actor_for_request_if_login(request)
+        shops = actor.shops()
+        seller = actor.seller()
+        clent = get_client_by_phone(request.POST['phone_number'])
+        order = seller.create_order([get_default_product], clent)
+
+
