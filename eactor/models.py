@@ -16,7 +16,7 @@ class Actor(models.Model):
     phone_m_type = models.CharField(verbose_name=u'Тип номера мобильного', max_length=128, null=True, blank=True)
     fio = models.CharField(verbose_name=u'Ф.И.О.', max_length=128, null=True, blank=True)
     password_hash = models.CharField(verbose_name=u'Хеш пароля', max_length=128, null=True, blank=True)
-    seller = models.ForeignKey(Seller)
+    seller = models.ForeignKey(Seller, null=True, blank=True)
 
     def create_client_shop_with_phone_number(self, shop, phone_number):
         self.seller.create_client_shop_with_phone_number(shop, phone_number)

@@ -25,6 +25,7 @@ SECRET_KEY = '^d^906aj^c46pk=sz64&1wf3nl3=h78c11*_@!qv8(sg(u1xj='
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+#DEBUG = False
 
 ALLOWED_HOSTS = [
     'malvina8.fvds.ru',
@@ -130,8 +131,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 #STATIC_URL = '/static/'
-STATIC_URL = '/dcashier/static/'
+STATIC_URL = '/css/'
 
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'dcashier/static/css'),
+    )
 
 
 import sys
