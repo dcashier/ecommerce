@@ -19,8 +19,13 @@
 				<div class="toolbar__backButton"></div>
 			</a>
 			<div class="toolbar__title textAlignLeft ml20">
+                {% if 0 %}
 				<h1>Василий Петроновский</h1>
 				<h2>+7 926 631 83 91</h2>
+                {% endif %}
+				<h1>{{ client.title }}</h1>
+				<h2>{{ client.phone_number }}</h2>
+
 			</div>
 				
 		</div>
@@ -37,7 +42,8 @@
 					</div>
 					<div class="listView__item__rightPart mt10">
 						<div class="listView__item__rightPart__detail">	
-							1 500 &#8381
+							{{ order_sum }} &#8381
+                            {% if 0 %}1 500 &#8381{% endif %}
 						</div>						
 					</div>
 				</div>
