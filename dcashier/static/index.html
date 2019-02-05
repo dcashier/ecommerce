@@ -81,7 +81,8 @@
 						<div class="listView__item__leftPart">		
 		
 							<div class="listView__item__leftPart__title">
-								Новая сделка
+								{% if 0 %}Новая сделка{% endif %}
+                                {% if is_order %}Текущая{% else %}Новая{% endif %} сделка
 							</div>
 							<div class="listView__item__leftPart__detail">
 								newDealPage.html

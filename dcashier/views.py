@@ -29,6 +29,8 @@ def index(request):
                 if str(shop.id) == str(shop_id):
                     answer['shop'] = shop
                     break
+            if request.session.get('order_id'):
+                answer['is_order'] = True
     else:
         answer['is_login'] = False
 
