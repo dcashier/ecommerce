@@ -176,8 +176,10 @@ class Seller(models.Model):
 
     def get_last_order_client(self, client):
         #return Order.objects.get(customer=client)
-        if Order.objects.filter(customer=client).count() > 0:
+        if Order.objects.filter(customer=client).count() > 1:
             print 'Error : Too many orderi get_last_order_client()', Order.objects.filter(customer=client).count()
+        elif Order.objects.filter(customer=client).count() == 0:
+            raise ValidationError(u"У клиента нет ни одного закзаза.")
         return Order.objects.filter(customer=client).order_by('-id')[0]
 
     def has_basket_for_client_in_shop(self, client, shop):
