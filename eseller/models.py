@@ -8,8 +8,23 @@ from ereserve.models import *
 from epricepolicy.models import *
 #from eoffer.models import *
 from epurchase.models import *
-from esale.models import *
+#from esale.models import *
 from eshop.models import *
+
+
+class Purchaser(models.Model):
+    title = models.CharField(max_length=100)
+    shop = models.ForeignKey(Shop)
+    phone_number = models.CharField(verbose_name=u'Телефонный номер', max_length=128, null=True, blank=True)
+
+    @classmethod
+    def get_purchaser_with_phone_number_for_client(cls, phone_number, client):
+        return Purchaser.objects.get(phone_number=phone_number, shop=client)
+
+    def pay_ball(self, order_client, ball):
+        print 'Alert : Not work pay_ball'
+        order_client.loyalty_ball = ball
+        order_client.save()
 
 class Seller(models.Model):
     """
@@ -21,6 +36,9 @@ class Seller(models.Model):
     shop = models.ForeignKey(Shop)
     price_policies = models.ManyToManyField(PricePolicy) # политики которые может использовать данный продавец ему назанчаются свыше
 
+    def add_product_in_basket(self, basket, product, quantity, price, currency):
+        basket.add(product, quantity, price, currency)
+
     def calculate_revards_balls_for_last_order(self):
         print 'Alert : Not work calculate_revards_balls_for_last_order'
         return 3000
@@ -31,6 +49,19 @@ class Seller(models.Model):
     def check_payment_for_last_order(self):
         print 'Alert : Not work check_payment_for_last_order'
         return True
+
+    def create_basket_for_client_in_shop(self, client, shop, purchaser):
+        basket = Basket(seller=self, customer=client, executor=shop, purchaser=purchaser)
+        basket.save()
+
+    def create_client_shop_with_phone_number(self, shop, phone_number):
+        if not self.is_work_in_shop(shop):
+            raise ValidationError(u"Выбранный прожавец не работает в указханном магазине.")
+        client = Shop(phone_number=phone_number)
+        client.save()
+        self.shop.clients.add(client)
+        purchaser = Purchaser(title=u"Default purchaser when Seller create Client.", shop=client, phone_number=phone_number)
+        purchaser.save()
 
     def create_order(self, parmas):
         """
@@ -48,6 +79,27 @@ class Seller(models.Model):
         Т.е. заказ это некий набор обьедиенных действий!
         """
         pass
+
+    def create_order_from_busket_and_pickup_point(self, client, shop, purchaser, basket, pickup_point):
+        #print 'Alert : Not work create_order_from_busket_and_pickup_point'
+        order = Order(
+            customer=client,
+            executor=shop,
+            purchaser=purchaser,
+            seller=self,
+            pickup_point=pickup_point,
+        )
+        order.save()
+        for basket_element in basket.elements():
+            print basket_element
+            print '===='
+            order.add(basket_element.product, basket_element.quantity, basket_element.price, basket_element.currency)
+
+
+        #create_datetime = models.DateTimeField(u'дата и время создание заказа')
+        #pickup_dateteme = models.DateTimeField(u'дата и время вручения всего заказа(т.е. последней партии)')
+
+        #loyalty_ball = models.IntegerField(u"Оплаено балами.")
 
     def create_payemnt_link_for_last_order(self):
         print 'Alert : Not work create_payemnt_link_for_last_order'
@@ -107,6 +159,39 @@ class Seller(models.Model):
             return 'Error : Same product not allow for sale'
         return None
 
+    def get_basket_for_client_in_shop(self, client, shop):
+        for basket in Basket.objects.filter(customer=client, executor=shop):
+            return basket
+        raise ValidationError(u"Не нашли корзину клиента в укаханоом магазине.")
+
+    def get_client_shop_with_phone_number(self, shop, phone_number):
+        if not self.is_work_in_shop(shop):
+            raise ValidationError(u"Выбранный прожавец не работает в указханном магазине.")
+        for client in Shop.objects.filter(phone_number=phone_number): # не безопасно
+            return client
+        raise ValidationError(u"У магазина ент клиента с таким телефоном.")
+
+    def get_last_order_client(self, client):
+        return Order.objects.get(customer=client)
+
+    def has_basket_for_client_in_shop(self, client, shop):
+        for basket in Basket.objects.filter(customer=client, executor=shop):
+            return True
+        return False
+
+    def has_shop_client_with_phone_number(self, shop, phone_number):
+        if not self.is_work_in_shop(shop):
+            raise ValidationError(u"Выбранный прожавец не работает в указханном магазине.")
+        for client in Shop.objects.filter(phone_number=phone_number): # не безопасно
+            if self.has_shop_client(shop, client):
+                return True
+        return False
+
+    def has_shop_client(self, shop, client):
+        if self.is_work_in_shop(shop) and client in self.shop.clients.all():
+            return True
+        return False
+
     def is_allow_order(self, order_params):
         error = self.__error_by_order(order_params)
         if error:
@@ -124,6 +209,11 @@ class Seller(models.Model):
         #if point_pickup.id == 2:
         #    return False
         return True
+
+    def is_work_in_shop(self, shop):
+        if self.shop and self.shop == shop:
+            return True
+        return False
 
     def __link_price_factory_product_storage_pickup_point(self, product, storages, pickup_points):
         link_price_factory_product_storage_pickup_point = []
@@ -248,4 +338,71 @@ class Customer(object):
 
     def pay_by(self, link_for_payment):
         pass
+
+class Basket(models.Model):
+    customer = models.ForeignKey(Shop, related_name='customer_shop')
+    executor = models.ForeignKey(Shop, related_name='executor_shop')
+    purchaser = models.ForeignKey(Purchaser)
+    seller = models.ForeignKey(Seller)
+
+    def add(self, product, quantity, price, currency):
+        """
+        При наличии такого продукта в корзине пол тойже ценет и в той же валюте - нужно увеличить quantity
+        баскет уже должен быть сохранен(иметь id)
+        """
+        print 'Error : Nead fix.'
+        basket_element = BasketElement(basket=self, product=product, quantity=quantity, price=price, currency=currency)
+        basket_element.save()
+
+    def elements(self):
+        return list(BasketElement.objects.filter(basket=self))
+
+class BasketElement(models.Model):
+    product = models.ForeignKey(Product)
+    quantity = models.IntegerField(u"Цена")
+    price = models.DecimalField(u"стоимость продажи одной штуки", decimal_places=2, max_digits=7)
+    currency = models.CharField(u"Валюта", max_length=5)
+    basket = models.ForeignKey(Basket)
+
+class Order(models.Model):
+    customer = models.ForeignKey(Shop, related_name='order_customer_shop')
+    executor = models.ForeignKey(Shop, related_name='order_executor_shop')
+    purchaser = models.ForeignKey(Purchaser)
+    seller = models.ForeignKey(Seller)
+
+    create_datetime = models.DateTimeField(u'дата и время создание заказа', auto_now_add=True)
+    pickup_point = models.ForeignKey(PickupPoint)
+    pickup_dateteme = models.DateTimeField(u'дата и время вручения всего заказа(т.е. последней партии)', auto_now_add=True)
+
+    loyalty_ball = models.IntegerField(u"Оплаено балами.", null=True, blank=True)
+
+    def add(self, product, quantity, price, currency):
+        """
+        При наличии такого продукта в корзине пол тойже ценет и в той же валюте - нужно увеличить quantity
+        баскет уже должен быть сохранен(иметь id)
+        """
+        #print 'Error : Nead fix.'
+        print '+++++', product, quantity, price, currency
+        order_element = OrderElement(order=self, product=product, quantity=quantity, price=price, currency=currency)
+        order_element.save()
+
+    def calculate_price(self):
+        price = 0
+        for order_element in OrderElement.objects.filter(order=self):
+            price += order_element.quantity * order_element.price
+            print order_element
+            print '--------------'
+        if self.loyalty_ball:
+            price -= self.loyalty_ball
+        if price < 0:
+            raise ValidationError(u"Стоимоть не может быть отрицательной!")
+        return price
+
+class OrderElement(models.Model):
+    product = models.ForeignKey(Product)
+    quantity = models.IntegerField(u"Цена")
+    price = models.DecimalField(u"стоимость продажи одной штуки", decimal_places=2, max_digits=7)
+    currency = models.CharField(u"Валюта", max_length=5)
+    order = models.ForeignKey(Order)
+
 

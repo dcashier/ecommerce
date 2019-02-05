@@ -25,32 +25,66 @@ class TestEActor(TestCase):
         shop_1 = Shop(title=u"main shop")
         shop_1.save()
 
-        seller = Seller(shop=shop_1)
-        seller.save()
+        seller_1 = Seller(shop=shop_1)
+        seller_1.save()
 
         phone_number_1 = '+79161111111'
         password_1 = '11111'
 
-        actor_1 = Actor(phone_number=phone_number_1, is_person=True, seller=seller)
+        actor_1 = Actor(phone_number=phone_number_1, is_person=True, seller=seller_1)
         actor_1.save()
         actor_1.set_password(password_1)
 
         self.assertTrue(auth_system.has_actor_by_phone_numnber_password(phone_number_1, password_1))
         self.assertEqual(actor_1, auth_system.get_actor_by_phone_numnber_password(phone_number_1, password_1))
 
+        shop_2 = Shop(title=u"shop two")
+        shop_2.save()
+
+        seller_2 = Seller(shop=shop_2)
+        seller_2.save()
+
         phone_number_2 = '+79165432112'
         password_2 = '12345'
 
-        actor_2 = Actor(phone_number=phone_number_2, is_person=True, seller=seller)
+        actor_2 = Actor(phone_number=phone_number_2, is_person=True, seller=seller_2)
         actor_2.save()
         actor_2.set_password(password_2)
 
         self.assertTrue(auth_system.has_actor_by_phone_numnber_password(phone_number_2, password_2))
         self.assertEqual(actor_2, auth_system.get_actor_by_phone_numnber_password(phone_number_2, password_2))
 
+        client_phone_number = '+71002003040'
+        self.assertFalse(actor_1.has_shop_client_with_phone_number(shop_1, client_phone_number))
+        self.assertFalse(actor_2.has_shop_client_with_phone_number(shop_2, client_phone_number))
+        self.assertTrue(actor_2.is_seller_shop(shop_2))
+        actor_2.create_client_shop_with_phone_number(shop_2, client_phone_number)
 
+        client = actor_2.get_client_shop_with_phone_number(shop_2, client_phone_number)
+        self.assertEqual(client_phone_number, client.get_phone_number())
 
-        pass
+        self.assertFalse(actor_1.has_shop_client_with_phone_number(shop_1, client_phone_number))
+        self.assertTrue(actor_2.has_shop_client_with_phone_number(shop_2, client_phone_number))
+
+        self.assertFalse(actor_1.has_shop_client(shop_1, client))
+        self.assertTrue(actor_2.has_shop_client(shop_2, client))
+
+        seller_3 = Seller(shop=shop_2)
+        seller_3.save()
+
+        phone_number_3 = '+79166543211'
+        password_3 = '12345'
+
+        actor_3 = Actor(phone_number=phone_number_3, is_person=True, seller=seller_3)
+        actor_3.save()
+        actor_3.set_password(password_3)
+
+        self.assertTrue(auth_system.has_actor_by_phone_numnber_password(phone_number_3, password_3))
+        self.assertEqual(actor_3, auth_system.get_actor_by_phone_numnber_password(phone_number_3, password_3))
+
+        self.assertTrue(actor_3.has_shop_client_with_phone_number(shop_2, client_phone_number))
+        self.assertTrue(actor_3.has_shop_client(shop_2, client))
+
 
 #    def test_seller(self):
 #        region_center = Region(title=u"Центральный")
@@ -297,16 +331,5 @@ class TestEActor(TestCase):
 #        #Когда он выберет метсто рассчитать дату и время когда он то сможет забрать
 #        #если все устраивает и пришла оплата, резериватьвать товар и перемещать на пункт выдачи
 #        #когда вова за ним придет выдать товар офрмить чек, и начислить балы в системе лояльности.
-#
-##    def test_list_shop_for_user_with_pickup_in_city(self):
-##        """
-##        Получить список разрешенных магазинов в определнном городе для пользователя.
-##        К примеру с обычными пользователями не будут работать оптовые магазины.
-##        А соответсвенно нет необходимости получать от них офферы.
-##        """
-#
-##    def test_list_offer_from_shop_for_user_with_pickup_in_city(self):
-##        """
-##        Получить список офферов которые он может забрать в городе у выбранного магазина для пользователя.
-##        Айфоны в рознице, по причине политической, не продаем во всех городах Крыма .
-##        """
+
+

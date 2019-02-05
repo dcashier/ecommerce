@@ -18,12 +18,35 @@ class Actor(models.Model):
     password_hash = models.CharField(verbose_name=u'Хеш пароля', max_length=128, null=True, blank=True)
     seller = models.ForeignKey(Seller)
 
+    def create_client_shop_with_phone_number(self, shop, phone_number):
+        self.seller.create_client_shop_with_phone_number(shop, phone_number)
+
+    def get_client_shop_with_phone_number(self, shop, phone_number):
+        return self.seller.get_client_shop_with_phone_number(shop, phone_number)
+        #from eshop.models import *
+        #return Shop(phone_number='+71002003040')
+
+    def has_shop_client(self, shop, client):
+        if self.seller.has_shop_client(shop, client):
+            return True
+        return False
+
+    def has_shop_client_with_phone_number(self, shop, phone_number):
+        if self.seller.has_shop_client_with_phone_number(shop, phone_number):
+            return True
+        return False
+
     def __has_link_with_actor(self, actor):
 	print 'Nead fix __has_link_with_actor'
 	return True
 
     def is_password(self, password):
         if self.password_hash == Actor.make_password_hash(password):
+            return True
+        return False
+
+    def is_seller_shop(self, shop):
+        if self.seller and self.seller.is_work_in_shop(shop):
             return True
         return False
 
