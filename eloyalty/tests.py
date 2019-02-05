@@ -237,7 +237,7 @@ class TestELoyalty(TestCase):
 
         self.assertTrue(seller_shop_1.check_payment_for_last_order())
 
-        reward_balls = seller_shop_1.calculate_revards_balls_for_last_order()
+        reward_balls = seller_shop_1.calculate_revards_balls_for_last_order(loyalty_1, client_2)
         self.assertEqual(3000, reward_balls)
         #actor_executor.confirm_out_payment_for_loyalty(shop_1, client_1, loyalty_1, 3000, 90)
         available_day = 90
