@@ -175,7 +175,7 @@ class Seller(models.Model):
         #return Order.objects.get(customer=client)
         if Order.objects.filter(customer=client).count() > 0:
             print 'Error : Too many orderi get_last_order_client()', Order.objects.filter(customer=client).count()
-        return Order.objects.filter(customer=client).order_by('-id')
+        return Order.objects.filter(customer=client).order_by('-id')[0]
 
     def has_basket_for_client_in_shop(self, client, shop):
         for basket in Basket.objects.filter(customer=client, executor=shop):
