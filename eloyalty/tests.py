@@ -254,7 +254,8 @@ class TestELoyalty(TestCase):
 
         reward_balls = seller_shop_1.calculate_revards_balls_for_last_order(loyalty_1, client_2)
         #self.assertEqual(3000, reward_balls)
-        self.assertEqual(57, reward_balls)
+        #self.assertEqual(57, reward_balls)
+        self.assertEqual(Decimal('11.561'), reward_balls)
         #actor_executor.confirm_out_payment_for_loyalty(shop_1, client_1, loyalty_1, 3000, 90)
         available_day = 90
         loyalty_1.transfer_ball(seller_shop_1, shop_1, client_2, reward_balls, available_day)
@@ -324,17 +325,20 @@ class TestELoyalty(TestCase):
 
         # так как Вова не только зарегился, и у него в системе уже есть балы.
         #vava_has_balls = 3000
-        vava_has_balls = 57
+        #vava_has_balls = 57
+        vava_has_balls = 11
         datetime_for_check = None
         self.assertEqual(vava_has_balls, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
 
         #vava_want_spend_balls = 2000
-        vava_want_spend_balls = 50
+        #vava_want_spend_balls = 50
+        vava_want_spend_balls = 5
         available_day = 0
         actor_client_new.set_payment_balls_for_last_order(vava_want_spend_balls)
         loyalty_1.transfer_ball(seller_shop_2, client_2, shop_1, vava_want_spend_balls, available_day)
         #self.assertEqual(1000, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
-        self.assertEqual(7, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
+        #self.assertEqual(7, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
+        self.assertEqual(6, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
 
         seller_shop_2.create_price_last_order()
 
@@ -345,12 +349,14 @@ class TestELoyalty(TestCase):
         self.assertTrue(seller_shop_2.check_payment_for_last_order())
 
         reward_balls = seller_shop_2.calculate_revards_balls_for_last_order(loyalty_1, client_2)
-        self.assertEqual(65, reward_balls)
+        #self.assertEqual(65, reward_balls)
+        self.assertEqual(Decimal('13.00'), reward_balls)
         #actor_executor.confirm_out_payment_for_loyalty(shop_1, client_1, loyalty_1, 3000, 90)
         available_day = 90
         loyalty_1.transfer_ball(seller_shop_2, shop_1, client_2, reward_balls, available_day)
 
-        self.assertEqual(72, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
+        #self.assertEqual(72, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
+        self.assertEqual(19, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
         seller_shop_2.change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
         # на этом вторая покупка Вовы закончилась.
 
