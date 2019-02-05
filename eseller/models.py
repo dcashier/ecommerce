@@ -39,9 +39,12 @@ class Seller(models.Model):
     def add_product_in_basket(self, basket, product, quantity, price, currency):
         basket.add(product, quantity, price, currency)
 
-    def calculate_revards_balls_for_last_order(self):
+    def calculate_revards_balls_for_last_order(self, loyalty, client):
         print 'Alert : Not work calculate_revards_balls_for_last_order'
-        return 3000
+        #return 3000
+        order = self.get_last_order_client(client)
+        max_ball = loyalty.create_range_ball(self, order.calculate_price())[1]
+        return max_ball
 
     def change_status_for_last_order(self, status):
         print 'Alert : Not work change_status_for_last_order'
