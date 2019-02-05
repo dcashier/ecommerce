@@ -59,7 +59,8 @@
 					</div>
 					<div class="listView__item__rightPart mt10">
 						<div class="listView__item__rightPart__detail">	
-							343
+                            {{ all_ball }}
+							{% if 0 %}343{% endif %}
 						</div>						
 					</div>
 				</div>
@@ -70,12 +71,14 @@
 							Можно списать
 						</div>
 						<div class="listView__item__leftPart__detail">	
-							Не более 30% покупки
+							Не более {{ max_percent_in_loyalty }}% покупки
+							{% if 0 %}Не более 30% покупки{% endif %}
 						</div>
 					</div>
 					<div class="listView__item__rightPart mt10">
 						<div class="listView__item__rightPart__detail">	
-							343
+                            {{ max_ball_for_pay }}
+							{% if 0 %}343{% endif %}
 						</div>						
 					</div>
 				</div>				
@@ -89,16 +92,38 @@
 					Итого
 				</div>
 				<div class="totalSection__leftPart__detail">
-					Со списанием 348 баллов
+					Со списанием {{ reward_ball }} баллов
+					{% if 0 %}Со списанием 348 баллов{% endif %}
 				</div>				
 			</div>
 
 			<div class="totalSection__rightPart">
-				1 152 &#8381
+				{{ order_sum_with_ball }} &#8381
+				{% if 0 %}1 152 &#838{% endif %}
 			</div>			
 		</div>
 
 
+
+
+		<div class="controlSection">
+			<div class="controlSection__buttonsHorizontally">
+	
+			<form method="post">
+				<input type="hidden" name="action" value="write_off">
+                <input type="submit" value="Списать" class="button mt20" >
+			</form>
+
+			<form method="post">
+				<input type="hidden" name="action" value="save_up">
+                <input type="submit" value="Копить" class="button mt20" >
+			</form>
+
+			</div>
+		</div>
+
+
+        {% if 0 %}
 		<div class="controlSection">
 			<div class="controlSection__buttonsHorizontally">
 				<a href="#" class="inverseButton w50p">Списать</a>
@@ -106,6 +131,8 @@
 
 			</div>
 		</div>
+        {% endif %}
+
 
 
 	</div>
