@@ -40,6 +40,12 @@ class Seller(models.Model):
     shop = models.ForeignKey(Shop)
     price_policies = models.ManyToManyField(PricePolicy, null=True, blank=True) # политики которые может использовать данный продавец ему назанчаются свыше
 
+    def __accumulate_customer_ball_for_order(self, order, purchaser, customer, executor, loyalty):
+        reward_ball = self.__calculate_revards_balls_for_order(order, loyalty)
+        available_day = 90
+        loyalty.transfer_ball(self, executor, customer, reward_ball, available_day)
+        self.__change_status_for_order(order, u'Начислии балы клиенту по заказа')
+
     def add_product_in_basket(self, basket, product, quantity, price, currency):
         basket.add(product, quantity, price, currency)
 
@@ -50,8 +56,12 @@ class Seller(models.Model):
         #max_ball = loyalty.create_range_ball(self, order.calculate_price())[1]
         #return max_ball
         #ball = loyalty.calculate_reward(None, order.calculate_price_without_loyalty_balls())['ball']
-        ball = loyalty.calculate_reward(None, order.calculate_price())['ball']
+        #ball = loyalty.calculate_reward(None, order.calculate_price())['ball']
+        ball = self.__calculate_revards_balls_for_order(order, loyalty)
         return ball
+
+    def __calculate_revards_balls_for_order(self, order, loyalty):
+        return loyalty.calculate_reward(None, order.calculate_price())['ball']
 
     def __change_status_for_last_order(self, status):
         print 'Alert : Not work change_status_for_last_order'
@@ -275,6 +285,16 @@ class Seller(models.Model):
                 products.add(product)
         return list(products)
 
+    def __max_allow_ball_for_spend_for_order(self, order, purchaser, customer, executor, loyalty):
+        datetime_for_check = None
+        all_ball = loyalty.get_balance(None, customer, datetime_for_check)
+        max_ball_for_spend = loyalty.create_range_ball(None, int(order.calculate_price_without_loyalty_balls()))[1]
+        if max_ball_for_spend > all_ball:
+            ball_for_spend = all_ball
+        else:
+            ball_for_spend = max_ball_for_spend
+        return ball_for_spend
+
     def pickup_points(self, params_basket, client_city, client_type):
         """
         Попробуем доставить с каждого возможного склада на каждую возможную точку выдачи,
@@ -324,6 +344,10 @@ class Seller(models.Model):
             prices.add(price)
         return sorted(list(prices))
 
+    def process_order_with_max_allow_ball_without_customer_security(self, order, purchaser, customer, executor, loyalty):
+        ball_for_spend = self.__max_allow_ball_for_spend_for_order(order, purchaser, customer, executor, loyalty)
+        self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend)
+
     def process_order_without_customer_security(self, order, purchaser, customer, executor, loyalty, ball_for_spend):
         # actor - аккаунт для purchaser
         # purchaser - закупщик у какогото ЮР Лица. (customer, executor, ...)
@@ -343,9 +367,7 @@ class Seller(models.Model):
         if not self.check_payment_for_last_order():
             return None
 
-        reward_ball = self.calculate_revards_balls_for_last_order(loyalty, customer)
-        available_day = 90
-        loyalty.transfer_ball(self, executor, customer, reward_ball, available_day)
+        self.__accumulate_customer_ball_for_order(order, purchaser, customer, executor, loyalty)
 
         self.__change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
 

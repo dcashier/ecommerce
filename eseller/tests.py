@@ -453,6 +453,13 @@ class TestESeller(TestCase):
         seller_2_1.process_order_without_customer_security(order_client, purchaser, client, shop_2, loyalty, ball)
         self.assertEqual(Decimal('4.00'), order_client.calculate_price())
 
+        #TODO второй раз нельзя процессить и здесь додлжно развалиться
+        seller_2_1.process_order_without_customer_security(order_client, purchaser, client, shop_2, loyalty, ball)
+        self.assertEqual(Decimal('4.00'), order_client.calculate_price())
+
+        seller_2_1.process_order_with_max_allow_ball_without_customer_security(order_client, purchaser, client, shop_2, loyalty)
+        self.assertEqual(Decimal('3.00'), order_client.calculate_price())
+
 
 
 
