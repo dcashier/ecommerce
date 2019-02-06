@@ -27,7 +27,7 @@ class Purchaser(models.Model):
         order.save()
 
     def __unicode__(self):
-        return u"(%s) : %s [customer : %s]" % (self.id, self.title, self.shop)
+        return u"Purchaser (%s) : %s [customer : %s]" % (self.id, self.title, self.shop)
 
 
 class Seller(models.Model):
@@ -53,8 +53,11 @@ class Seller(models.Model):
         ball = loyalty.calculate_reward(None, order.calculate_price())['ball']
         return ball
 
-    def change_status_for_last_order(self, status):
+    def __change_status_for_last_order(self, status):
         print 'Alert : Not work change_status_for_last_order'
+
+    def __change_status_for_order(self, order, status):
+        pass
 
     def check_payment_for_last_order(self):
         print 'Alert : Not work check_payment_for_last_order'
@@ -321,6 +324,31 @@ class Seller(models.Model):
             prices.add(price)
         return sorted(list(prices))
 
+    def process_order_without_customer_security(self, order, purchaser, customer, executor, loyalty, ball_for_spend):
+        # actor - аккаунт для purchaser
+        # purchaser - закупщик у какогото ЮР Лица. (customer, executor, ...)
+        # shop - executor
+        # client - customer
+
+        if ball_for_spend:
+            self.__spend_customer_ball_for_order(order, purchaser, customer, executor, loyalty, ball_for_spend)
+        else:
+            #purchaser.pay_ball(order, 0)
+            order.loyalty_ball = 0
+            order.save()
+
+        # Нужно для провери что пришла оплата тоглда можно начислять балы за покупку.
+        self.create_price_last_order()
+        link_for_payment = self.create_payemnt_link_for_last_order()
+        if not self.check_payment_for_last_order():
+            return None
+
+        reward_ball = self.calculate_revards_balls_for_last_order(loyalty, customer)
+        available_day = 90
+        loyalty.transfer_ball(self, executor, customer, reward_ball, available_day)
+
+        self.__change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
+
     def quantity_for_sale(self, product):
         storages = self.shop.storages.all()
         quantity = 0
@@ -343,8 +371,24 @@ class Seller(models.Model):
     def shops(self):
         return [self.shop]
 
+    def __spend_customer_ball_for_order(self, order, purchaser, customer, executor, loyalty, ball_for_spend):
+        datetime_for_check = None
+        all_ball = loyalty.get_balance(purchaser, customer, datetime_for_check)
+        if ball_for_spend > all_ball:
+            ball_for_spend = all_ball
+
+        available_day = 0
+        #loyalty.transfer_ball(seller, customer, executor, ball_for_spend, available_day)
+        loyalty.transfer_ball(purchaser, customer, executor, ball_for_spend, available_day)
+
+        #purchaser.pay_ball(order, ball_for_spend)
+        order.loyalty_ball = ball_for_spend
+        order.save()
+
+        self.__change_status_for_order(order, u'Оплатил часть заказа балами')
+
     def __unicode__(self):
-        return u"(%s) : %s [shop : %s]" % (self.id, self.title, self.shop)
+        return u"Seller (%s) : %s [shop : %s]" % (self.id, self.title, self.shop)
 
 
 class Customer(object):
@@ -419,7 +463,7 @@ class Order(models.Model):
         return price
 
     def __unicode__(self):
-        return u"(%s) : %s %s %s %s" % (self.id, self.purchaser, self.customer, self.executor, self.seller)
+        return u"Order (%s) : %s %s %s %s" % (self.id, self.purchaser, self.customer, self.executor, self.seller)
 
 class OrderElement(models.Model):
     product = models.ForeignKey(Product)

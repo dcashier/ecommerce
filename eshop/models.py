@@ -48,6 +48,6 @@ class Shop(models.Model):
         return False
 
     def __unicode__(self):
-        return u"%s: %s - %s (%s)" % (self.id, self.title, self.phone_number, self.fio)
+        return u"Shop (%s): %s - %s (%s)" % (self.id, self.title, self.phone_number, self.fio)
 
 

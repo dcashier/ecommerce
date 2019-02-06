@@ -260,7 +260,7 @@ class TestELoyalty(TestCase):
         available_day = 90
         loyalty_1.transfer_ball(seller_shop_1, shop_1, client_2, reward_balls, available_day)
 
-        seller_shop_1.change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
+        # seller_shop_1.change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
         # на этом первая покупка Вовы закончилась.
 
 
@@ -357,7 +357,7 @@ class TestELoyalty(TestCase):
 
         #self.assertEqual(72, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
         self.assertEqual(19, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
-        seller_shop_2.change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
+        #seller_shop_2.change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
         # на этом вторая покупка Вовы закончилась.
 
 

@@ -10,6 +10,8 @@ import pprint
 from decimal import Decimal
 import datetime
 
+from eloyalty.models import *
+
 class TestESeller(TestCase):
     def setUp(self):
         print "SETUP DATA FOR ..."
@@ -429,11 +431,29 @@ class TestESeller(TestCase):
         seller_2_1.create_order_from_busket_and_pickup_point(client, shop_2, purchaser, basket_client, pickup_point)
         order_client = seller_2_1.get_last_order_client(client)
         ball = 1
-        purchaser.pay_ball(order_client, ball)
+        #purchaser.pay_ball(order_client, ball)
+
+        srl = ServiceRepositoryLoyalty()
+        title = "Roga i Kopita"
+        max_percent = 50
+        start_ball = 1000000
+        start_ball_available_day = 20000
+        reward_percent = 10
+        available_day =90
+        is_need_auth = True
+        srl.create_loyalty(seller_2_1, shop_2, title, max_percent, start_ball, start_ball_available_day, reward_percent, available_day, is_need_auth)
+        loyalties = srl.list_loyalty_for_owner(seller_2_1, shop_2)
+        loyalty = loyalties[0]
+        loyalty.register_in_loyalty_hello_1000(seller_2_1, client, shop_2)
+
+        #loyalty_record = LoyaltyRecord()
+        #loyalty_record.save()
+        #loyalty = Loyalty(loyalty_record)
+
+        seller_2_1.process_order_without_customer_security(order_client, purchaser, client, shop_2, loyalty, ball)
         self.assertEqual(Decimal('4.00'), order_client.calculate_price())
 
 
-        
 
 
 #    def test_list_shop_for_user_with_pickup_in_city(self):
