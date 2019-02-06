@@ -149,9 +149,8 @@ class ShopPage(View):
 
         from eseller.models import Purchaser
         purchaser = Purchaser.get_purchaser_with_phone_number_for_client(client_phone_number, client)
-        #print client, shop
+
         if not seller.has_basket_for_client_in_shop(client, shop):
-            #print purchaser, actor, purchaser == actor
             seller.create_basket_for_client_in_shop(client, shop, purchaser)
         basket_client = seller.get_basket_for_client_in_shop(client, shop)
         seller.add_product_in_basket(basket_client, default_product, quantity, price, currency)
@@ -167,12 +166,6 @@ class ShopPage(View):
 
         basket_client.delete()
 
-        #ball = 1
-        #purchaser.pay_ball(order_client, ball)
-        #self.assertEqual(Decimal('4.00'), order_client.calculate_price())
-
-#        get_client
-#        order = Order()
         return HttpResponse("You're create <a href=\"/newDealPage.html\">order</a>" )
 
 
@@ -182,9 +175,9 @@ class NewDealPage(View):
         shop = get_shop_for_request_if_login(request)
         seller = actor.seller
         from eseller.models import Order
-        order = Order.objects.filter(id=request.session.get('order_id'))[0]
+        order = Order.objects.get(id=request.session.get('order_id'))
         from eshop.models import Shop
-        client = Shop.objects.filter(id=request.session.get('client_id'))[0]
+        client = Shop.objects.get(id=request.session.get('client_id'))
         from eloyalty.models import ServiceRepositoryLoyalty
         srl = ServiceRepositoryLoyalty()
         loyalties = srl.list_loyalty_for_owner(seller, shop)
@@ -196,19 +189,17 @@ class NewDealPage(View):
         datetime_for_check = None
         all_ball = loyalty.get_balance(actor, client, datetime_for_check)
 
-        #reward_ball = seller.calculate_revards_balls_for_last_order()
-        max_ball_for_pay = loyalty.create_range_ball(actor, int(order.calculate_price()))[1]
+        max_ball_for_pay = loyalty.create_range_ball(actor, int(order.calculate_price_without_loyalty_balls()))[1]
         if max_ball_for_pay > all_ball:
             max_ball_for_pay = all_ball
 
         answer = {}
-        answer['order_sum'] = int(order.calculate_price())
+        answer['order_sum'] = int(order.calculate_price_without_loyalty_balls())
         answer['client'] = client
         answer['all_ball'] = all_ball
-        #answer['reward_ball'] = max_ball_for_pay
         answer['max_ball_for_pay'] = max_ball_for_pay
         answer['max_percent_in_loyalty'] = loyalty.get_max_percent()
-        answer['order_sum_with_ball'] = int(order.calculate_price()) - max_ball_for_pay
+        answer['order_sum_with_ball'] = int(order.calculate_price_without_loyalty_balls()) - max_ball_for_pay
         template = loader.get_template('dcashier/static/newDealPage.html')
         context = RequestContext(request, answer)
         #return HttpResponse(template.render(context))
@@ -220,33 +211,34 @@ class NewDealPage(View):
         shop = get_shop_for_request_if_login(request)
         seller = actor.seller
         from eseller.models import Order
-        order = Order.objects.filter(id=request.session.get('order_id'))[0]
+        order = Order.objects.get(id=request.session.get('order_id'))
         from eshop.models import Shop
-        client = Shop.objects.filter(id=request.session.get('client_id'))[0]
+        client = Shop.objects.get(id=request.session.get('client_id'))
         from eloyalty.models import ServiceRepositoryLoyalty
         srl = ServiceRepositoryLoyalty()
         loyalties = srl.list_loyalty_for_owner(seller, shop)
         loyalty = loyalties[0]
+
         datetime_for_check = None
         all_ball = loyalty.get_balance(actor, client, datetime_for_check)
 
-        print request.POST['action']  == 'write_off', request.POST['action']
+        from eseller.models import Purchaser
+        purchaser = Purchaser.objects.get(id=request.session.get('purchaser_id'))
+
         if request.POST['action']  == 'write_off':
-            max_ball_for_pay = loyalty.create_range_ball(actor, int(order.calculate_price()))[1]
+            max_ball_for_pay = loyalty.create_range_ball(actor, int(order.calculate_price_without_loyalty_balls()))[1]
             if max_ball_for_pay > all_ball:
                 max_ball_for_pay = all_ball
-            from eseller.models import Purchaser
-            purchaser = Purchaser.objects.get(id=request.session.get('purchaser_id'))
             purchaser.pay_ball(order, max_ball_for_pay)
             available_day = 0
             loyalty.transfer_ball(seller, client, shop, max_ball_for_pay, available_day)
 
         elif request.POST['action']  == 'save_up':
+            purchaser.pay_ball(order, 0)
             pass
 
         seller.create_price_last_order()
         link_for_payment = seller.create_payemnt_link_for_last_order()
-
         if not seller.check_payment_for_last_order():
             return None
 

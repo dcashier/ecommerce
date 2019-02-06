@@ -1,6 +1,6 @@
 from django.contrib import admin
-from eseller.models import Seller
+from eseller.models import *
 
-class SellerAdmin(admin.ModelAdmin):
-    pass
-admin.site.register(Seller, SellerAdmin)
+admin.site.register(Seller)
+admin.site.register(Order)
+admin.site.register(OrderElement)
