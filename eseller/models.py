@@ -21,10 +21,14 @@ class Purchaser(models.Model):
     def get_purchaser_with_phone_number_for_client(cls, phone_number, client):
         return Purchaser.objects.get(phone_number=phone_number, shop=client)
 
-    def pay_ball(self, order_client, ball):
-        print 'Alert : Not work pay_ball'
-        order_client.loyalty_ball = ball
-        order_client.save()
+    def pay_ball(self, order, ball):
+        print 'Alert : Not work pay_ball', order, ball
+        order.loyalty_ball = ball
+        order.save()
+
+    def __unicode__(self):
+        return u"(%s) : %s [customer : %s]" % (self.id, self.title, self.shop)
+
 
 class Seller(models.Model):
     """
@@ -34,7 +38,7 @@ class Seller(models.Model):
     """
     title = models.CharField(max_length=100)
     shop = models.ForeignKey(Shop)
-    price_policies = models.ManyToManyField(PricePolicy) # политики которые может использовать данный продавец ему назанчаются свыше
+    price_policies = models.ManyToManyField(PricePolicy, null=True, blank=True) # политики которые может использовать данный продавец ему назанчаются свыше
 
     def add_product_in_basket(self, basket, product, quantity, price, currency):
         basket.add(product, quantity, price, currency)
@@ -45,6 +49,7 @@ class Seller(models.Model):
         order = self.get_last_order_client(client)
         #max_ball = loyalty.create_range_ball(self, order.calculate_price())[1]
         #return max_ball
+        #ball = loyalty.calculate_reward(None, order.calculate_price_without_loyalty_balls())['ball']
         ball = loyalty.calculate_reward(None, order.calculate_price())['ball']
         return ball
 
@@ -96,10 +101,7 @@ class Seller(models.Model):
         )
         order.save()
         for basket_element in basket.elements():
-            print basket_element
-            print '===='
             order.add(basket_element.product, basket_element.quantity, basket_element.price, basket_element.currency)
-
 
         #create_datetime = models.DateTimeField(u'дата и время создание заказа')
         #pickup_dateteme = models.DateTimeField(u'дата и время вручения всего заказа(т.е. последней партии)')
@@ -341,6 +343,9 @@ class Seller(models.Model):
     def shops(self):
         return [self.shop]
 
+    def __unicode__(self):
+        return u"(%s) : %s [shop : %s]" % (self.id, self.title, self.shop)
+
 
 class Customer(object):
     def set_payment_balls_for_last_order(self, balls):
@@ -391,22 +396,30 @@ class Order(models.Model):
         При наличии такого продукта в корзине пол тойже ценет и в той же валюте - нужно увеличить quantity
         баскет уже должен быть сохранен(иметь id)
         """
-        #print 'Error : Nead fix.'
+        print 'Error : Nead fix.'
         print '+++++', product, quantity, price, currency
         order_element = OrderElement(order=self, product=product, quantity=quantity, price=price, currency=currency)
         order_element.save()
 
     def calculate_price(self):
-        price = 0
-        for order_element in OrderElement.objects.filter(order=self):
-            price += order_element.quantity * order_element.price
-            print order_element
-            print '--------------'
+        #price = 0
+        #for order_element in OrderElement.objects.filter(order=self):
+        #    price += order_element.quantity * order_element.price
+        price = self.calculate_price_without_loyalty_balls()
         if self.loyalty_ball:
             price -= self.loyalty_ball
         if price < 0:
             raise ValidationError(u"Стоимоть не может быть отрицательной!")
         return price
+
+    def calculate_price_without_loyalty_balls(self):
+        price = 0
+        for order_element in OrderElement.objects.filter(order=self):
+            price += order_element.quantity * order_element.price
+        return price
+
+    def __unicode__(self):
+        return u"(%s) : %s %s %s %s" % (self.id, self.purchaser, self.customer, self.executor, self.seller)
 
 class OrderElement(models.Model):
     product = models.ForeignKey(Product)
