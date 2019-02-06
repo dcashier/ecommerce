@@ -15,7 +15,7 @@
 	<div class="container">
 
 		<div class="toolbar">
-			<a href="/">
+			<a href="index.html">
 				<div class="toolbar__backButton"></div>
 			</a>
 			<div class="toolbar__title textAlignCenter">
@@ -26,35 +26,7 @@
 
 		<div class="workSection mt40">
 			<div class="listView">
-                {% for shop in shops %}
 
-				<a href=#>
-					<div class="listView__item">
-						<div class="listView__item__leftPart">
-							<div class="listView__item__leftPart__title">
-								Магазин №{{ shop.id }}
-							</div>
-							<div class="listView__item__leftPart__detail">
-								{{ shop.title }}
-							</div>
-						</div>	
-
-						<div class="listView__item__rightPart">	
-							<div class="listView__item__moreButton">
-
-                                <form  method="post">
-                                    <input type="hidden" name="shop_id" value="{{ shop.id }}">
-                                    <input type="submit" value=">>" class="button mt20" >
-                                </form>
-
-                            </div>
-						</div>
-					</div>
-				</a>
-                {% endfor %}
-
-                
-                {% if 0 %}
 				<a href=#>
 					<div class="listView__item">
 						<div class="listView__item__leftPart">
@@ -89,7 +61,6 @@
 						</div>
 					</div>
 				</a>
-                {% endif %}
 
 
 			</div>

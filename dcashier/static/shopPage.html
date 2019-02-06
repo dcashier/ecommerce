@@ -16,14 +16,10 @@
 
 		<div class="toolbar">
 			<div class="toolbar__title textAlignLeft ml20">
-                {% if 0 %}
 				<h1>Магазин №1</h1>
 				<h2>Александр Сайгаков</h2>				
-                {% endif %}
-				<h1>Магазин №{{ shop.id }}</h1>
-				<h2>{{ shop.title }}</h2>
 			</div>
-			<a href="/">
+			<a href="index.html">
 				<div class="toolbar__exitButton"></div>
 			</a>
 
@@ -31,16 +27,13 @@
 
 
 		<div class="workSection mt80">
-			<form action="" method="post">
+			<form action="">
 				<input type="number" tabindex="0" required autocomplete="off" placeholder = "Телефон клиента" name="customerPhoneInput" class = "input">			
 				<input type="number" tabindex="1" required autocomplete="on" placeholder = "Сумма покупки" name="dealSummInput" class = "input mt20">
 				
 				<a class="button mt20" href="#">Поехали!</a>
-                <input type="submit" value="Создать заказ" class="button mt20" >
 				<a class="inverseButton mt30" href="#">Добавить клиента</a>
 				<a class="inverseButton mt10" href="#">Возвраты</a>
-
-			</form>
 
 			</form>
 		</div>

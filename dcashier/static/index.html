@@ -6,14 +6,9 @@
 	<title>Дисконт Онлайн</title>
 	<link rel="stylesheet" href="css/style.css" type="text/css">
 	<link rel="stylesheet" href="css/response.css" type="text/css">	
-    {% if 1 %}
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,700,800&amp;subset=cyrillic" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
 	      rel="stylesheet">	
-    {% else %}
-	<link href="css/google_main.css" rel="stylesheet">
-	<link href="css/google_icon.css" rel="stylesheet">
-    {% endif %}
 </head>
 
 <body ontouchstart="">
@@ -25,21 +20,24 @@
 		
 		<div class="workSection">
 			<div class="listView">
-                {% if is_login %}
+
+				<a href="authPage.html">
 					<div class="listView__item">
 
 						<div class="listView__item__leftPart">
 							<div class="listView__item__leftPart__title">
-								Аунтетификация пройдена	
+								Аунтетификация	
 							</div>
 							<div class="listView__item__leftPart__detail">
-								{{ actor.title }}
-                                {% if shop %}
-	    							[{{ shop.title }}]
-                                {% endif %}
+								authPage.html
 							</div>
 						</div>	
+
+						<div class="listView__item__rightPart">	
+							<div class="listView__item__moreButton"></div>
+						</div>
 					</div>
+				</a>
 
 				<a href="selectShopPage.html">
 					<div class="listView__item">
@@ -60,7 +58,6 @@
 				</a>				
 
 
-                {% if shop %}
 				<a href="shopPage.html">
 					<div class="listView__item">
 
@@ -86,8 +83,7 @@
 						<div class="listView__item__leftPart">		
 		
 							<div class="listView__item__leftPart__title">
-								{% if 0 %}Новая сделка{% endif %}
-                                {% if is_order %}Текущая{% else %}Новая{% endif %} сделка
+								Новая сделка
 							</div>
 							<div class="listView__item__leftPart__detail">
 								newDealPage.html
@@ -100,64 +96,6 @@
 												
 					</div>
 				</a>				
-
-				<a href="sellerDealPage.html">
-					<div class="listView__item">
-						<div class="listView__item__leftPart">		
-							<div class="listView__item__leftPart__title">
-								Продано
-							</div>
-							<div class="listView__item__leftPart__detail">
-								sellerDealPage.html
-							</div>
-						</div>
-						<div class="listView__item__rightPart">	
-							<div class="listView__item__moreButton"></div>
-						</div>
-					</div>
-				</a>				
-
-                {% if price_last_order %}
-				<a href="/">
-					<div class="listView__item">
-						<div class="listView__item__leftPart">		
-							<div class="listView__item__leftPart__title">
-								Оформлен заказ
-							</div>
-							<div class="listView__item__leftPart__detail">
-                                На сумму {{ price_last_order }}, клиенту начисленно {{ reward_ball_last_order }} баллов.
-							</div>
-						</div>
-
-						<div class="listView__item__rightPart">	
-							<div class="listView__item__moreButton"></div>
-						</div>
-												
-					</div>
-				</a>				
-                {% endif %}
-                {% endif %}
-                {% else %}
-				<a href="authPage.html">
-					<div class="listView__item">
-
-						<div class="listView__item__leftPart">
-							<div class="listView__item__leftPart__title">
-								Аунтетификация	
-							</div>
-							<div class="listView__item__leftPart__detail">
-								authPage.html
-							</div>
-						</div>	
-
-						<div class="listView__item__rightPart">	
-							<div class="listView__item__moreButton"></div>
-						</div>
-					</div>
-				</a>
-
-
-                {% endif %}
 			</div>
 		</div>
 
