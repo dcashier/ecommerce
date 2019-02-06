@@ -142,6 +142,9 @@ class SellerDealPage(View):
         #answer['orders'] = seller.list_create_orders()
         from eseller.models import Order
         answer['orders'] = Order.objects.filter(executor=executor, seller=seller)
+        answer['seller'] = seller
+        answer['executor'] = executor
+        answer['actor'] = actor
         template = loader.get_template('dcashier/static/sellerDealPage.html')
         context = RequestContext(request, answer)
         #return HttpResponse(template.render(context))
