@@ -43,8 +43,10 @@ class Seller(models.Model):
         print 'Alert : Not work calculate_revards_balls_for_last_order'
         #return 3000
         order = self.get_last_order_client(client)
-        max_ball = loyalty.create_range_ball(self, order.calculate_price())[1]
-        return max_ball
+        #max_ball = loyalty.create_range_ball(self, order.calculate_price())[1]
+        #return max_ball
+        ball = loyalty.calculate_reward(None, order.calculate_price())['ball']
+        return ball
 
     def change_status_for_last_order(self, status):
         print 'Alert : Not work change_status_for_last_order'
@@ -176,8 +178,10 @@ class Seller(models.Model):
 
     def get_last_order_client(self, client):
         #return Order.objects.get(customer=client)
-        if Order.objects.filter(customer=client).count() > 0:
+        if Order.objects.filter(customer=client).count() > 1:
             print 'Error : Too many orderi get_last_order_client()', Order.objects.filter(customer=client).count()
+        elif Order.objects.filter(customer=client).count() == 0:
+            raise ValidationError(u"У клиента нет ни одного закзаза.")
         return Order.objects.filter(customer=client).order_by('-id')[0]
 
     def has_basket_for_client_in_shop(self, client, shop):
