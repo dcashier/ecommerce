@@ -133,6 +133,20 @@ class SelectShopPage(View):
         #return HttpResponse("You're select not good shop")
         return redirect('/selectShopPage.html')
 
+class SellerDealPage(View):
+    def get(self, request, *args, **kwargs):
+        actor = get_actor_for_request_if_login(request)
+        seller = actor.seller
+        executor = get_shop_for_request_if_login(request)
+        answer = {}
+        #answer['orders'] = seller.list_create_orders()
+        from eseller.models import Order
+        answer['orders'] = Order.objects.filter(executor=executor, seller=seller)
+        template = loader.get_template('dcashier/static/sellerDealPage.html')
+        context = RequestContext(request, answer)
+        #return HttpResponse(template.render(context))
+        return HttpResponse(template.render(context.flatten()))
+
 class ShopPage(View):
     def get(self, request, *args, **kwargs):
         actor = get_actor_for_request_if_login(request)

@@ -30,6 +30,7 @@ urlpatterns = [
     url(r'^selectShopPage.html$', SelectShopPage.as_view(), name='my-view'),
     url(r'^shopPage.html$', ShopPage.as_view(), name='my-view'),
     url(r'^newDealPage.html$', NewDealPage.as_view(), name='my-view'),
+    url(r'^sellerDealPage.html$', SellerDealPage.as_view(), name='my-view'),
 
 
     url(r'^login/$', Login.as_view(), name='login'),

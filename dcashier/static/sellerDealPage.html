@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Дисконт Онлайн</title>
+	<link rel="stylesheet" href="css/style.css" type="text/css">
+	<link rel="stylesheet" href="css/response.css" type="text/css">
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,700,800&amp;subset=cyrillic" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+	      rel="stylesheet">	
+</head>
+
+<body ontouchstart="">
+	<div class="container">
+		<div class="workSection mt40">
+			<div class="listView mt40">
+
+
+                {% for order in orders %}
+				<div class="listView__item">
+					<div class="listView__item__leftPart">
+						<div class="listView__item__leftPart__title">	
+							id: {{ order.id }} 
+                            {{ order.customer.title }} {{ order.customer.phone_number }}
+						</div>
+						<div class="listView__item__leftPart__detail">	
+						    Балами оплачено {{ order.loyalty_ball }} 
+                            Полная {{ order.calculate_price_without_loyalty_balls }} &#8381
+						</div>
+					</div>
+					<div class="listView__item__rightPart mt10">
+						<div class="listView__item__rightPart__detail">	
+                            {{ order.calculate_price }} &#8381
+						</div>						
+					</div>
+				</div>				
+                {% endfor %}
+
+			</div>
+		</div>
+
+	</div>
+</body>
+</html>
