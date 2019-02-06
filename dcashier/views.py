@@ -6,6 +6,7 @@ from django.shortcuts import render
 from eactor.models import AuthSystem
 
 from django.template import RequestContext, loader
+from django.shortcuts import redirect
 
 class MyView(View):
 
@@ -35,6 +36,13 @@ def index(request):
     else:
         answer['is_login'] = False
 
+    if request.session.get('price_last_order') and \
+        request.session.get('reward_ball_last_order'):
+        answer['price_last_order'] = int(request.session['price_last_order'])
+        answer['reward_ball_last_order'] = int(request.session['reward_ball_last_order'])
+        del request.session['price_last_order']
+        del request.session['reward_ball_last_order']
+
     template = loader.get_template('dcashier/static/index.html')
     context = RequestContext(request, answer)
     #return HttpResponse(template.render(context))
@@ -49,7 +57,14 @@ class ShopNone(object):
 
 class AuthPage(View):
     def get(self, request, *args, **kwargs):
-        return render(request, 'dcashier/static/authPage.html')
+        #return render(request, 'dcashier/static/authPage.html')
+        answer = {}
+        answer['is_error_login'] = request.session.get('is_error_login')
+        template = loader.get_template('dcashier/static/authPage.html')
+        context = RequestContext(request, answer)
+        #return HttpResponse(template.render(context))
+        return HttpResponse(template.render(context.flatten()))
+
 
 def get_actor_for_request_if_login(request):
     if request.session.get('actor_id'):
@@ -78,9 +93,13 @@ class Login(View):
         if auth_system.has_actor_by_phone_numnber_password(phone_number, password):
             actor = auth_system.get_actor_by_phone_numnber_password(phone_number, password)
             request.session['actor_id'] = actor.id
-            return HttpResponse("You're logged in. <a href=\"/\">main</a>")
+            request.session['is_error_login'] = False
+            return redirect('/')
+            #return HttpResponse("You're logged in. <a href=\"/\">main</a>")
 	else:
-            return HttpResponse("Your username and password didn't match. <a href=\"/\">main</a>")
+            request.session['is_error_login'] = True
+            return redirect('/authPage.html')
+            #return HttpResponse("Your username and password didn't match. <a href=\"/\">main</a>")
 
 class Logout(View):
     def post(self, request, *args, **kwargs):
@@ -109,8 +128,10 @@ class SelectShopPage(View):
         for shop in shops:
             if str(shop.id) == str(shop_id):
                 request.session['shop_id'] = shop_id
-                return HttpResponse("You're select shop!")
-        return HttpResponse("You're select not good shop")
+                #return HttpResponse("You're select shop!")
+                return redirect('/')
+        #return HttpResponse("You're select not good shop")
+        return redirect('/selectShopPage.html')
 
 class ShopPage(View):
     def get(self, request, *args, **kwargs):
@@ -166,7 +187,8 @@ class ShopPage(View):
 
         basket_client.delete()
 
-        return HttpResponse("You're create <a href=\"/newDealPage.html\">order</a>" )
+        #return HttpResponse("You're create <a href=\"/newDealPage.html\">order</a>" )
+        return redirect('/newDealPage.html')
 
 
 class NewDealPage(View):
@@ -248,4 +270,7 @@ class NewDealPage(View):
 
         seller.change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
 
-        return HttpResponse("You're create order pay : %s, save up %s ball's" % (order.calculate_price(), reward_ball))
+        #return HttpResponse("You're create order pay : %s, save up %s ball's" % (order.calculate_price(), reward_ball))
+        request.session['price_last_order'] = int(order.calculate_price())
+        request.session['reward_ball_last_order'] = int(reward_ball)
+        return redirect('/')

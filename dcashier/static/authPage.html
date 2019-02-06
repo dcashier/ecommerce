@@ -19,8 +19,13 @@
 		
 		<div class="workSection mt40">
 			<form action="/login/" method="post">
+                {% if is_error_login %}
+				<p class="colorRed">Пользователь не найден</p>
+				<p class="colorRed">Неверный пароль</p>
+                {% else %}
 				<p class="colorRed invisible">Пользователь не найден</p>
 				<p class="colorRed invisible">Неверный пароль</p>
+                {% endif %}
 				<input type="email" tabindex="0" required autocomplete="on" placeholder = "Введите логин" name="authNameInput_email" class = "input">
 				<input type="text" tabindex="0" required autocomplete="on" placeholder = "Введите логин" name="authNameInput" class = "input">
 				<input type="password" tabindex="1" required autocomplete="on" placeholder = "Пароль" name="authPasswordInput" class = "input mt20">

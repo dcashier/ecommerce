@@ -6,9 +6,14 @@
 	<title>Дисконт Онлайн</title>
 	<link rel="stylesheet" href="css/style.css" type="text/css">
 	<link rel="stylesheet" href="css/response.css" type="text/css">	
+    {% if 1 %}
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,700,800&amp;subset=cyrillic" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
 	      rel="stylesheet">	
+    {% else %}
+	<link href="css/google_main.css" rel="stylesheet">
+	<link href="css/google_icon.css" rel="stylesheet">
+    {% endif %}
 </head>
 
 <body ontouchstart="">
@@ -95,6 +100,27 @@
 												
 					</div>
 				</a>				
+
+
+                {% if price_last_order %}
+				<a href="/">
+					<div class="listView__item">
+						<div class="listView__item__leftPart">		
+							<div class="listView__item__leftPart__title">
+								Оформлен заказ
+							</div>
+							<div class="listView__item__leftPart__detail">
+                                На сумму {{ price_last_order }}, клиенту начисленно {{ reward_ball_last_order }} баллов.
+							</div>
+						</div>
+
+						<div class="listView__item__rightPart">	
+							<div class="listView__item__moreButton"></div>
+						</div>
+												
+					</div>
+				</a>				
+                {% endif %}
                 {% endif %}
                 {% else %}
 				<a href="authPage.html">
