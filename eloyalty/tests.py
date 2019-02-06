@@ -142,6 +142,13 @@ class TestELoyalty(TestCase):
         client_new.phone_m_type = params.get('phone_m_type')
         client_new.save()
 
+        #seller_shop_1.create_client_shop_with_phone_number(shop_1, client_new['phone_number'])
+        purchaser = Purchaser(
+            title=u"Default purchaser when Seller create Client.",
+            shop=client_new,
+            phone_number=client_new.phone_number)
+        purchaser.save()
+
         ## надо вынести
         #link = EntityLinkActor()
         #link.entity = record
@@ -217,7 +224,15 @@ class TestELoyalty(TestCase):
             'payment_balls': None,
             'status': ['create'],
         }
-        seller_shop_1.create_order(order_params)
+        #seller_shop_1.create_order(order_params)
+        self.assertFalse(seller_shop_1.has_basket_for_client_in_shop(client_2, shop_1))
+        purchaser = Purchaser.get_purchaser_with_phone_number_for_client(client_2.phone_number, client_2)
+        seller_shop_1.create_basket_for_client_in_shop(client_2, shop_1, purchaser)
+        self.assertTrue(seller_shop_1.has_basket_for_client_in_shop(client_2, shop_1))
+        basket_client = seller_shop_1.get_basket_for_client_in_shop(client_2, shop_1)
+        seller_shop_1.add_product_in_basket(basket_client, product_mi8, 1, Decimal('115.61'), 'USD')
+        seller_shop_1.create_order_from_busket_and_pickup_point(client_2, shop_1, purchaser, basket_client, pickup_point_1)
+        basket_client.delete()
 
         # так как Вова только зарегился у него 0 балов.
         vava_has_balls = 0
@@ -238,7 +253,9 @@ class TestELoyalty(TestCase):
         self.assertTrue(seller_shop_1.check_payment_for_last_order())
 
         reward_balls = seller_shop_1.calculate_revards_balls_for_last_order(loyalty_1, client_2)
-        self.assertEqual(3000, reward_balls)
+        #self.assertEqual(3000, reward_balls)
+        #self.assertEqual(57, reward_balls)
+        self.assertEqual(Decimal('11.561'), reward_balls)
         #actor_executor.confirm_out_payment_for_loyalty(shop_1, client_1, loyalty_1, 3000, 90)
         available_day = 90
         loyalty_1.transfer_ball(seller_shop_1, shop_1, client_2, reward_balls, available_day)
@@ -281,7 +298,7 @@ class TestELoyalty(TestCase):
                 {
                     'product': product_mi8,
                     'quantity': 1,
-                    'price': Decimal('115.61'),
+                    'price': Decimal('130'),
                     'currency': "USD",
                 },
             ],
@@ -297,18 +314,31 @@ class TestELoyalty(TestCase):
             'payment_balls': None,
             'status': ['create'],
         }
-        seller_shop_2.create_order(order_params)
+        #seller_shop_2.create_order(order_params)
+        self.assertFalse(seller_shop_2.has_basket_for_client_in_shop(client_2, shop_1))
+        purchaser = Purchaser.get_purchaser_with_phone_number_for_client(client_2.phone_number, client_2)
+        seller_shop_2.create_basket_for_client_in_shop(client_2, shop_1, purchaser)
+        self.assertTrue(seller_shop_2.has_basket_for_client_in_shop(client_2, shop_1))
+        basket_client = seller_shop_2.get_basket_for_client_in_shop(client_2, shop_1)
+        seller_shop_2.add_product_in_basket(basket_client, product_mi8, 1, Decimal('130'), 'USD')
+        seller_shop_2.create_order_from_busket_and_pickup_point(client_2, shop_1, purchaser, basket_client, pickup_point_1)
 
-        # так как Вова только зарегился у него 0 балов.
-        vava_has_balls = 3000
+        # так как Вова не только зарегился, и у него в системе уже есть балы.
+        #vava_has_balls = 3000
+        #vava_has_balls = 57
+        vava_has_balls = 11
         datetime_for_check = None
         self.assertEqual(vava_has_balls, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
 
-        vava_want_spend_balls = 2000
+        #vava_want_spend_balls = 2000
+        #vava_want_spend_balls = 50
+        vava_want_spend_balls = 5
         available_day = 0
         actor_client_new.set_payment_balls_for_last_order(vava_want_spend_balls)
         loyalty_1.transfer_ball(seller_shop_2, client_2, shop_1, vava_want_spend_balls, available_day)
-        self.assertEqual(1000, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
+        #self.assertEqual(1000, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
+        #self.assertEqual(7, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
+        self.assertEqual(6, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
 
         seller_shop_2.create_price_last_order()
 
@@ -318,11 +348,15 @@ class TestELoyalty(TestCase):
 
         self.assertTrue(seller_shop_2.check_payment_for_last_order())
 
-        reward_balls = seller_shop_2.calculate_revards_balls_for_last_order()
+        reward_balls = seller_shop_2.calculate_revards_balls_for_last_order(loyalty_1, client_2)
+        #self.assertEqual(65, reward_balls)
+        self.assertEqual(Decimal('13.00'), reward_balls)
         #actor_executor.confirm_out_payment_for_loyalty(shop_1, client_1, loyalty_1, 3000, 90)
         available_day = 90
         loyalty_1.transfer_ball(seller_shop_2, shop_1, client_2, reward_balls, available_day)
 
+        #self.assertEqual(72, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
+        self.assertEqual(19, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
         seller_shop_2.change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
         # на этом вторая покупка Вовы закончилась.
 
