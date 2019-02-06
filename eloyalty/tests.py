@@ -114,7 +114,8 @@ class TestELoyalty(TestCase):
 
 
         # Сейчас будет работать представитель клиента
-        actor_client_new = Customer()
+        #actor_client_new = Customer()
+        actor_client_new = None
 
         #client_2 = Shop()
         #client_2.save()
@@ -241,18 +242,21 @@ class TestELoyalty(TestCase):
 
         vava_want_spend_balls = 0
         available_day = 0
-        actor_client_new.set_payment_balls_for_last_order(vava_want_spend_balls)
+        #actor_client_new.set_payment_balls_for_last_order(vava_want_spend_balls)
         #loyalty_1.transfer_ball(seller_shop_1, client_1, shop_1, vava_want_spend_balls, available_day)
 
-        seller_shop_1.create_price_last_order()
+        #seller_shop_1.create_price_last_order()
 
-        link_for_payment = seller_shop_1.create_payemnt_link_for_last_order()
+        #link_for_payment = seller_shop_1.create_payemnt_link_for_last_order()
 
-        actor_client_new.pay_by(link_for_payment)
+        #actor_client_new.pay_by(link_for_payment)
 
         self.assertTrue(seller_shop_1.check_payment_for_last_order())
 
-        reward_balls = seller_shop_1.calculate_revards_balls_for_last_order(loyalty_1, client_2)
+
+        #reward_balls = seller_shop_1.calculate_revards_balls_for_last_order(loyalty_1, client_2)
+        last_order_for_client_2 = seller_shop_1.get_last_order_client(client_2)
+        reward_balls = seller_shop_1.calculate_revards_balls_for_order(last_order_for_client_2, loyalty_1)
         #self.assertEqual(3000, reward_balls)
         #self.assertEqual(57, reward_balls)
         self.assertEqual(Decimal('11.561'), reward_balls)
@@ -279,7 +283,8 @@ class TestELoyalty(TestCase):
         loyalties = srl.list_loyalty_for_owner(seller_shop_2, shop_1)
         loyalty_1 = loyalties[0]
 
-        actor_client_new = Customer()
+        #actor_client_new = Customer()
+        actor_client_new = None 
         params = {
             #'fio': u'Ануфрева Авдотья Тимофеевна',
             #'birthday': u'1933-10-06',
@@ -334,21 +339,23 @@ class TestELoyalty(TestCase):
         #vava_want_spend_balls = 50
         vava_want_spend_balls = 5
         available_day = 0
-        actor_client_new.set_payment_balls_for_last_order(vava_want_spend_balls)
+        #actor_client_new.set_payment_balls_for_last_order(vava_want_spend_balls)
         loyalty_1.transfer_ball(seller_shop_2, client_2, shop_1, vava_want_spend_balls, available_day)
         #self.assertEqual(1000, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
         #self.assertEqual(7, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
         self.assertEqual(6, loyalty_1.get_balance(actor_client_new, client_2, datetime_for_check))
 
-        seller_shop_2.create_price_last_order()
+        #seller_shop_2.create_price_last_order()
 
-        link_for_payment = seller_shop_2.create_payemnt_link_for_last_order()
+        #link_for_payment = seller_shop_2.create_payemnt_link_for_last_order()
 
-        actor_client_new.pay_by(link_for_payment)
+        #actor_client_new.pay_by(link_for_payment)
 
         self.assertTrue(seller_shop_2.check_payment_for_last_order())
 
-        reward_balls = seller_shop_2.calculate_revards_balls_for_last_order(loyalty_1, client_2)
+        #reward_balls = seller_shop_2.calculate_revards_balls_for_last_order(loyalty_1, client_2)
+        last_order_for_client_2 = seller_shop_2.get_last_order_client(client_2)
+        reward_balls = seller_shop_2.calculate_revards_balls_for_order(last_order_for_client_2, loyalty_1)
         #self.assertEqual(65, reward_balls)
         self.assertEqual(Decimal('13.00'), reward_balls)
         #actor_executor.confirm_out_payment_for_loyalty(shop_1, client_1, loyalty_1, 3000, 90)

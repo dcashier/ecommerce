@@ -116,7 +116,8 @@ class Loyalty(object):
     def list_customer(self, actor, samebody):
         owners = []
         for lar in LoyaltyAccountRecord.objects.filter(loyalty=self.__record):
-            owners.append(Customer(lar.owner))
+            #owners.append(Customer(lar.owner))
+            owners.append(lar.owner)
         return owners
 
     def list_transaction(self, actor, samebody):

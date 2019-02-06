@@ -22,6 +22,9 @@ class Purchaser(models.Model):
         return Purchaser.objects.get(phone_number=phone_number, shop=client)
 
     def pay_ball(self, order, ball):
+        #XXX
+        assert False
+
         print 'Alert : Not work pay_ball', order, ball
         order.loyalty_ball = ball
         order.save()
@@ -41,7 +44,7 @@ class Seller(models.Model):
     price_policies = models.ManyToManyField(PricePolicy, null=True, blank=True) # политики которые может использовать данный продавец ему назанчаются свыше
 
     def __accumulate_customer_ball_for_order(self, order, purchaser, customer, executor, loyalty):
-        reward_ball = self.__calculate_revards_balls_for_order(order, loyalty)
+        reward_ball = self.calculate_revards_balls_for_order(order, loyalty)
         available_day = 90
         loyalty.transfer_ball(self, executor, customer, reward_ball, available_day)
         self.__change_status_for_order(order, u'Начислии балы клиенту по заказа')
@@ -50,6 +53,9 @@ class Seller(models.Model):
         basket.add(product, quantity, price, currency)
 
     def calculate_revards_balls_for_last_order(self, loyalty, client):
+        #XXX
+        assert False
+
         print 'Alert : Not work calculate_revards_balls_for_last_order'
         #return 3000
         order = self.get_last_order_client(client)
@@ -57,13 +63,16 @@ class Seller(models.Model):
         #return max_ball
         #ball = loyalty.calculate_reward(None, order.calculate_price_without_loyalty_balls())['ball']
         #ball = loyalty.calculate_reward(None, order.calculate_price())['ball']
-        ball = self.__calculate_revards_balls_for_order(order, loyalty)
+        ball = self.calculate_revards_balls_for_order(order, loyalty)
         return ball
 
-    def __calculate_revards_balls_for_order(self, order, loyalty):
+    def calculate_revards_balls_for_order(self, order, loyalty):
         return loyalty.calculate_reward(None, order.calculate_price())['ball']
 
     def __change_status_for_last_order(self, status):
+        #XXX
+        assert False
+
         print 'Alert : Not work change_status_for_last_order'
 
     def __change_status_for_order(self, order, status):
@@ -87,6 +96,10 @@ class Seller(models.Model):
         purchaser.save()
 
     def create_order(self, parmas):
+        #XXX
+        assert False
+
+    def create_order_from_busket_and_pickup_point(self, client, shop, purchaser, basket, pickup_point):
         """
         Следует указать:
             что
@@ -101,9 +114,6 @@ class Seller(models.Model):
 
         Т.е. заказ это некий набор обьедиенных действий!
         """
-        pass
-
-    def create_order_from_busket_and_pickup_point(self, client, shop, purchaser, basket, pickup_point):
         #print 'Alert : Not work create_order_from_busket_and_pickup_point'
         order = Order(
             customer=client,
@@ -122,11 +132,16 @@ class Seller(models.Model):
         #loyalty_ball = models.IntegerField(u"Оплаено балами.")
 
     def create_payemnt_link_for_last_order(self):
+        #XXX
+        assert False
+
         print 'Alert : Not work create_payemnt_link_for_last_order'
 
     def create_price_last_order(self):
-        print 'Alert : Not work create_price_last_order'
+        #XXX
+        assert False
 
+        print 'Alert : Not work create_price_last_order'
 
     def __error_by_order(self, order_params):
         """
@@ -192,7 +207,6 @@ class Seller(models.Model):
         raise ValidationError(u"У магазина ент клиента с таким телефоном.")
 
     def get_last_order_client(self, client):
-        #return Order.objects.get(customer=client)
         if Order.objects.filter(customer=client).count() > 1:
             print 'Error : Too many orderi get_last_order_client()', Order.objects.filter(customer=client).count()
         elif Order.objects.filter(customer=client).count() == 0:
@@ -362,14 +376,15 @@ class Seller(models.Model):
             order.save()
 
         # Нужно для провери что пришла оплата тоглда можно начислять балы за покупку.
-        self.create_price_last_order()
-        link_for_payment = self.create_payemnt_link_for_last_order()
+        #self.create_price_last_order()
+        #link_for_payment = self.create_payemnt_link_for_last_order()
         if not self.check_payment_for_last_order():
             return None
 
         self.__accumulate_customer_ball_for_order(order, purchaser, customer, executor, loyalty)
 
-        self.__change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
+        #self.__change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
+        self.__change_status_for_order(order, u'Ожидает выдачи позиций заказа клиенту')
 
     def quantity_for_sale(self, product):
         storages = self.shop.storages.all()
@@ -413,12 +428,15 @@ class Seller(models.Model):
         return u"Seller (%s) : %s [shop : %s]" % (self.id, self.title, self.shop)
 
 
-class Customer(object):
-    def set_payment_balls_for_last_order(self, balls):
-        pass
-
-    def pay_by(self, link_for_payment):
-        pass
+#class Customer(object):
+#    """
+#    Используется в системе лояльности для связывания клиента и счета
+#    """
+#    def set_payment_balls_for_last_order(self, balls):
+#        pass
+#
+#    def pay_by(self, link_for_payment):
+#        pass
 
 class Basket(models.Model):
     customer = models.ForeignKey(Shop, related_name='customer_shop')
