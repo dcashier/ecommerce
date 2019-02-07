@@ -228,7 +228,8 @@ class ShopPage(View):
         order_client = seller.get_last_order_client(client)
         request.session['order_id'] = order_client.id
         request.session['client_id'] = client.id
-        request.session['purchaser_id'] = purchaser.id
+        #request.session['purchaser_id'] = purchaser.id
+        request.session['purchaser_id'] = None
 
         #basket_client.delete()
 
@@ -248,7 +249,7 @@ class NewDealPage(View):
         order = seller.get_my_order(request.session.get('order_id'))
         #from eshop.models import Shop
         #client = Shop.objects.get(id=request.session.get('client_id'))
-        client = seller.get_my_customer(request.session.get('client_id')):
+        client = seller.get_my_customer(request.session.get('client_id'))
         from eloyalty.models import ServiceRepositoryLoyalty
         srl = ServiceRepositoryLoyalty()
         loyalties = srl.list_loyalty_for_owner(seller, shop)
@@ -346,7 +347,7 @@ class NewDealPage(View):
         #purchaser = Purchaser.objects.get(id=request.session.get('purchaser_id'))
         #from eshop.models import Shop
         #client = Shop.objects.get(id=request.session.get('client_id'))
-        client = seller.get_my_customer(request.session.get('client_id')):
+        client = seller.get_my_customer(request.session.get('client_id'))
         shop = get_shop_for_request_if_login(request)
         from eloyalty.models import ServiceRepositoryLoyalty
         srl = ServiceRepositoryLoyalty()
@@ -368,7 +369,7 @@ class NewDealPage(View):
             from eproduct.models import Product
             for product_id in request.POST.getlist('products'):
                 #product = Product.objects.get(id=product_id)
-                product = get_easy_product(id=product_id)
+                product = seller.get_easy_product(product_id)
                 order.add(product, 1, 0, 'RUS')
             return redirect('/newDealPage.html')
 
