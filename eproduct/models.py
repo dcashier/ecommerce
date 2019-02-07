@@ -12,7 +12,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     title = models.CharField(max_length=200)
-    categories = models.ManyToManyField(Category)
+    categories = models.ManyToManyField(Category, blank=True)
     brand = models.ForeignKey(Brand)
 
     def __unicode__(self):

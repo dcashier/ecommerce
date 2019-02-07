@@ -41,7 +41,7 @@ class Seller(models.Model):
     """
     title = models.CharField(max_length=100)
     shop = models.ForeignKey(Shop)
-    price_policies = models.ManyToManyField(PricePolicy, null=True, blank=True) # политики которые может использовать данный продавец ему назанчаются свыше
+    price_policies = models.ManyToManyField(PricePolicy, blank=True) # политики которые может использовать данный продавец ему назанчаются свыше
 
     def __accumulate_customer_ball_for_order(self, order, purchaser, customer, executor, loyalty):
         reward_ball = self.calculate_revards_balls_for_order(order, loyalty)
