@@ -248,46 +248,68 @@ class NewDealPage(View):
 
 
     def post(self, request, *args, **kwargs):
+        #actor = get_actor_for_request_if_login(request)
+        #shop = get_shop_for_request_if_login(request)
+        #seller = actor.seller
+        #from eseller.models import Order
+        #order = Order.objects.get(id=request.session.get('order_id'))
+        #from eshop.models import Shop
+        #client = Shop.objects.get(id=request.session.get('client_id'))
+        #from eloyalty.models import ServiceRepositoryLoyalty
+        #srl = ServiceRepositoryLoyalty()
+        #loyalties = srl.list_loyalty_for_owner(seller, shop)
+        #loyalty = loyalties[0]
+
+        #datetime_for_check = None
+        #all_ball = loyalty.get_balance(actor, client, datetime_for_check)
+
+        #from eseller.models import Purchaser
+        #purchaser = Purchaser.objects.get(id=request.session.get('purchaser_id'))
+
+        #if request.POST['action']  == 'write_off':
+        #    max_ball_for_pay = loyalty.create_range_ball(actor, int(order.calculate_price_without_loyalty_balls()))[1]
+        #    if max_ball_for_pay > all_ball:
+        #        max_ball_for_pay = all_ball
+        #    purchaser.pay_ball(order, max_ball_for_pay)
+        #    available_day = 0
+        #    loyalty.transfer_ball(seller, client, shop, max_ball_for_pay, available_day)
+
+        #elif request.POST['action']  == 'save_up':
+        #    purchaser.pay_ball(order, 0)
+        #    pass
+
+        #seller.create_price_last_order()
+        #link_for_payment = seller.create_payemnt_link_for_last_order()
+        #if not seller.check_payment_for_last_order():
+        #    return None
+
+        #reward_ball = seller.calculate_revards_balls_for_last_order(loyalty, client)
+        #available_day = 90
+        #loyalty.transfer_ball(seller, shop, client, reward_ball, available_day)
+
+        #seller.change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
+
+        # Fix start
         actor = get_actor_for_request_if_login(request)
-        shop = get_shop_for_request_if_login(request)
         seller = actor.seller
         from eseller.models import Order
         order = Order.objects.get(id=request.session.get('order_id'))
+        from eseller.models import Purchaser
+        purchaser = Purchaser.objects.get(id=request.session.get('purchaser_id'))
         from eshop.models import Shop
         client = Shop.objects.get(id=request.session.get('client_id'))
+        shop = get_shop_for_request_if_login(request)
         from eloyalty.models import ServiceRepositoryLoyalty
         srl = ServiceRepositoryLoyalty()
         loyalties = srl.list_loyalty_for_owner(seller, shop)
         loyalty = loyalties[0]
-
-        datetime_for_check = None
-        all_ball = loyalty.get_balance(actor, client, datetime_for_check)
-
-        from eseller.models import Purchaser
-        purchaser = Purchaser.objects.get(id=request.session.get('purchaser_id'))
-
         if request.POST['action']  == 'write_off':
-            max_ball_for_pay = loyalty.create_range_ball(actor, int(order.calculate_price_without_loyalty_balls()))[1]
-            if max_ball_for_pay > all_ball:
-                max_ball_for_pay = all_ball
-            purchaser.pay_ball(order, max_ball_for_pay)
-            available_day = 0
-            loyalty.transfer_ball(seller, client, shop, max_ball_for_pay, available_day)
-
+            seller.process_order_with_max_allow_ball_without_customer_security(order, purchaser, client, shop, loyalty)
         elif request.POST['action']  == 'save_up':
-            purchaser.pay_ball(order, 0)
-            pass
-
-        seller.create_price_last_order()
-        link_for_payment = seller.create_payemnt_link_for_last_order()
-        if not seller.check_payment_for_last_order():
-            return None
-
-        reward_ball = seller.calculate_revards_balls_for_last_order(loyalty, client)
-        available_day = 90
-        loyalty.transfer_ball(seller, shop, client, reward_ball, available_day)
-
-        seller.change_status_for_last_order(u'Ожидает выдачи позиций заказа клиенту')
+            ball = 0
+            seller.process_order_without_customer_security(order, purchaser, client, shop, loyalty, ball)
+        reward_ball = seller.calculate_revards_balls_for_order(order, loyalty)
+        # Fix stop
 
         #return HttpResponse("You're create order pay : %s, save up %s ball's" % (order.calculate_price(), reward_ball))
         request.session['price_last_order'] = int(order.calculate_price())
