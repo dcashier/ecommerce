@@ -39,7 +39,7 @@
 						<div class="listView__item__leftPart__detail">	
 						    Балами {{ order.loyalty_ball }} 
                             Полная {{ order.calculate_price_without_loyalty_balls }} &#8381
-                            ~ {% for product in order.products %}{{ product.title }}. {% endfor %}
+                            ~ {% for product in order.list_easy_product %}{{ product.title }}. {% endfor %}
 						</div>
 					</div>
 					<div class="listView__item__rightPart mt10">
