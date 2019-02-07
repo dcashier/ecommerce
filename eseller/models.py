@@ -54,6 +54,9 @@ class Seller(models.Model):
         print 'Alert : Not work check_payment_for_last_order'
         return True
 
+    def count_order_customer(self, customer):
+        return Order.objects.filter(customer=customer).count()
+
     def create_basket_for_client_in_shop(self, client, shop, purchaser):
         basket = Basket(seller=self, customer=client, executor=shop, purchaser=purchaser)
         basket.save()
@@ -66,6 +69,25 @@ class Seller(models.Model):
         self.shop.clients.add(client)
         purchaser = Purchaser(title=u"Default purchaser when Seller create Client.", shop=client, phone_number=phone_number)
         purchaser.save()
+
+    #def create_easy_order_by_phone_number_of_customer(self, phone_number, executor, price):
+    def create_easy_order_by_phone_number_of_customer(self, phone_number, price):
+        executor = self.shop
+        if not self.has_shop_client_with_phone_number(executor, phone_number):
+            self.create_client_shop_with_phone_number(executor, phone_number)
+        customer = self.get_client_shop_with_phone_number(executor, phone_number)
+        default_product = Product.objects.get(id=1)
+        quantity = 1
+        currency = "RUS"
+        purchaser = Purchaser.get_purchaser_with_phone_number_for_client(phone_number, customer)
+        if not self.has_basket_for_client_in_shop(customer, executor):
+            self.create_basket_for_client_in_shop(customer, executor, purchaser)
+        self.create_basket_for_client_in_shop(customer, executor, purchaser)
+        basket = self.get_basket_for_client_in_shop(customer, executor)
+        self.add_product_in_basket(basket, default_product, quantity, price, currency)
+        pickup_point = PickupPoint.objects.get(id=1)
+        self.create_order_from_busket_and_pickup_point(customer, executor, purchaser, basket, pickup_point)
+        basket.delete()
 
     def create_order_from_busket_and_pickup_point(self, client, shop, purchaser, basket, pickup_point):
         """
@@ -169,10 +191,22 @@ class Seller(models.Model):
             raise ValidationError(u"У клиента нет ни одного закзаза.")
         return Order.objects.filter(customer=client).order_by('-id')[0]
 
+    def get_my_order(self, order_id):
+        #TODO проверка прав доступа к заказу.
+        return Order.objects.get(id=order_id, seller=self)
+
+    def get_my_customer(self, customer_id):
+        #TODO Нужна проверка прав доступа к заказу.
+        return Shop.objects.get(id=customer_id)
+
     def has_basket_for_client_in_shop(self, client, shop):
         for basket in Basket.objects.filter(customer=client, executor=shop):
             return True
         return False
+
+    def get_easy_product(self, product_id):
+        #TODO Нужна проверка прав доступа к заказу.
+        return Product.objects.get(id=product_id)
 
     def has_shop_client_with_phone_number(self, shop, phone_number):
         if not self.is_work_in_shop(shop):
@@ -247,6 +281,9 @@ class Seller(models.Model):
                 allow_products.append(product)
         return allow_products
 
+    def list_order_for_shop(self, executor):
+        return Order.objects.filter(executor=executor, seller=self)
+
     def list_product_in_stock(self, category):
         storages = self.shop.storages.all()
         products = set()
@@ -254,6 +291,16 @@ class Seller(models.Model):
             for product in storage.list_product():
                 products.add(product)
         return list(products)
+
+    def list_easy_product(self):
+        #TODO У каждого магазина должен быть свой набор продуктов или можно испоьзовать общий.
+        # но не давать возможноть изменять никакой инфы по продуктам в базе, только создавать.
+        # тогда будет общая база продуктов и в дальнейшем мапить не надо будет.
+        products = []
+        for product in Product.objects.all():
+            if product.id != 1:
+                products.append(product)
+        return products
 
     def __max_allow_ball_for_spend_for_order(self, order, purchaser, customer, executor, loyalty):
         datetime_for_check = None
@@ -313,6 +360,15 @@ class Seller(models.Model):
             price = link['price']
             prices.add(price)
         return sorted(list(prices))
+
+    def process_order_easy_with_max_allow_ball_without_customer_security(self, order, customer, executor, loyalty):
+        purchaser = Purchaser.objects.get(shop=customer)
+        self.process_order_with_max_allow_ball_without_customer_security(order, purchaser, customer, executor, loyalty)
+
+    def process_order_easy_with_zero_ball_without_customer_security(self, order, customer, executor, loyalty):
+        ball = 0
+        purchaser = Purchaser.objects.get(shop=customer)
+        self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball)
 
     def process_order_with_max_allow_ball_without_customer_security(self, order, purchaser, customer, executor, loyalty):
         ball_for_spend = self.__max_allow_ball_for_spend_for_order(order, purchaser, customer, executor, loyalty)
@@ -458,12 +514,17 @@ class Order(models.Model):
             price += order_element.quantity * order_element.price
         return price
 
-    def products(self):
-        selected_products = []
+    def delete_easy_products(self):
         for e in OrderElement.objects.filter(order=self):
             if e.product.id != 1:
-                selected_products.append(e.product)
-        return selected_products
+                e.delete()
+
+    def list_easy_product(self):
+        products = []
+        for e in OrderElement.objects.filter(order=self):
+            if e.product.id != 1:
+                products.append(e.product)
+        return products
 
     def __unicode__(self):
         return u"Order (%s) : %s %s %s %s" % (self.id, self.purchaser, self.customer, self.executor, self.seller)
