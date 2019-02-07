@@ -21,14 +21,6 @@ class Purchaser(models.Model):
     def get_purchaser_with_phone_number_for_client(cls, phone_number, client):
         return Purchaser.objects.get(phone_number=phone_number, shop=client)
 
-    def pay_ball(self, order, ball):
-        #XXX
-        assert False
-
-        print 'Alert : Not work pay_ball', order, ball
-        order.loyalty_ball = ball
-        order.save()
-
     def __unicode__(self):
         return u"Purchaser (%s) : %s [customer : %s]" % (self.id, self.title, self.shop)
 
@@ -52,28 +44,8 @@ class Seller(models.Model):
     def add_product_in_basket(self, basket, product, quantity, price, currency):
         basket.add(product, quantity, price, currency)
 
-    def calculate_revards_balls_for_last_order(self, loyalty, client):
-        #XXX
-        assert False
-
-        print 'Alert : Not work calculate_revards_balls_for_last_order'
-        #return 3000
-        order = self.get_last_order_client(client)
-        #max_ball = loyalty.create_range_ball(self, order.calculate_price())[1]
-        #return max_ball
-        #ball = loyalty.calculate_reward(None, order.calculate_price_without_loyalty_balls())['ball']
-        #ball = loyalty.calculate_reward(None, order.calculate_price())['ball']
-        ball = self.calculate_revards_balls_for_order(order, loyalty)
-        return ball
-
     def calculate_revards_balls_for_order(self, order, loyalty):
         return loyalty.calculate_reward(None, order.calculate_price())['ball']
-
-    def __change_status_for_last_order(self, status):
-        #XXX
-        assert False
-
-        print 'Alert : Not work change_status_for_last_order'
 
     def __change_status_for_order(self, order, status):
         pass
@@ -94,10 +66,6 @@ class Seller(models.Model):
         self.shop.clients.add(client)
         purchaser = Purchaser(title=u"Default purchaser when Seller create Client.", shop=client, phone_number=phone_number)
         purchaser.save()
-
-    def create_order(self, parmas):
-        #XXX
-        assert False
 
     def create_order_from_busket_and_pickup_point(self, client, shop, purchaser, basket, pickup_point):
         """
@@ -130,18 +98,6 @@ class Seller(models.Model):
         #pickup_dateteme = models.DateTimeField(u'дата и время вручения всего заказа(т.е. последней партии)')
 
         #loyalty_ball = models.IntegerField(u"Оплаено балами.")
-
-    def create_payemnt_link_for_last_order(self):
-        #XXX
-        assert False
-
-        print 'Alert : Not work create_payemnt_link_for_last_order'
-
-    def create_price_last_order(self):
-        #XXX
-        assert False
-
-        print 'Alert : Not work create_price_last_order'
 
     def __error_by_order(self, order_params):
         """
