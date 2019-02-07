@@ -213,6 +213,8 @@ class NewDealPage(View):
         actor = get_actor_for_request_if_login(request)
         shop = get_shop_for_request_if_login(request)
         seller = actor.seller
+        if not request.session.get('order_id'):
+            return redirect('/')
         from eseller.models import Order
         order = Order.objects.get(id=request.session.get('order_id'))
         from eshop.models import Shop
