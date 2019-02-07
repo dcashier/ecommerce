@@ -37,8 +37,9 @@
                             {{ order.customer.title }} {{ order.customer.phone_number }}
 						</div>
 						<div class="listView__item__leftPart__detail">	
-						    Балами оплачено {{ order.loyalty_ball }} 
+						    Балами {{ order.loyalty_ball }} 
                             Полная {{ order.calculate_price_without_loyalty_balls }} &#8381
+                            [ {% for product in selected_products %}{{ product.title }} {% endfor %} ]
 						</div>
 					</div>
 					<div class="listView__item__rightPart mt10">

@@ -49,8 +49,13 @@ def index(request):
     return HttpResponse(template.render(context.flatten()))
 
 class ActorNone(object):
+    seller = None
+
     def shops(self):
         return []
+
+    def seller(self):
+        return None
 
 class ShopNone(object):
     pass
@@ -135,6 +140,8 @@ class SelectShopPage(View):
 
 class SellerDealPage(View):
     def get(self, request, *args, **kwargs):
+        if not request.session.get('actor_id'):
+            return redirect('/')
         actor = get_actor_for_request_if_login(request)
         seller = actor.seller
         executor = get_shop_for_request_if_login(request)
@@ -145,6 +152,14 @@ class SellerDealPage(View):
         answer['seller'] = seller
         answer['executor'] = executor
         answer['actor'] = actor
+        selected_products = []
+        from eseller.models import Order
+        order = Order.objects.get(id=request.session.get('order_id'))
+        from eseller.models import OrderElement
+        for e in OrderElement.objects.filter(order=order):
+            if e.product.id != 1:
+                selected_products.append(e.product)
+        answer['selected_products'] = selected_products
         template = loader.get_template('dcashier/static/sellerDealPage.html')
         context = RequestContext(request, answer)
         #return HttpResponse(template.render(context))
@@ -234,6 +249,18 @@ class NewDealPage(View):
         if max_ball_for_pay > all_ball:
             max_ball_for_pay = all_ball
 
+        from eproduct.models import Product
+        #special_products = Product.objects.all()
+        special_products = []
+        for p in Product.objects.all():
+            if p.id != 1:
+                special_products.append(p)
+
+        selected_products = []
+        from eseller.models import OrderElement
+        for e in OrderElement.objects.filter(order=order):
+            selected_products.append(e.product)
+
         answer = {}
         answer['order_sum'] = int(order.calculate_price_without_loyalty_balls())
         answer['client'] = client
@@ -241,6 +268,8 @@ class NewDealPage(View):
         answer['max_ball_for_pay'] = max_ball_for_pay
         answer['max_percent_in_loyalty'] = loyalty.get_max_percent()
         answer['order_sum_with_ball'] = int(order.calculate_price_without_loyalty_balls()) - max_ball_for_pay
+        answer['special_products'] = special_products
+        answer['selected_products'] = selected_products
         template = loader.get_template('dcashier/static/newDealPage.html')
         context = RequestContext(request, answer)
         #return HttpResponse(template.render(context))
@@ -308,6 +337,17 @@ class NewDealPage(View):
         elif request.POST['action']  == 'save_up':
             ball = 0
             seller.process_order_without_customer_security(order, purchaser, client, shop, loyalty, ball)
+        elif request.POST['action']  == 'set_product':
+            from eseller.models import OrderElement
+            for e in OrderElement.objects.filter(order=order):
+                if e.id != 1:
+                    e.delete()
+            from eproduct.models import Product
+            for product_id in request.POST.getlist('products'):
+                product = Product.objects.get(id=product_id)
+                order.add(product, 1, 0, 'RUS')
+            return redirect('/newDealPage.html')
+
         reward_ball = seller.calculate_revards_balls_for_order(order, loyalty)
         # Fix stop
 

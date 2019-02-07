@@ -25,15 +25,11 @@
                 {% endif %}
 				<h1>{{ client.title }}</h1>
 				<h2>{{ client.phone_number }}</h2>
-
 			</div>
-				
 		</div>
-
 
 		<div class="workSection mt40">
 			<div class="listView">
-				
 				<div class="listView__item">
 					<div class="listView__item__leftPart mt10">
 						<div class="listView__item__leftPart__title">	
@@ -49,6 +45,19 @@
 				</div>
 			</div>
 
+			<div class="listView">
+				<div class="listView__item">
+					<form method="post">
+						<select multiple size="3" name="products">
+                    		{% for product in special_products %}
+								<option value="{{ product.id }}" {% if product in selected_products %}selected{% endif %}>{{ product.title }}</option>
+		                    {% endfor %}
+						</select>
+						<input type="hidden" name="action" value="set_product">
+                		<input type="submit" value="Зафиксировать продукты" >
+					</form>
+				</div>
+			</div>
 
 			<div class="listView mt40">
 				<div class="listView__item">
@@ -85,7 +94,6 @@
 			</div>
 		</div>
 
-
 		<div class="totalSection">
 			<div class="totalSection__leftPart">
 				<div class="totalSection__leftPart__title">
@@ -103,9 +111,6 @@
 			</div>			
 		</div>
 
-
-
-
 		<div class="controlSection">
 			<div class="controlSection__buttonsHorizontally">
 	
@@ -122,7 +127,6 @@
 			</div>
 		</div>
 
-
         {% if 0 %}
 		<div class="controlSection">
 			<div class="controlSection__buttonsHorizontally">
@@ -132,8 +136,6 @@
 			</div>
 		</div>
         {% endif %}
-
-
 
 	</div>
 </body>
