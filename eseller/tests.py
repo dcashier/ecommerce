@@ -349,6 +349,11 @@ class TestESeller(TestCase):
         #когда вова за ним придет выдать товар офрмить чек, и начислить балы в системе лояльности.
 
     def test_create_client(self):
+        brand_1 = Brand(title=u"Базовый")
+        brand_1.save()
+        product_1 = Product(title="Позиция для списывания суммы", brand=brand_1)
+        product_1.save()
+
         shop_1 = Shop(title=u"main shop")
         shop_1.save()
 
@@ -460,8 +465,49 @@ class TestESeller(TestCase):
         seller_2_1.process_order_with_max_allow_ball_without_customer_security(order_client, purchaser, client, shop_2, loyalty)
         self.assertEqual(Decimal('3.00'), order_client.calculate_price())
 
+        basket = seller_2_1.get_basket_for_client_in_shop(client, shop_2)
+        basket.delete()
 
+        # create_easy_order_by_phone_number_of_customer
+        price = Decimal('15.00')
+        self.assertEqual(1, seller_2_1.count_order_customer(client))
+	seller_2_1.create_easy_order_by_phone_number_of_customer(client_phone_number, price)
+        self.assertEqual(2, seller_2_1.count_order_customer(client))
+        self.assertEqual(Decimal('15.00'), seller_2_1.get_last_order_client(client).calculate_price_without_loyalty_balls())
 
+        # get_my_order
+        order_2 = seller_2_1.get_last_order_client(client)
+        self.assertEqual(order_2, seller_2_1.get_my_order(order_2.id))
+
+        # get_my_customer
+        self.assertEqual(client, seller_2_1.get_my_customer(client.id))
+
+        # get_easy_product
+        self.assertEqual(product_my, seller_2_1.get_easy_product(product_my.id))
+
+        # list_order_for_shop
+        self.assertEqual([order_client, order_2], list(seller_2_1.list_order_for_shop(shop_2)))
+
+        # list_easy_product
+        self.assertEqual([product_my], seller_2_1.list_easy_product())
+
+        #XXX доделпть тесты
+
+        # process_order_easy_with_max_allow_ball_without_customer_security
+        self.assertEqual(None, order_2.loyalty_ball)
+        seller_2_1.process_order_easy_with_max_allow_ball_without_customer_security(order_2, client, shop_2, loyalty)
+        self.assertEqual(7, order_2.loyalty_ball)
+
+        # process_order_easy_with_zero_ball_without_customer_security
+        seller_2_1.process_order_easy_with_zero_ball_without_customer_security(order_2, client, shop_2, loyalty)
+        self.assertEqual(0, order_2.loyalty_ball)
+
+        # delete_easy_products
+        self.assertEqual([], order_2.list_easy_product())
+        order_2.delete_easy_products()
+
+        # list_easy_product
+        self.assertEqual([], order_2.list_easy_product())
 
 #    def test_list_shop_for_user_with_pickup_in_city(self):
 #        """
