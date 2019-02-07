@@ -458,6 +458,13 @@ class Order(models.Model):
             price += order_element.quantity * order_element.price
         return price
 
+    def products(self):
+        selected_products = []
+        for e in OrderElement.objects.filter(order=self):
+            if e.product.id != 1:
+                selected_products.append(e.product)
+        return selected_products
+
     def __unicode__(self):
         return u"Order (%s) : %s %s %s %s" % (self.id, self.purchaser, self.customer, self.executor, self.seller)
 
