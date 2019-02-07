@@ -1,0 +1,124 @@
+./manage.py createsuperuser
+
+Затем созадем необходимые данне для старта
+./manage.py shell
+
+
+--init--default--
+
+from eshop.models import *
+shop = Shop.objects.create(title='New shop')
+
+from eseller.models import *
+seller = Seller.objects.create(shop=shop, title='New seller')
+
+from eactor.models import *
+actor = Actor.objects.create(seller=seller, phone_number='89161002030', title='New actor')
+actor.set_password('12345')
+
+from eproduct.models import *
+brand = Brand.objects.create()
+product = Product.objects.create(brand=brand)
+
+from estorage.models import *
+region = Region.objects.create()
+city = City.objects.create(region=region)
+pickup_point = PickupPoint.objects.create(city=city)
+
+from eloyalty.models import *
+srl = ServiceRepositoryLoyalty()
+title = 'New loyalty'; max_percent = 50; start_ball = 1000000; start_ball_available_day = 20000; reward_percent = 10; available_day = 90; is_need_auth = True
+srl.create_loyalty(seller, shop, title, max_percent, start_ball, start_ball_available_day, reward_percent, available_day, is_need_auth)
+
+
+--init--default for individual entrepreneur--
+
+title = 'I.P. Vova'
+phone_number = '89161002030'
+password = '12345'
+max_percent = 50
+reward_percent = 10
+
+from eshop.models import *
+shop = Shop.objects.create(title=title)
+
+from eseller.models import *
+seller = Seller.objects.create(shop=shop, title=title)
+
+from eactor.models import *
+actor = Actor.objects.create(seller=seller, phone_number=phone_number, title=title)
+actor.set_password(password)
+
+from eproduct.models import *
+brand = Brand.objects.create()
+product = Product.objects.create(brand=brand)
+
+from estorage.models import *
+region = Region.objects.create()
+city = City.objects.create(region=region)
+pickup_point = PickupPoint.objects.create(city=city)
+
+from eloyalty.models import *
+srl = ServiceRepositoryLoyalty()
+max_percent = max_percent; start_ball = 10000000; start_ball_available_day = 20000; reward_percent = reward_percent; available_day = 10000; is_need_auth = False
+srl.create_loyalty(seller, shop, title, max_percent, start_ball, start_ball_available_day, reward_percent, available_day, is_need_auth)
+
+
+--init--Dcahier ENG--
+
+#!-*-coding: utf-8 -*-
+
+from eshop.models import *
+from eseller.models import *
+from eactor.models import *
+from eproduct.models import *
+from estorage.models import *
+from eloyalty.models import *
+
+shop = Shop.objects.create(title='Sokol st. home 3')
+seller = Seller.objects.create(title='Cassir Petya', shop=shop)
+actor = Actor.objects.create(seller=seller, phone_number='Vladimir.V.Bykov@gmail.com', title=u'Vova Vladimir.V.Bykov')
+actor.set_password('12345')
+brand = Brand.objects.create()
+product = Product.objects.create(brand=brand)
+region = Region.objects.create()
+city = City.objects.create(region=region)
+pickup_point = PickupPoint.objects.create(city=city)
+srl = ServiceRepositoryLoyalty()
+srl.list_loyalty_for_owner(seller, shop)
+srl.has_loyalty_for_owner(seller, shop)
+title = "Roga i Kopita"; max_percent = 50; start_ball = 1000000; start_ball_available_day = 20000; reward_percent = 10; available_day = 90; is_need_auth = True
+srl.create_loyalty(seller, shop, title, max_percent, start_ball, start_ball_available_day, reward_percent, available_day, is_need_auth)
+loyalty = srl.list_loyalty_for_owner(seller, shop)[0]
+srl.has_loyalty_for_owner(seller, shop)
+
+
+--init--Dcahier RUS--
+
+#!-*-coding: utf-8 -*-
+
+from eshop.models import *
+from eseller.models import *
+from eactor.models import *
+from eproduct.models import *
+from estorage.models import *
+from eloyalty.models import *
+
+shop = Shop.objects.create(title=u'Сокольническая набережная д 3')
+seller = Seller.objects.create(title=u'Кассир Петя', shop=shop)
+actor = Actor.objects.create(seller=seller, phone_number='Vladimir.V.Bykov@gmail.com', title=u'Вова Vladimir.V.Bykov')
+actor.set_password('12345')
+brand = Brand.objects.create()
+product = Product.objects.create(brand=brand)
+region = Region.objects.create()
+city = City.objects.create(region=region)
+pickup_point = PickupPoint.objects.create(city=city)
+srl = ServiceRepositoryLoyalty()
+srl.list_loyalty_for_owner(seller, shop)
+srl.has_loyalty_for_owner(seller, shop)
+title = "Roga i Kopita"; max_percent = 50; start_ball = 1000000; start_ball_available_day = 20000; reward_percent = 10; available_day = 90; is_need_auth = True
+srl.create_loyalty(seller, shop, title, max_percent, start_ball, start_ball_available_day, reward_percent, available_day, is_need_auth)
+loyalty = srl.list_loyalty_for_owner(seller, shop)[0]
+srl.has_loyalty_for_owner(seller, shop)
+
+
