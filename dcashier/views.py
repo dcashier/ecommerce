@@ -152,14 +152,14 @@ class SellerDealPage(View):
         answer['seller'] = seller
         answer['executor'] = executor
         answer['actor'] = actor
-        selected_products = []
-        from eseller.models import Order
-        order = Order.objects.get(id=request.session.get('order_id'))
-        from eseller.models import OrderElement
-        for e in OrderElement.objects.filter(order=order):
-            if e.product.id != 1:
-                selected_products.append(e.product)
-        answer['selected_products'] = selected_products
+        #selected_products = []
+        #from eseller.models import Order
+        #order = Order.objects.get(id=request.session.get('order_id'))
+        #from eseller.models import OrderElement
+        #for e in OrderElement.objects.filter(order=order):
+        #    if e.product.id != 1:
+        #        selected_products.append(e.product)
+        #answer['selected_products'] = selected_products
         template = loader.get_template('dcashier/static/sellerDealPage.html')
         context = RequestContext(request, answer)
         #return HttpResponse(template.render(context))
@@ -259,7 +259,8 @@ class NewDealPage(View):
         selected_products = []
         from eseller.models import OrderElement
         for e in OrderElement.objects.filter(order=order):
-            selected_products.append(e.product)
+            if e.product.id != 1:
+                selected_products.append(e.product)
 
         answer = {}
         answer['order_sum'] = int(order.calculate_price_without_loyalty_balls())
@@ -340,7 +341,7 @@ class NewDealPage(View):
         elif request.POST['action']  == 'set_product':
             from eseller.models import OrderElement
             for e in OrderElement.objects.filter(order=order):
-                if e.id != 1:
+                if e.product.id != 1:
                     e.delete()
             from eproduct.models import Product
             for product_id in request.POST.getlist('products'):
