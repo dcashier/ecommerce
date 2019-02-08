@@ -129,6 +129,7 @@ srl.has_loyalty_for_owner(seller, shop)
 
 --DoOwner1@yandex.ru xs--
 
+size = 'xs'
 title_of_shop = 'Shop 1'
 title_of_pickup_point = 'Pickup point 1'
 title_of_seller = 'Cassir 1'
@@ -148,7 +149,7 @@ from eloyalty.models import *
 region, c = Region.objects.get_or_create()
 city, c = City.objects.get_or_create(region=region)
 pickup_point, c = PickupPoint.objects.get_or_create(city=city, title=title_of_pickup_point)
-shop = Shop.objects.create(title=title_of_shop)
+shop = Shop.objects.create(title=title_of_shop, size=size)
 seller = Seller.objects.create(title=title_of_seller, shop=shop)
 seller.pickup_points.add(pickup_point)
 actor = Actor.objects.create(seller=seller, phone_number=login, title=title_of_actor)
@@ -168,8 +169,9 @@ loyalty = srl.list_loyalty_for_owner(seller, shop)[0]
 srl.has_loyalty_for_owner(seller, shop)
 
 
---DoOwner2@yandex.ru xs--
+--DoOwner2@yandex.ru s--
 
+size = 's'
 title_of_shop = 'Shop ii'
 title_of_pickup_points = ('Pickup point ii 1', 'Pickup point ii 2', 'Pickup point ii 3')
 title_of_owner = 'Owner ii'
@@ -187,7 +189,7 @@ from eproduct.models import *
 from estorage.models import *
 from eloyalty.models import *
 
-shop = Shop.objects.create(title=title_of_shop)
+shop = Shop.objects.create(title=title_of_shop, size=size)
 
 region, c = Region.objects.get_or_create()
 city, c = City.objects.get_or_create(region=region)

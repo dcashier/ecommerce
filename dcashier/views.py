@@ -21,7 +21,7 @@ def index(request):
             shop_id = request.session.get('shop_id')
             actor = get_actor_for_request_if_login(request)
             #shops = actor.shops()
-            seller = actor.seller
+            seller = actor.get_seller()
             shops = seller.list_shop()
             for shop in shops:
                 if str(shop.id) == str(shop_id):
@@ -80,7 +80,9 @@ def get_shop_for_request_if_login(request):
     if actor:
         shop_id = request.session.get('shop_id')
         if shop_id:
-            shops = actor.shops()
+            #shops = actor.shops()
+            seller = actor.get_seller()
+            shops = seller.list_shop()
             for shop in shops:
                 if str(shop.id) == str(shop_id):
                     return shop
@@ -111,8 +113,9 @@ class Logout(View):
 class SelectShopPage(View):
     def get(self, request, *args, **kwargs):
         actor = get_actor_for_request_if_login(request)
-        shops = actor.shops()
-        print shops
+        #shops = actor.shops()
+        seller = actor.get_seller()
+        shops = seller.list_shop()
         answer = {}
         answer['shops'] = shops
         template = loader.get_template('dcashier/static/selectShopPage.html')
@@ -123,7 +126,9 @@ class SelectShopPage(View):
     def post(self, request, *args, **kwargs):
         shop_id = request.POST['shop_id']
         actor = get_actor_for_request_if_login(request)
-        shops = actor.shops()
+        #shops = actor.shops()
+        seller = actor.get_seller()
+        shops = seller.list_shop()
         for shop in shops:
             if str(shop.id) == str(shop_id):
                 request.session['shop_id'] = shop_id
@@ -135,7 +140,8 @@ class SellerDealPage(View):
         if not request.session.get('actor_id'):
             return redirect('/')
         actor = get_actor_for_request_if_login(request)
-        seller = actor.seller
+        #seller = actor.seller
+        seller = actor.get_seller()
         executor = seller.get_executor()
         if not request.session.get('shop_id'):
             return redirect('/')
@@ -143,8 +149,9 @@ class SellerDealPage(View):
         if shop.is_null():
             return redirect('/')
         answer = {}
-        answer['orders'] = seller.list_order_for_shop(executor, shop)
-        answer['seller'] = seller
+        #answer['orders'] = seller.list_order_for_shop(executor, shop)
+        answer['orders'] = seller.list_order()
+        answer['seller'] = seller.get_object()
         answer['executor'] = executor
         answer['shop'] = shop
         answer['actor'] = actor
@@ -166,31 +173,33 @@ class ShopPage(View):
 
     def post(self, request, *args, **kwargs):
         actor = get_actor_for_request_if_login(request)
-        seller = actor.seller
+        #seller = actor.seller
+        seller = actor.get_seller()
         phone_number = request.POST['customerPhoneInput']
         order_sum = request.POST['dealSummInput']
         from decimal import Decimal
         price = Decimal(order_sum)
-        seller.create_easy_order_xs(phone_number, price)
-        order = seller.get_last_order_for_client_with_phone_number_xs(phone_number)
-        client = seller.get_client_with_phone_number_xs(phone_number)
+        seller.create_order(phone_number, price)
+        order = seller.get_last_order_for_client_with_phone_number(phone_number)
+        client = seller.get_client_with_phone_number(phone_number)
         request.session['order_id'] = order.id
         request.session['client_id'] = client.id
-        request.session['purchaser_id'] = None
+        #request.session['purchaser_id'] = None
         return redirect('/newDealPage.html')
 
 class NewDealPage(View):
     def get(self, request, *args, **kwargs):
         actor = get_actor_for_request_if_login(request)
         shop = get_shop_for_request_if_login(request)
-        seller = actor.seller
+        #seller = actor.seller
+        seller = actor.get_seller()
         executor = seller.get_executor()
         if not request.session.get('order_id'):
             return redirect('/')
         if not seller.has_order(request.session.get('order_id')):
             return redirect('/')
-        order = seller.get_my_order(request.session.get('order_id'))
-        client = seller.get_my_customer(request.session.get('client_id'))
+        order = seller.get_order(request.session.get('order_id'))
+        client = seller.get_customer(request.session.get('client_id'))
 
         from eloyalty.models import ServiceRepositoryLoyalty
         srl = ServiceRepositoryLoyalty()
@@ -206,7 +215,7 @@ class NewDealPage(View):
         if max_ball_for_pay > all_ball:
             max_ball_for_pay = all_ball
 
-        special_products = seller.list_easy_product()
+        special_products = seller.list_product()
         selected_products = order.list_easy_product()
 
         answer = {}
@@ -225,31 +234,34 @@ class NewDealPage(View):
 
     def post(self, request, *args, **kwargs):
         actor = get_actor_for_request_if_login(request)
-        seller = actor.seller
+        #seller = actor.seller
+        seller = actor.get_seller()
         executor = seller.get_executor()
-        order = seller.get_my_order(request.session.get('order_id'))
-        client = seller.get_my_customer(request.session.get('client_id'))
+        order = seller.get_order(request.session.get('order_id'))
+        client = seller.get_customer(request.session.get('client_id'))
         shop = get_shop_for_request_if_login(request)
 
         if request.POST['action']  == 'set_product':
             order.delete_easy_products()
             for product_id in request.POST.getlist('products'):
-                product = seller.get_easy_product(product_id)
+                product = seller.get_product(product_id)
                 order.add(product, 1, 0, 'RUS')
             return redirect('/newDealPage.html')
         else:
             if request.POST['action']  == 'write_off':
                 #seller.process_order_with_ball_type_xs(order, client, 'MAX')
-                seller.process_order_with_ball_type_s(order, client, 'MAX', shop)
+                #seller.process_order_with_ball_type(order, client, 'MAX', shop)
+                seller.process_order_with_ball_type(order, 'MAX')
             elif request.POST['action']  == 'save_up':
                 #seller.process_order_with_ball_type_xs(order, client, 'ZERO')
-                seller.process_order_with_ball_type_s(order, client, 'ZERO', shop)
+                #seller.process_order_with_ball_type(order, client, 'ZERO', shop)
+                seller.process_order_with_ball_type(order, 'ZERO')
             #from eloyalty.models import ServiceRepositoryLoyalty
             #srl = ServiceRepositoryLoyalty()
             #loyalties = srl.list_loyalty_for_owner(seller, executor)
             #loyalty = loyalties[0]
             #reward_ball = seller.calculate_revards_balls_for_order(order, loyalty)
-            reward_ball = seller.calculate_revards_balls_for_order_xs(order)
+            reward_ball = seller.calculate_revards_balls_for_order(order)
             request.session['price_last_order'] = int(order.calculate_price())
             request.session['reward_ball_last_order'] = int(reward_ball)
             return redirect('/')
