@@ -240,7 +240,7 @@ class TestESeller(TestCase):
                 'currency': "USD",
             },
         ]
-        pickup_points = seller.pickup_points(params_basket, client_city, client_type)
+        pickup_points = seller.list_pickup_points(params_basket, client_city, client_type)
         self.assertEqual([pickup_point_1, pickup_point_2], pickup_points)
 
         #Вова решил купить Ми8 за цену 115.61, оформляет заказ.
@@ -455,14 +455,14 @@ class TestESeller(TestCase):
         #loyalty_record.save()
         #loyalty = Loyalty(loyalty_record)
 
-        seller_2_1.process_order_without_customer_security(order_client, purchaser, client, shop_2, loyalty, ball)
+        seller_2_1.process_order_without_customer_security(order_client, purchaser, client, shop_2, loyalty, ball, pickup_point)
         self.assertEqual(Decimal('4.00'), order_client.calculate_price())
 
         #TODO второй раз нельзя процессить и здесь додлжно развалиться
-        seller_2_1.process_order_without_customer_security(order_client, purchaser, client, shop_2, loyalty, ball)
+        seller_2_1.process_order_without_customer_security(order_client, purchaser, client, shop_2, loyalty, ball, pickup_point)
         self.assertEqual(Decimal('4.00'), order_client.calculate_price())
 
-        seller_2_1.process_order_with_max_allow_ball_without_customer_security(order_client, purchaser, client, shop_2, loyalty)
+        seller_2_1.process_order_with_max_allow_ball_without_customer_security(order_client, purchaser, client, shop_2, loyalty, pickup_point)
         self.assertEqual(Decimal('3.00'), order_client.calculate_price())
 
         basket = seller_2_1.get_basket_for_client_in_shop(client, shop_2)
@@ -471,7 +471,7 @@ class TestESeller(TestCase):
         # create_easy_order_by_phone_number_of_customer
         price = Decimal('15.00')
         self.assertEqual(1, seller_2_1.count_order_customer(client))
-	seller_2_1.create_easy_order_by_phone_number_of_customer(client_phone_number, price)
+	seller_2_1.create_easy_order_by_phone_number_of_customer(client_phone_number, price, pickup_point)
         self.assertEqual(2, seller_2_1.count_order_customer(client))
         self.assertEqual(Decimal('15.00'), seller_2_1.get_last_order_client(client).calculate_price_without_loyalty_balls())
 
@@ -486,7 +486,7 @@ class TestESeller(TestCase):
         self.assertEqual(product_my, seller_2_1.get_easy_product(product_my.id))
 
         # list_order_for_shop
-        self.assertEqual([order_client, order_2], list(seller_2_1.list_order_for_shop(shop_2)))
+        self.assertEqual([order_client, order_2], list(seller_2_1.list_order_for_shop(shop_2, pickup_point)))
 
         # list_easy_product
         self.assertEqual([product_my], seller_2_1.list_easy_product())
@@ -495,11 +495,11 @@ class TestESeller(TestCase):
 
         # process_order_easy_with_max_allow_ball_without_customer_security
         self.assertEqual(None, order_2.loyalty_ball)
-        seller_2_1.process_order_easy_with_max_allow_ball_without_customer_security(order_2, client, shop_2, loyalty)
+        seller_2_1.process_order_easy_with_max_allow_ball_without_customer_security(order_2, client, shop_2, loyalty, pickup_point)
         self.assertEqual(7, order_2.loyalty_ball)
 
         # process_order_easy_with_zero_ball_without_customer_security
-        seller_2_1.process_order_easy_with_zero_ball_without_customer_security(order_2, client, shop_2, loyalty)
+        seller_2_1.process_order_easy_with_zero_ball_without_customer_security(order_2, client, shop_2, loyalty, pickup_point)
         self.assertEqual(0, order_2.loyalty_ball)
 
         # delete_easy_products

@@ -63,6 +63,9 @@ class PickupPoint(models.Model):
     def get_city(self):
         return self.city
 
+    def is_null(self):
+        return False
+
 class FilterPickupPointIdCity(models.Model):
     pickup_points = models.ManyToManyField(PickupPoint)
     cities = models.ManyToManyField(City)

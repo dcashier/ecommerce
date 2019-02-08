@@ -224,7 +224,7 @@ class TestEActor(TestCase):
 #                'currency': "USD",
 #            },
 #        ]
-#        pickup_points = seller.pickup_points(params_basket, client_city, client_type)
+#        pickup_points = seller.list_pickup_points(params_basket, client_city, client_type)
 #        self.assertEqual([pickup_point_1, pickup_point_2], pickup_points)
 #
 #        #Вова решил купить Ми8 за цену 115.61, оформляет заказ.
