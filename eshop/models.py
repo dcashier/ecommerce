@@ -11,7 +11,7 @@ class Shop(models.Model):
         Но если товра продается чераз интернет магазин, как и кто прибивает чек? И вообще пробивают ли на точке получения?
     """
     # поставщик / получатель
-    title = models.CharField(verbose_name=u'Название Ип / ооо / оао', max_length=254, null=True, blank=True)
+    title = models.CharField(verbose_name=u'Название Ип / ооо / оао / компании', max_length=254, null=True, blank=True)
     pickup_points = models.ManyToManyField(PickupPoint, blank=True)
     storages = models.ManyToManyField(Storage, blank=True)
     is_person = models.BooleanField(verbose_name=u'Персона или Юр. лицо', default=False)
@@ -20,6 +20,7 @@ class Shop(models.Model):
     phone_m_type = models.CharField(verbose_name=u'Тип номера мобильного', max_length=128, null=True, blank=True)
     fio = models.CharField(verbose_name=u'Ф.И.О.', max_length=128, null=True, blank=True)
     clients = models.ManyToManyField('self', symmetrical=False, blank=True)
+    size = models.CharField(verbose_name=u'Размер компании, от него зависит размер, поведение дейтсвующих лиц, их права ...', max_length=10, null=True, blank=True)
 
     def get_phone_number(self):
         return self.phone_number
