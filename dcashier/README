@@ -130,6 +130,7 @@ srl.has_loyalty_for_owner(seller, shop)
 --DoOwner1@yandex.ru xs--
 
 title_of_shop = 'Shop 1'
+title_of_pickup_point = 'Pickup point 1'
 title_of_seller = 'Cassir 1'
 login = 'DoOwner1@yandex.ru'
 title_of_actor = 'Actor 1'
@@ -144,8 +145,12 @@ from eproduct.models import *
 from estorage.models import *
 from eloyalty.models import *
 
+region, c = Region.objects.get_or_create()
+city, c = City.objects.get_or_create(region=region)
+pickup_point, c = PickupPoint.objects.get_or_create(city=city, title=title_of_pickup_point)
 shop = Shop.objects.create(title=title_of_shop)
 seller = Seller.objects.create(title=title_of_seller, shop=shop)
+seller.pickup_points.add(pickup_point)
 actor = Actor.objects.create(seller=seller, phone_number=login, title=title_of_actor)
 actor.set_password(password_of_actor)
 brand, c = Brand.objects.get_or_create()
@@ -155,9 +160,6 @@ product, c = Product.objects.get_or_create(brand=brand, title='Balck Tea')
 product, c = Product.objects.get_or_create(brand=brand, title='Coffee')
 product, c = Product.objects.get_or_create(brand=brand, title='Dishes')
 product, c = Product.objects.get_or_create(brand=brand, title='Puer')
-region, c = Region.objects.get_or_create()
-city, c = City.objects.get_or_create(region=region)
-pickup_point, c = PickupPoint.objects.get_or_create(city=city)
 srl = ServiceRepositoryLoyalty()
 srl.list_loyalty_for_owner(seller, shop)
 srl.has_loyalty_for_owner(seller, shop)
