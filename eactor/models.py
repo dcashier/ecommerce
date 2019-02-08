@@ -66,7 +66,8 @@ class Actor(models.Model):
         Список магазинов которыми может управлять продавец ассоцированный с данной учетной записью
         """
         if self.seller:
-            return self.seller.shops()
+            #return self.seller.shops()
+            return self.seller.list_shop()
         return []
 
     def __unicode__(self):
