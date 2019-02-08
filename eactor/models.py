@@ -27,6 +27,13 @@ class Actor(models.Model):
         #from eshop.models import *
         #return Shop(phone_number='+71002003040')
 
+    def get_seller(self):
+        if self.seller.get_shop_size() == 'xs':
+            return SellerXS(self.seller)
+        elif self.seller.get_shop_size() == 's':
+            return SellerS(self.seller)
+        assert False
+
     def has_shop_client(self, shop, client):
         if self.seller.has_shop_client(shop, client):
             return True
@@ -65,6 +72,7 @@ class Actor(models.Model):
         """
         Список магазинов которыми может управлять продавец ассоцированный с данной учетной записью
         """
+        assert False
         if self.seller:
             #return self.seller.shops()
             return self.seller.list_shop()
