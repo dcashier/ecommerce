@@ -471,7 +471,13 @@ class TestESeller(TestCase):
         self.assertEqual(Decimal('4.00'), order_client.calculate_price())
 
         #seller_2_1.process_order_with_max_allow_ball_without_customer_security(order_client, purchaser, client, shop_2, loyalty, pickup_point)
-        seller_2_1.process_order_with_ball_type_xs(order_client, client, 'MAX')
+        #self.assertEqual(Decimal('3.00'), order_client.calculate_price())
+
+        ball_for_spend = 2
+        seller_2_1.process_order_without_customer_security(order_client, purchaser, client, shop_2, loyalty, ball_for_spend, pickup_point)
+        self.assertEqual(Decimal('3.00'), order_client.calculate_price())
+
+        SellerXS(seller_2_1).process_order_with_ball_type(order_client, 'MAX')
         self.assertEqual(Decimal('3.00'), order_client.calculate_price())
 
         basket = seller_2_1.get_basket_for_client_in_shop(client, shop_2)
@@ -480,37 +486,56 @@ class TestESeller(TestCase):
         # create_easy_order_by_phone_number_of_customer
         price = Decimal('15.00')
         self.assertEqual(1, seller_2_1.count_order_customer(client))
-	seller_2_1.create_easy_order_by_phone_number_of_customer(client_phone_number, price, pickup_point)
+	#seller_2_1.create_easy_order_by_phone_number_of_customer(client_phone_number, price, pickup_point)
+	SellerXS(seller_2_1).create_order(client_phone_number, price)
         self.assertEqual(2, seller_2_1.count_order_customer(client))
         self.assertEqual(Decimal('15.00'), seller_2_1.get_last_order_client(client).calculate_price_without_loyalty_balls())
 
         # get_my_order
-        order_2 = seller_2_1.get_last_order_client(client)
-        self.assertEqual(order_2, seller_2_1.get_my_order(order_2.id))
+        #order_2 = seller_2_1.get_last_order_client(client)
+        order_2 = SellerXS(seller_2_1).get_last_order_for_client(client)
+        #self.assertEqual(order_2, seller_2_1.get_my_order(order_2.id))
+        self.assertEqual(order_2, SellerXS(seller_2_1).get_order(order_2.id))
 
         # get_my_customer
-        self.assertEqual(client, seller_2_1.get_my_customer(client.id))
+        #self.assertEqual(client, seller_2_1.get_my_customer(client.id))
+        self.assertEqual(client, SellerXS(seller_2_1).get_customer(client.id))
 
         # get_easy_product
-        self.assertEqual(product_my, seller_2_1.get_easy_product(product_my.id))
+        #self.assertEqual(product_my, seller_2_1.get_easy_product(product_my.id))
+        self.assertEqual(product_my, SellerXS(seller_2_1).get_product(product_my.id))
 
         # list_order_for_shop
         self.assertEqual([order_client, order_2], list(seller_2_1.list_order_for_shop(shop_2, pickup_point)))
 
         # list_easy_product
-        self.assertEqual([product_my], seller_2_1.list_easy_product())
+        #self.assertEqual([product_my], seller_2_1.list_easy_product())
+        self.assertEqual([product_my], SellerXS(seller_2_1).list_product())
 
         #XXX доделпть тесты
 
         # process_order_easy_with_max_allow_ball_without_customer_security
         self.assertEqual(None, order_2.loyalty_ball)
+
         #seller_2_1.process_order_easy_with_max_allow_ball_without_customer_security(order_2, client, shop_2, loyalty, pickup_point)
-        seller_2_1.process_order_with_ball_type_xs(order_2, client, 'MAX')
+        #SellerXS(seller_2_1).process_order_with_ball_type(order_2, 'MAX')
+        #self.assertEqual(7, order_2.loyalty_ball)
+        #seller_2_1.process_order_without_customer_security(order_2, purchaser, client, shop_2, loyalty, ball, pickup_point)
+        #self.assertEqual(7, order_2.loyalty_ball)
+
+        SellerXS(seller_2_1).process_order_with_ball_type(order_2, 'MAX')
         self.assertEqual(7, order_2.loyalty_ball)
 
         # process_order_easy_with_zero_ball_without_customer_security
         #seller_2_1.process_order_easy_with_zero_ball_without_customer_security(order_2, client, shop_2, loyalty, pickup_point)
-        seller_2_1.process_order_with_ball_type_xs(order_2, client, 'ZERO')
+        SellerXS(seller_2_1).process_order_with_ball_type(order_2, 'ZERO')
+        self.assertEqual(0, order_2.loyalty_ball)
+
+        #seller_2_1.process_order_easy_with_zero_ball_without_customer_security(order_2, client, shop_2, loyalty, pickup_point)
+        #self.assertEqual(0, order_2.loyalty_ball)
+
+        #seller_2_1.process_order_with_ball_type_xs(order_2, client, 'ZERO')
+        SellerXS(seller_2_1).process_order_with_ball_type(order_2, 'ZERO')
         self.assertEqual(0, order_2.loyalty_ball)
 
         # delete_easy_products
