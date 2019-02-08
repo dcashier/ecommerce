@@ -11,6 +11,9 @@ from epurchase.models import *
 #from esale.models import *
 from eshop.models import *
 
+class Owner(object):
+    def add_seller_for_shop():
+        pass
 
 class Purchaser(models.Model):
     title = models.CharField(max_length=100)
@@ -33,6 +36,8 @@ class Seller(models.Model):
     """
     title = models.CharField(max_length=100)
     shop = models.ForeignKey(Shop)
+    pickup_points = models.ManyToManyField(PickupPoint, blank=True)
+    #shop = models.ManyToManyField(Shop, blank=True)
     price_policies = models.ManyToManyField(PricePolicy, blank=True) # политики которые может использовать данный продавец ему назанчаются свыше
 
     def __accumulate_customer_ball_for_order(self, order, purchaser, customer, executor, loyalty):
@@ -71,8 +76,8 @@ class Seller(models.Model):
         purchaser.save()
 
     #def create_easy_order_by_phone_number_of_customer(self, phone_number, executor, price):
-    def create_easy_order_by_phone_number_of_customer(self, phone_number, price):
-        executor = self.shop
+    def create_easy_order_by_phone_number_of_customer(self, phone_number, price, pickup_point):
+        executor = self.get_executor()
         if not self.has_shop_client_with_phone_number(executor, phone_number):
             self.create_client_shop_with_phone_number(executor, phone_number)
         customer = self.get_client_shop_with_phone_number(executor, phone_number)
@@ -85,7 +90,7 @@ class Seller(models.Model):
         self.create_basket_for_client_in_shop(customer, executor, purchaser)
         basket = self.get_basket_for_client_in_shop(customer, executor)
         self.add_product_in_basket(basket, default_product, quantity, price, currency)
-        pickup_point = PickupPoint.objects.get(id=1)
+        #pickup_point = PickupPoint.objects.get(id=1)
         self.create_order_from_busket_and_pickup_point(customer, executor, purchaser, basket, pickup_point)
         basket.delete()
 
@@ -184,6 +189,9 @@ class Seller(models.Model):
             return client
         raise ValidationError(u"У магазина ент клиента с таким телефоном.")
 
+    def get_executor(self):
+        return self.shop
+
     def get_last_order_client(self, client):
         if Order.objects.filter(customer=client).count() > 1:
             print 'Error : Too many orderi get_last_order_client()', Order.objects.filter(customer=client).count()
@@ -207,6 +215,9 @@ class Seller(models.Model):
     def get_easy_product(self, product_id):
         #TODO Нужна проверка прав доступа к заказу.
         return Product.objects.get(id=product_id)
+
+    def has_order(self, order_id):
+        return True if Order.objects.filter(id=order_id, seller=self).count() > 0 else False
 
     def has_shop_client_with_phone_number(self, shop, phone_number):
         if not self.is_work_in_shop(shop):
@@ -281,8 +292,8 @@ class Seller(models.Model):
                 allow_products.append(product)
         return allow_products
 
-    def list_order_for_shop(self, executor):
-        return Order.objects.filter(executor=executor, seller=self)
+    def list_order_for_shop(self, executor, pickup_point):
+        return Order.objects.filter(executor=executor, pickup_point=pickup_point, seller=self)
 
     def list_product_in_stock(self, category):
         storages = self.shop.storages.all()
@@ -312,7 +323,7 @@ class Seller(models.Model):
             ball_for_spend = max_ball_for_spend
         return ball_for_spend
 
-    def pickup_points(self, params_basket, client_city, client_type):
+    def list_pickup_points(self, params_basket, client_city, client_type):
         """
         Попробуем доставить с каждого возможного склада на каждую возможную точку выдачи,
             столько сколько есть в наличии на складе.
@@ -361,20 +372,20 @@ class Seller(models.Model):
             prices.add(price)
         return sorted(list(prices))
 
-    def process_order_easy_with_max_allow_ball_without_customer_security(self, order, customer, executor, loyalty):
+    def process_order_easy_with_max_allow_ball_without_customer_security(self, order, customer, executor, loyalty, pickup_point):
         purchaser = Purchaser.objects.get(shop=customer)
-        self.process_order_with_max_allow_ball_without_customer_security(order, purchaser, customer, executor, loyalty)
+        self.process_order_with_max_allow_ball_without_customer_security(order, purchaser, customer, executor, loyalty, pickup_point)
 
-    def process_order_easy_with_zero_ball_without_customer_security(self, order, customer, executor, loyalty):
+    def process_order_easy_with_zero_ball_without_customer_security(self, order, customer, executor, loyalty, pickup_point):
         ball = 0
         purchaser = Purchaser.objects.get(shop=customer)
-        self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball)
+        self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball, pickup_point)
 
-    def process_order_with_max_allow_ball_without_customer_security(self, order, purchaser, customer, executor, loyalty):
+    def process_order_with_max_allow_ball_without_customer_security(self, order, purchaser, customer, executor, loyalty, pickup_point):
         ball_for_spend = self.__max_allow_ball_for_spend_for_order(order, purchaser, customer, executor, loyalty)
-        self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend)
+        self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point)
 
-    def process_order_without_customer_security(self, order, purchaser, customer, executor, loyalty, ball_for_spend):
+    def process_order_without_customer_security(self, order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point):
         # actor - аккаунт для purchaser
         # purchaser - закупщик у какогото ЮР Лица. (customer, executor, ...)
         # shop - executor
@@ -418,7 +429,8 @@ class Seller(models.Model):
         reserve.save()
 
     def shops(self):
-        return [self.shop]
+        #return [self.shop]
+        return self.pickup_points.all()
 
     def __spend_customer_ball_for_order(self, order, purchaser, customer, executor, loyalty, ball_for_spend):
         datetime_for_check = None
