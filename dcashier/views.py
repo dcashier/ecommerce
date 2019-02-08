@@ -58,7 +58,8 @@ class ActorNone(object):
         return None
 
 class ShopNone(object):
-    pass
+    def is_null(self):
+        return True
 
 class AuthPage(View):
     def get(self, request, *args, **kwargs):
@@ -144,14 +145,21 @@ class SellerDealPage(View):
             return redirect('/')
         actor = get_actor_for_request_if_login(request)
         seller = actor.seller
-        executor = get_shop_for_request_if_login(request)
+        executor = seller.get_executor()
+
+        if not request.session.get('shop_id'):
+            return redirect('/')
+        shop = get_shop_for_request_if_login(request)
+        if shop.is_null():
+            return redirect('/')
         answer = {}
         #answer['orders'] = seller.list_create_orders()
         #from eseller.models import Order
         #answer['orders'] = Order.objects.filter(executor=executor, seller=seller)
-        answer['orders'] = seller.list_order_for_shop(executor)
+        answer['orders'] = seller.list_order_for_shop(executor, shop)
         answer['seller'] = seller
         answer['executor'] = executor
+        answer['shop'] = shop
         answer['actor'] = actor
         #selected_products = []
         #from eseller.models import Order
@@ -218,12 +226,13 @@ class ShopPage(View):
         from decimal import Decimal
         price = Decimal(order_sum)
 
-        if not seller.has_shop_client_with_phone_number(shop, phone_number):
-            seller.create_client_shop_with_phone_number(shop, phone_number)
-        client = seller.get_client_shop_with_phone_number(shop, phone_number)
+        executor = seller.get_executor()
+        if not seller.has_shop_client_with_phone_number(executor, phone_number):
+            seller.create_client_shop_with_phone_number(executor, phone_number)
+        client = seller.get_client_shop_with_phone_number(executor, phone_number)
 
         #seller.create_easy_order_by_phone_number_of_customer(phone_number, shop, price)
-        seller.create_easy_order_by_phone_number_of_customer(phone_number, price)
+        seller.create_easy_order_by_phone_number_of_customer(phone_number, price, shop)
 
         order_client = seller.get_last_order_client(client)
         request.session['order_id'] = order_client.id
@@ -242,7 +251,10 @@ class NewDealPage(View):
         actor = get_actor_for_request_if_login(request)
         shop = get_shop_for_request_if_login(request)
         seller = actor.seller
+        executor = seller.get_executor()
         if not request.session.get('order_id'):
+            return redirect('/')
+        if not seller.has_order(request.session.get('order_id')):
             return redirect('/')
         #from eseller.models import Order
         #order = Order.objects.get(id=request.session.get('order_id'))
@@ -252,11 +264,11 @@ class NewDealPage(View):
         client = seller.get_my_customer(request.session.get('client_id'))
         from eloyalty.models import ServiceRepositoryLoyalty
         srl = ServiceRepositoryLoyalty()
-        loyalties = srl.list_loyalty_for_owner(seller, shop)
+        loyalties = srl.list_loyalty_for_owner(seller, executor)
         loyalty = loyalties[0]
 
         if not loyalty.is_registration(seller, client):
-            loyalty.register_in_loyalty_hello_0(seller, client, shop)
+            loyalty.register_in_loyalty_hello_0(seller, client, executor)
 
         datetime_for_check = None
         all_ball = loyalty.get_balance(actor, client, datetime_for_check)
@@ -340,6 +352,7 @@ class NewDealPage(View):
         # Fix start
         actor = get_actor_for_request_if_login(request)
         seller = actor.seller
+        executor = seller.get_executor()
         #from eseller.models import Order
         #order = Order.objects.get(id=request.session.get('order_id'))
         order = seller.get_my_order(request.session.get('order_id'))
@@ -351,15 +364,15 @@ class NewDealPage(View):
         shop = get_shop_for_request_if_login(request)
         from eloyalty.models import ServiceRepositoryLoyalty
         srl = ServiceRepositoryLoyalty()
-        loyalties = srl.list_loyalty_for_owner(seller, shop)
+        loyalties = srl.list_loyalty_for_owner(seller, executor)
         loyalty = loyalties[0]
         if request.POST['action']  == 'write_off':
             #seller.process_order_with_max_allow_ball_without_customer_security(order, purchaser, client, shop, loyalty)
-            seller.process_order_easy_with_max_allow_ball_without_customer_security(order, client, shop, loyalty)
+            seller.process_order_easy_with_max_allow_ball_without_customer_security(order, client, executor, loyalty, shop)
         elif request.POST['action']  == 'save_up':
             #ball = 0
             #seller.process_order_without_customer_security(order, purchaser, client, shop, loyalty, ball)
-            seller.process_order_easy_with_zero_ball_without_customer_security(order, client, shop, loyalty)
+            seller.process_order_easy_with_zero_ball_without_customer_security(order, client, executor, loyalty, shop)
         elif request.POST['action']  == 'set_product':
             #from eseller.models import OrderElement
             #for e in OrderElement.objects.filter(order=order):
