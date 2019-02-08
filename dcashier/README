@@ -127,3 +127,42 @@ loyalty = srl.list_loyalty_for_owner(seller, shop)[0]
 srl.has_loyalty_for_owner(seller, shop)
 
 
+--DoOwner1@yandex.ru xs--
+
+title_of_shop = 'Shop 1'
+title_of_seller = 'Cassir 1'
+login = 'DoOwner1@yandex.ru'
+title_of_actor = 'Actor 1'
+password_of_actor = '12345'
+#list_product = []
+title_of_loyalty = "Loyalty 1"; max_percent = 40; start_ball = 1000000; start_ball_available_day = 20000; reward_percent = 10; available_day = 90; is_need_auth = False
+
+from eshop.models import *
+from eseller.models import *
+from eactor.models import *
+from eproduct.models import *
+from estorage.models import *
+from eloyalty.models import *
+
+shop = Shop.objects.create(title=title_of_shop)
+seller = Seller.objects.create(title=title_of_seller, shop=shop)
+actor = Actor.objects.create(seller=seller, phone_number=login, title=title_of_actor)
+actor.set_password(password_of_actor)
+brand, c = Brand.objects.get_or_create()
+product, c = Product.objects.get_or_create(brand=brand, title='For take payment')
+product, c = Product.objects.get_or_create(brand=brand, title='Grean Tea')
+product, c = Product.objects.get_or_create(brand=brand, title='Balck Tea')
+product, c = Product.objects.get_or_create(brand=brand, title='Coffee')
+product, c = Product.objects.get_or_create(brand=brand, title='Dishes')
+product, c = Product.objects.get_or_create(brand=brand, title='Puer')
+region, c = Region.objects.get_or_create()
+city, c = City.objects.get_or_create(region=region)
+pickup_point, c = PickupPoint.objects.get_or_create(city=city)
+srl = ServiceRepositoryLoyalty()
+srl.list_loyalty_for_owner(seller, shop)
+srl.has_loyalty_for_owner(seller, shop)
+srl.create_loyalty(seller, shop, title_of_loyalty, max_percent, start_ball, start_ball_available_day, reward_percent, available_day, is_need_auth)
+loyalty = srl.list_loyalty_for_owner(seller, shop)[0]
+srl.has_loyalty_for_owner(seller, shop)
+
+
