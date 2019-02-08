@@ -19,7 +19,6 @@ class Actor(models.Model):
     seller = models.ForeignKey(Seller, null=True, blank=True)
     purchaser = models.ForeignKey(Purchaser, null=True, blank=True)
 
-
     def create_client_shop_with_phone_number(self, shop, phone_number):
         self.seller.create_client_shop_with_phone_number(shop, phone_number)
 
@@ -67,7 +66,8 @@ class Actor(models.Model):
         Список магазинов которыми может управлять продавец ассоцированный с данной учетной записью
         """
         if self.seller:
-            return self.seller.shops()
+            #return self.seller.shops()
+            return self.seller.list_shop()
         return []
 
     def __unicode__(self):

@@ -367,8 +367,16 @@ class TestESeller(TestCase):
         shop_2 = Shop(title=u"shop two")
         shop_2.save()
 
+        region_center = Region(title=u"Центральный")
+        region_center.save()
+        city_moscow = City(title=u"Moscow", region=region_center)
+        city_moscow.save()
+        pickup_point = PickupPoint(title=u"pickup 1", city=city_moscow)
+        pickup_point.save()
+
         seller_2_1 = Seller(shop=shop_2)
         seller_2_1.save()
+        seller_2_1.pickup_points.add(pickup_point)
 
         self.assertTrue(seller_2_1.is_work_in_shop(shop_2))
         self.assertFalse(seller_1.is_work_in_shop(shop_2))
@@ -426,12 +434,12 @@ class TestESeller(TestCase):
 
         seller_2_1.add_product_in_basket(basket_client, product_my, quantity, price, currency)
 
-        region_center = Region(title=u"Центральный")
-        region_center.save()
-        city_moscow = City(title=u"Moscow", region=region_center)
-        city_moscow.save()
-        pickup_point = PickupPoint(title=u"pickup 1", city=city_moscow)
-        pickup_point.save()
+        #region_center = Region(title=u"Центральный")
+        #region_center.save()
+        #city_moscow = City(title=u"Moscow", region=region_center)
+        #city_moscow.save()
+        #pickup_point = PickupPoint(title=u"pickup 1", city=city_moscow)
+        #pickup_point.save()
 
         seller_2_1.create_order_from_busket_and_pickup_point(client, shop_2, purchaser, basket_client, pickup_point)
         order_client = seller_2_1.get_last_order_client(client)
@@ -462,7 +470,8 @@ class TestESeller(TestCase):
         seller_2_1.process_order_without_customer_security(order_client, purchaser, client, shop_2, loyalty, ball, pickup_point)
         self.assertEqual(Decimal('4.00'), order_client.calculate_price())
 
-        seller_2_1.process_order_with_max_allow_ball_without_customer_security(order_client, purchaser, client, shop_2, loyalty, pickup_point)
+        #seller_2_1.process_order_with_max_allow_ball_without_customer_security(order_client, purchaser, client, shop_2, loyalty, pickup_point)
+        seller_2_1.process_order_with_ball_type_xs(order_client, client, 'MAX')
         self.assertEqual(Decimal('3.00'), order_client.calculate_price())
 
         basket = seller_2_1.get_basket_for_client_in_shop(client, shop_2)
@@ -495,11 +504,13 @@ class TestESeller(TestCase):
 
         # process_order_easy_with_max_allow_ball_without_customer_security
         self.assertEqual(None, order_2.loyalty_ball)
-        seller_2_1.process_order_easy_with_max_allow_ball_without_customer_security(order_2, client, shop_2, loyalty, pickup_point)
+        #seller_2_1.process_order_easy_with_max_allow_ball_without_customer_security(order_2, client, shop_2, loyalty, pickup_point)
+        seller_2_1.process_order_with_ball_type_xs(order_2, client, 'MAX')
         self.assertEqual(7, order_2.loyalty_ball)
 
         # process_order_easy_with_zero_ball_without_customer_security
-        seller_2_1.process_order_easy_with_zero_ball_without_customer_security(order_2, client, shop_2, loyalty, pickup_point)
+        #seller_2_1.process_order_easy_with_zero_ball_without_customer_security(order_2, client, shop_2, loyalty, pickup_point)
+        seller_2_1.process_order_with_ball_type_xs(order_2, client, 'ZERO')
         self.assertEqual(0, order_2.loyalty_ball)
 
         # delete_easy_products

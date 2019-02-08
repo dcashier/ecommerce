@@ -15,6 +15,13 @@ class Owner(object):
     def add_seller_for_shop():
         pass
 
+class CassirXS(object):
+    def list_shop(self):
+        return []
+
+class SellerXS(object):
+    pass
+
 class Purchaser(models.Model):
     title = models.CharField(max_length=100)
     shop = models.ForeignKey(Shop)
@@ -52,6 +59,10 @@ class Seller(models.Model):
     def calculate_revards_balls_for_order(self, order, loyalty):
         return loyalty.calculate_reward(None, order.calculate_price())['ball']
 
+    def calculate_revards_balls_for_order_xs(self, order):
+        loyalty = self.get_loyalty_xs()
+        return loyalty.calculate_reward(None, order.calculate_price())['ball']
+
     def __change_status_for_order(self, order, status):
         pass
 
@@ -75,7 +86,10 @@ class Seller(models.Model):
         purchaser = Purchaser(title=u"Default purchaser when Seller create Client.", shop=client, phone_number=phone_number)
         purchaser.save()
 
-    #def create_easy_order_by_phone_number_of_customer(self, phone_number, executor, price):
+    def create_easy_order_xs(self, phone_number, price):
+        pickup_point = self.get_pickup_point_xs()
+        self.create_easy_order_by_phone_number_of_customer(phone_number, price, pickup_point)
+
     def create_easy_order_by_phone_number_of_customer(self, phone_number, price, pickup_point):
         executor = self.get_executor()
         if not self.has_shop_client_with_phone_number(executor, phone_number):
@@ -189,6 +203,9 @@ class Seller(models.Model):
             return client
         raise ValidationError(u"У магазина ент клиента с таким телефоном.")
 
+    def get_client_with_phone_number_xs(self, phone_number):
+        return self.get_client_shop_with_phone_number(self.get_executor(), phone_number)
+
     def get_executor(self):
         return self.shop
 
@@ -199,6 +216,18 @@ class Seller(models.Model):
             raise ValidationError(u"У клиента нет ни одного закзаза.")
         return Order.objects.filter(customer=client).order_by('-id')[0]
 
+    def get_last_order_for_client_with_phone_number_xs(self, phone_number):
+        client = self.get_client_shop_with_phone_number(self.get_executor(), phone_number)
+        return self.get_last_order_client(client)
+
+    def get_loyalty_xs(self):
+        from eloyalty.models import ServiceRepositoryLoyalty
+        srl = ServiceRepositoryLoyalty()
+        loyalties = srl.list_loyalty_for_owner(self, self.get_executor())
+        if len(loyalties) > 1:
+            raise ValidationError(u"Error : Do not use size XS.")
+        return loyalties[0]
+
     def get_my_order(self, order_id):
         #TODO проверка прав доступа к заказу.
         return Order.objects.get(id=order_id, seller=self)
@@ -206,6 +235,11 @@ class Seller(models.Model):
     def get_my_customer(self, customer_id):
         #TODO Нужна проверка прав доступа к заказу.
         return Shop.objects.get(id=customer_id)
+
+    def get_pickup_point_xs(self):
+        if self.pickup_points.all().count() > 1:
+            raise ValidationError(u"Error : Do not use size XS.")
+        return self.pickup_points.all()[0]
 
     def has_basket_for_client_in_shop(self, client, shop):
         for basket in Basket.objects.filter(customer=client, executor=shop):
@@ -372,18 +406,48 @@ class Seller(models.Model):
             prices.add(price)
         return sorted(list(prices))
 
-    def process_order_easy_with_max_allow_ball_without_customer_security(self, order, customer, executor, loyalty, pickup_point):
-        purchaser = Purchaser.objects.get(shop=customer)
-        self.process_order_with_max_allow_ball_without_customer_security(order, purchaser, customer, executor, loyalty, pickup_point)
+    def process_order_with_ball_type_xs(self, order, customer, ball_type):
+        pickup_point = self.get_pickup_point_xs()
+        self.process_order_with_ball_type_s(order, customer, ball_type, pickup_point)
 
-    def process_order_easy_with_zero_ball_without_customer_security(self, order, customer, executor, loyalty, pickup_point):
-        ball = 0
+    def process_order_with_ball_type_s(self, order, customer, ball_type, pickup_point):
         purchaser = Purchaser.objects.get(shop=customer)
-        self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball, pickup_point)
-
-    def process_order_with_max_allow_ball_without_customer_security(self, order, purchaser, customer, executor, loyalty, pickup_point):
-        ball_for_spend = self.__max_allow_ball_for_spend_for_order(order, purchaser, customer, executor, loyalty)
+        executor = self.get_executor()
+        loyalty = self.get_loyalty_xs()
+        if ball_type == 'MAX':
+            ball_for_spend = self.__max_allow_ball_for_spend_for_order(order, purchaser, customer, executor, loyalty)
+        elif ball_type == 'ZERO':
+            ball_for_spend = 0
         self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point)
+
+    #def process_order_max_ball_xs(self, order, customer):
+    #    purchaser = Purchaser.objects.get(shop=customer)
+    #    executor = self.get_executor()
+    #    loyalty = self.get_loyalty()
+    #    pickup_point = self.get_pickup_point()
+    #    ball_for_spend = self.__max_allow_ball_for_spend_for_order(order, purchaser, customer, executor, loyalty)
+    #    self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point)
+
+    #def process_order_zero_ball_xs(self, order, customer):
+    #    purchaser = Purchaser.objects.get(shop=customer)
+    #    executor = self.get_executor()
+    #    loyalty = self.get_loyalty()
+    #    pickup_point = self.get_pickup_point()
+    #    ball_for_spend = 0
+    #    self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point)
+
+    #def process_order_easy_with_max_allow_ball_without_customer_security(self, order, customer, executor, loyalty, pickup_point):
+    #    purchaser = Purchaser.objects.get(shop=customer)
+    #    self.process_order_with_max_allow_ball_without_customer_security(order, purchaser, customer, executor, loyalty, pickup_point)
+
+    #def process_order_easy_with_zero_ball_without_customer_security(self, order, customer, executor, loyalty, pickup_point):
+    #    ball = 0
+    #    purchaser = Purchaser.objects.get(shop=customer)
+    #    self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball, pickup_point)
+
+    #def process_order_with_max_allow_ball_without_customer_security(self, order, purchaser, customer, executor, loyalty, pickup_point):
+    #    ball_for_spend = self.__max_allow_ball_for_spend_for_order(order, purchaser, customer, executor, loyalty)
+    #    self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point)
 
     def process_order_without_customer_security(self, order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point):
         # actor - аккаунт для purchaser
@@ -428,7 +492,7 @@ class Seller(models.Model):
         reserve = Reserve(product=product, quantity=quantity, storage=storage, part_number=part_number)
         reserve.save()
 
-    def shops(self):
+    def list_shop(self):
         #return [self.shop]
         return self.pickup_points.all()
 
