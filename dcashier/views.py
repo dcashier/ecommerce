@@ -46,10 +46,16 @@ def index(request):
 class ActorNone(object):
     seller = None
 
-    def shops(self):
-        return []
+    def get_seller(self):
+        return None
+
+    def is_null(self):
+        return True
 
     def list_shop(self):
+        return []
+
+    def shops(self):
         return []
 
     def seller(self):
@@ -191,6 +197,8 @@ class NewDealPage(View):
     def get(self, request, *args, **kwargs):
         actor = get_actor_for_request_if_login(request)
         shop = get_shop_for_request_if_login(request)
+        if shop.is_null():
+            return redirect('/')
         #seller = actor.seller
         seller = actor.get_seller()
         executor = seller.get_executor()
@@ -240,6 +248,9 @@ class NewDealPage(View):
         order = seller.get_order(request.session.get('order_id'))
         client = seller.get_customer(request.session.get('client_id'))
         shop = get_shop_for_request_if_login(request)
+
+        if not request.POST.get('action'):
+            return redirect('/')
 
         if request.POST['action']  == 'set_product':
             order.delete_easy_products()
