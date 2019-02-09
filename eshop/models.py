@@ -48,6 +48,12 @@ class Shop(models.Model):
             return True
         return False
 
+    def is_size_s(self):
+        return True if self.size=='s' else False
+
+    def is_size_xs(self):
+        return True if self.size=='xs' else False
+
     def __unicode__(self):
         return u"Shop (%s): %s - %s (%s)" % (self.id, self.title, self.phone_number, self.fio)
 
