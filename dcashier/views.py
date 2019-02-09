@@ -120,6 +120,8 @@ class SelectShopPage(View):
     def get(self, request, *args, **kwargs):
         actor = get_actor_for_request_if_login(request)
         #shops = actor.shops()
+        if not request.session.get('actor_id'):
+            return redirect('/')
         seller = actor.get_seller()
         shops = seller.list_shop()
         answer = {}
@@ -185,7 +187,13 @@ class ShopPage(View):
         order_sum = request.POST['dealSummInput']
         from decimal import Decimal
         price = Decimal(order_sum)
-        seller.create_order(phone_number, price)
+        if seller.get_executor().is_size_xs():
+            seller.create_order(phone_number, price)
+        elif seller.get_executor().is_size_s():
+            pickup_point = seller.get_pickup_point_by_id(int(request.session.get('shop_id')))
+            seller.create_order(phone_number, price, pickup_point)
+        else:
+            assert False
         order = seller.get_last_order_for_client_with_phone_number(phone_number)
         client = seller.get_client_with_phone_number(phone_number)
         request.session['order_id'] = order.id
@@ -262,11 +270,23 @@ class NewDealPage(View):
             if request.POST['action']  == 'write_off':
                 #seller.process_order_with_ball_type_xs(order, client, 'MAX')
                 #seller.process_order_with_ball_type(order, client, 'MAX', shop)
-                seller.process_order_with_ball_type(order, 'MAX')
+                if seller.get_executor().is_size_xs():
+                    seller.process_order_with_ball_type(order, 'MAX')
+                elif seller.get_executor().is_size_s():
+                    pickup_point = seller.get_pickup_point_by_id(int(request.session.get('shop_id')))
+                    seller.process_order_with_ball_type(order, 'MAX', pickup_point)
+                else:
+                    assert False
             elif request.POST['action']  == 'save_up':
                 #seller.process_order_with_ball_type_xs(order, client, 'ZERO')
                 #seller.process_order_with_ball_type(order, client, 'ZERO', shop)
-                seller.process_order_with_ball_type(order, 'ZERO')
+                if seller.get_executor().is_size_xs():
+                    seller.process_order_with_ball_type(order, 'ZERO')
+                elif seller.get_executor().is_size_s():
+                    pickup_point = seller.get_pickup_point_by_id(int(request.session.get('shop_id')))
+                    seller.process_order_with_ball_type(order, 'ZERO', pickup_point)
+                else:
+                    assert False
             #from eloyalty.models import ServiceRepositoryLoyalty
             #srl = ServiceRepositoryLoyalty()
             #loyalties = srl.list_loyalty_for_owner(seller, executor)

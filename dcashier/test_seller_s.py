@@ -18,38 +18,52 @@ from estorage.models import *
 from eloyalty.models import *
 
 
-class TestESellerXS(TestCase):
+class TestESellerS(TestCase):
     def setUp(self):
         """
-        --DoOwner1@yandex.ru xs--
+        --DoOwner2@yandex.ru s--
         """
         print "SETUP DATA FOR ..."
         self.assertEqual.__self__.maxDiff = None
 
-        size = 'xs'
-        title_of_shop = 'Shop 1'
-        title_of_pickup_point = 'Pickup point 1'
-        title_of_seller = 'Cassir 1'
-        login = 'DoOwner1@yandex.ru'
-        title_of_actor = 'Actor 1'
-        password_of_actor = '12345'
+        size = 's'
+        title_of_shop = 'Shop ii'
+        title_of_pickup_points = ('Pickup point ii 1', 'Pickup point ii 2', 'Pickup point ii 3')
+        title_of_owner = 'Owner ii'
+        title_of_sellers = ('Cassir ii 1', 'Cassir ii 2')
+        logins = ('DoOwner2@yandex.ru', 'DoSeller21@yandex.ru', 'DoSeller22@yandex.ru')
+        title_of_actors = ('Actor ii Main ii', 'Actor ii 1', 'Actor ii 2')
+        password_of_actors = ('12345', '12345', '12345')
         #list_product = []
-        title_of_loyalty = "Loyalty 1";
-        max_percent = 40;
-        start_ball = 1000000;
-        start_ball_available_day = 20000;
-        reward_percent = 10;
-        available_day = 90;
-        is_need_auth = False
+        title_of_loyalty = "Loyalty 1"; max_percent = 40; start_ball = 1000000; start_ball_available_day = 20000; reward_percent = 10; available_day = 90; is_need_auth = False
+
+        shop = Shop.objects.create(title=title_of_shop, size=size)
 
         region, c = Region.objects.get_or_create()
         city, c = City.objects.get_or_create(region=region)
-        pickup_point, c = PickupPoint.objects.get_or_create(city=city, title=title_of_pickup_point)
-        shop = Shop.objects.create(title=title_of_shop, size=size)
-        seller = Seller.objects.create(title=title_of_seller, shop=shop)
-        seller.pickup_points.add(pickup_point)
-        actor = Actor.objects.create(seller=seller, phone_number=login, title=title_of_actor)
-        actor.set_password(password_of_actor)
+
+        pickup_point_1 = PickupPoint.objects.create(title=title_of_pickup_points[0], city=city)
+        pickup_point_2 = PickupPoint.objects.create(title=title_of_pickup_points[1], city=city)
+        pickup_point_3 = PickupPoint.objects.create(title=title_of_pickup_points[2], city=city)
+
+        owner = Seller.objects.create(title=title_of_owner, shop=shop)
+        owner.pickup_points.add(pickup_point_1)
+        owner.pickup_points.add(pickup_point_2)
+        owner.pickup_points.add(pickup_point_3)
+        actor_1 = Actor.objects.create(seller=owner, phone_number=logins[0], title=title_of_actors[0])
+        actor_1.set_password(password_of_actors[0])
+
+        seller_1 = Seller.objects.create(title=title_of_sellers[0], shop=shop)
+        seller_1.pickup_points.add(pickup_point_1)
+        seller_1.pickup_points.add(pickup_point_2)
+        actor_2 = Actor.objects.create(seller=seller_1, phone_number=logins[1], title=title_of_actors[1])
+        actor_2.set_password(password_of_actors[1])
+
+        seller_2 = Seller.objects.create(title=title_of_sellers[1], shop=shop)
+        seller_2.pickup_points.add(pickup_point_3)
+        actor_3 = Actor.objects.create(seller=seller_2, phone_number=logins[2], title=title_of_actors[2])
+        actor_3.set_password(password_of_actors[2])
+
         brand, c = Brand.objects.get_or_create()
         product, c = Product.objects.get_or_create(brand=brand, title='For take payment')
         product, c = Product.objects.get_or_create(brand=brand, title='Grean Tea')
@@ -57,12 +71,13 @@ class TestESellerXS(TestCase):
         product, c = Product.objects.get_or_create(brand=brand, title='Coffee')
         product, c = Product.objects.get_or_create(brand=brand, title='Dishes')
         product, c = Product.objects.get_or_create(brand=brand, title='Puer')
+
         srl = ServiceRepositoryLoyalty()
-        srl.list_loyalty_for_owner(seller, shop)
-        srl.has_loyalty_for_owner(seller, shop)
-        srl.create_loyalty(seller, shop, title_of_loyalty, max_percent, start_ball, start_ball_available_day, reward_percent, available_day, is_need_auth)
-        loyalty = srl.list_loyalty_for_owner(seller, shop)[0]
-        srl.has_loyalty_for_owner(seller, shop)
+        srl.list_loyalty_for_owner(owner, shop)
+        srl.has_loyalty_for_owner(owner, shop)
+        srl.create_loyalty(owner, shop, title_of_loyalty, max_percent, start_ball, start_ball_available_day, reward_percent, available_day, is_need_auth)
+        loyalty = srl.list_loyalty_for_owner(owner, shop)[0]
+        srl.has_loyalty_for_owner(owner, shop)
 
     def test_1(self):
         """
@@ -74,8 +89,9 @@ class TestESellerXS(TestCase):
         /newDealPage.html
         /sellerDealPage.html
         """
+
         #init
-        login = 'DoOwner1@yandex.ru'
+        login = 'DoOwner2@yandex.ru'
 
         client = Client()
 
@@ -261,4 +277,5 @@ class TestESellerXS(TestCase):
         self.assertEqual(18036, response.context['order_sum_with_ball'])
         self.assertEqual(list(Product.objects.filter(id__in=[2,3,4,5,6])), response.context['special_products'])
         self.assertEqual([], response.context['selected_products'])
+
 
