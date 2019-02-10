@@ -122,6 +122,7 @@ class TestESellerS(TestCase):
 
         response = client.get('/selectShopPage.html')
         self.assertEqual(200, response.status_code)
+        self.assertEqual(list(PickupPoint.objects.filter(id__in=[1,2,3])), list(response.context['shops']))
 
         response = client.post('/selectShopPage.html', {'shop_id': 1})
         self.assertEqual(302, response.status_code)
@@ -308,6 +309,7 @@ class TestESellerS(TestCase):
 
         response = client.get('/selectShopPage.html')
         self.assertEqual(200, response.status_code)
+        self.assertEqual(list(PickupPoint.objects.filter(id__in=[1,2])), list(response.context['shops']))
 
         response = client.post('/selectShopPage.html', {'shop_id': 1})
         self.assertEqual(302, response.status_code)
