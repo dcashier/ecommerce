@@ -11,6 +11,15 @@ from epurchase.models import *
 #from esale.models import *
 from eshop.models import *
 
+class SessionClientComeToShop(object):
+    """
+    Взаимодействие с клиентом, в рамках этого взаимодействия определяется постепенно
+    набор всех желаемых позиций заказа, сроки и место доствки, ...
+    но срок жизни ограничен.
+    Анализировать все обращения к ресурсу?
+    """
+    pass
+
 class Owner(object):
     def add_seller_for_shop():
         pass
@@ -22,6 +31,12 @@ class SellerXS(object):
 
     def create_order(self, phone_number, price):
         pickup_point = self.get_pickup_point()
+        self._create_order_pickup_point(phone_number, price, pickup_point)
+
+    def _create_order_pickup_point(self, phone_number, price, pickup_point):
+        """
+        close
+        """
         executor = self.get_executor()
         if not self.seller.has_shop_client_with_phone_number(executor, phone_number):
             self.seller.create_client_shop_with_phone_number(executor, phone_number)
@@ -109,7 +124,9 @@ class SellerXS(object):
 
     def process_order_with_ball_type(self, order, ball_type):
         pickup_point = self.get_pickup_point()
+        self._process_order_with_ball_type_pickup_point(order, ball_type, pickup_point)
 
+    def _process_order_with_ball_type_pickup_point(self, order, ball_type, pickup_point):
         customer = self.get_customer_order(order)
         purchaser = Purchaser.objects.get(shop=customer)
         executor = self.get_executor()
@@ -121,26 +138,42 @@ class SellerXS(object):
         self.seller.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point)
 
 
-class SellerS(object):
-    def get_executor(self):
-        return self.seller.get_executor()
+class SellerS(SellerXS):
+    def create_order(self, phone_number, price, pickup_point):
+        self._create_order_pickup_point(phone_number, price, pickup_point)
+
+    def get_pickup_point_by_id(self, pickup_point_id):
+        """
+        Если права позволют работать сданной точкой
+        """
+        for pickup_point in self.seller.pickup_points.all():
+            #print pickup_point.id, '==', pickup_point_id, pickup_point.id == pickup_point_id
+            if pickup_point.id == pickup_point_id:
+                return pickup_point
+        assert False
 
     def __init__(self, seller):
         self.seller = seller
+        self.order_repositiry = Order
+
+    #def list_order(self, order_specification):
+    def list_order(self):
+        executor = self.get_executor()
+        #pickup_point = self.get_pickup_point()
+
+        order_specification = OrderSpecification()
+        order_specification.pickup_points = list(self.seller.list_pickup_point())
+        order_specification.executor = executor
+        order_specification.seller = self.seller
+        #return self.order_repositiry.list_order(order_specification)
+        return Order.list_order(order_specification)
+        #return Order.objects.filter(executor=executor, pickup_point=pickup_point, seller=self.seller)
 
     def list_shop(self):
         return self.seller.list_shop()
 
     def process_order_with_ball_type(self, order, ball_type, pickup_point):
-        customer = self.get_customer_order(order)
-        purchaser = Purchaser.objects.get(shop=customer)
-        executor = self.get_executor()
-        loyalty = self.get_loyalty_xs()
-        if ball_type == 'MAX':
-            ball_for_spend = self.max_allow_ball_for_spend_for_order(order, purchaser, customer, executor, loyalty)
-        elif ball_type == 'ZERO':
-            ball_for_spend = 0
-        self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point)
+        self._process_order_with_ball_type_pickup_point(order, ball_type, pickup_point)
 
 
 class Purchaser(models.Model):
@@ -642,6 +675,9 @@ class Seller(models.Model):
         reserve = Reserve(product=product, quantity=quantity, storage=storage, part_number=part_number)
         reserve.save()
 
+    def list_pickup_point(self):
+        return self.pickup_points.all()
+
     def list_shop(self):
         #return [self.shop]
         return self.pickup_points.all()
@@ -752,6 +788,13 @@ class Order(models.Model):
                 products.append(e.product)
         return products
 
+    @classmethod
+    def list_order(cls, order_specification):
+        return Order.objects.filter(
+            executor=order_specification.executor,
+            pickup_point__in=order_specification.pickup_points,
+            seller=order_specification.seller)
+
     def __unicode__(self):
         return u"Order (%s) : %s %s %s %s" % (self.id, self.purchaser, self.customer, self.executor, self.seller)
 
@@ -762,4 +805,9 @@ class OrderElement(models.Model):
     currency = models.CharField(u"Валюта", max_length=5)
     order = models.ForeignKey(Order)
 
-
+class OrderSpecification(object):
+    def __init__(self):
+        self.pickup_point_specification = None
+        self.pickup_points = []
+        self.executor = None
+        self.seller = None
