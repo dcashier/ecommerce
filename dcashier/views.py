@@ -277,6 +277,16 @@ class NewDealPage(View):
                     seller.process_order_with_ball_type(order, 'MAX', pickup_point)
                 else:
                     assert False
+
+                template = loader.get_template('dcashier/static/transCompletedBallSpendPage.html')
+                answer = {}
+                reward_ball = seller.calculate_rewards_balls_for_order(order)
+
+                #answer['reward_ball_last_order'] = int(reward_ball)
+                answer['reward_ball_last_order'] = int(order.rewards_ball)
+                context = RequestContext(request, answer)
+                return HttpResponse(template.render(context.flatten()))
+
             elif request.POST['action']  == 'save_up':
                 #seller.process_order_with_ball_type_xs(order, client, 'ZERO')
                 #seller.process_order_with_ball_type(order, client, 'ZERO', shop)
@@ -287,12 +297,30 @@ class NewDealPage(View):
                     seller.process_order_with_ball_type(order, 'ZERO', pickup_point)
                 else:
                     assert False
+
+                template = loader.get_template('dcashier/static/transCompletedBallSavePage.html')
+                answer = {}
+                reward_ball = seller.calculate_rewards_balls_for_order(order)
+
+                from eloyalty.models import ServiceRepositoryLoyalty
+                srl = ServiceRepositoryLoyalty()
+                loyalties = srl.list_loyalty_for_owner(seller, executor)
+                loyalty = loyalties[0]
+
+                datetime_for_check = None
+                all_ball = loyalty.get_balance(actor, client, datetime_for_check)
+
+                answer['reward_ball_last_order'] = int(order.rewards_ball)
+                answer['all_ball'] = int(all_ball)
+                context = RequestContext(request, answer)
+                return HttpResponse(template.render(context.flatten()))
+
             #from eloyalty.models import ServiceRepositoryLoyalty
             #srl = ServiceRepositoryLoyalty()
             #loyalties = srl.list_loyalty_for_owner(seller, executor)
             #loyalty = loyalties[0]
-            #reward_ball = seller.calculate_revards_balls_for_order(order, loyalty)
-            reward_ball = seller.calculate_revards_balls_for_order(order)
+            #reward_ball = seller.calculate_rewards_balls_for_order(order, loyalty)
+            reward_ball = seller.calculate_rewards_balls_for_order(order)
             request.session['price_last_order'] = int(order.calculate_price())
             request.session['reward_ball_last_order'] = int(reward_ball)
             return redirect('/')

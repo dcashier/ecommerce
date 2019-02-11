@@ -19,9 +19,13 @@
 				<div class="toolbar__backButton"></div>
 			</a>
 			<div class="toolbar__title textAlignLeft ml20">
+                {% if 0 %}
 				<h1>Василий Петроновский</h1>
 				<h2>+7 926 631 83 91</h2>
-			</div>
+                {% endif %}
+				<h1>{{ client.title }}</h1>
+				<h2>{{ clietn.phone_number }}</h2>
+ 			</div>
 				
 		</div>
 
@@ -30,7 +34,7 @@
 		<div class="workSection mt120">
 			<div class="workSection__layout">
 				<h1 class="textAlignCenter f30">Баллы списаны!</h1>
-				<h2 class="textAlignCenter mt20">и начисленно<br> <b>115</b> баллов за покупку</h2>				
+				<h2 class="textAlignCenter mt20">и начисленно<br> <b>{{ reward_ball_last_order }}</b> баллов за покупку</h2>				
 			</div>
 		</div>
 	
