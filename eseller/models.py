@@ -136,6 +136,11 @@ class SellerXS(object):
         pickup_point = self.get_pickup_point()
         return Order.objects.filter(executor=executor, pickup_point=pickup_point, seller=self.seller)
 
+    def list_order_for_customer(self, customer):
+        executor = self.get_executor()
+        pickup_point = self.get_pickup_point()
+        return Order.objects.filter(executor=executor, pickup_point=pickup_point, seller=self.seller, customer=customer).order_by('-id')
+
     def list_product(self):
         #TODO У каждого магазина должен быть свой набор продуктов или можно испоьзовать общий.
         # но не давать возможноть изменять никакой инфы по продуктам в базе, только создавать.
@@ -236,6 +241,8 @@ class Seller(models.Model):
         available_day = 90
         loyalty.transfer_ball(self, executor, customer, reward_ball, available_day)
         self.__change_status_for_order(order, u'Начислии балы клиенту по заказа')
+        order.revards_ball = reward_ball
+        order.save()
 
     def add_product_in_basket(self, basket, product, quantity, price, currency):
         basket.add(product, quantity, price, currency)
@@ -788,6 +795,7 @@ class Order(models.Model):
     pickup_dateteme = models.DateTimeField(u'дата и время вручения всего заказа(т.е. последней партии)', auto_now_add=True)
 
     loyalty_ball = models.IntegerField(u"Оплаено балами.", null=True, blank=True)
+    revards_ball = models.IntegerField(u"Накопленно балов.", null=True, blank=True)
 
     def add(self, product, quantity, price, currency):
         """
