@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Дисконт Онлайн</title>
+	<link rel="stylesheet" href="css/style.css" type="text/css">
+	<link rel="stylesheet" href="css/response.css" type="text/css">	
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,700,800&amp;subset=cyrillic" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+	      rel="stylesheet">	
+</head>
+
+<body ontouchstart="">
+	<div class="container">
+
+		<div class="toolbar">
+			<a href="index.html">
+				<div class="toolbar__backButton"></div>
+			</a>
+			<div class="toolbar__title textAlignLeft ml20">
+				<h1 class="">Новый клиент</h1>
+				<h1 class="invisible">Не нашел клиента,<br>давай добавим</h1>
+			</div>
+				
+		</div>
+
+
+		<form action="">
+			<div class="workSection mt40">
+				<div class="workSection__layout">
+					<input type="number" tabindex="0" required autocomplete="off" placeholder = "Номер телефона" name="customerPhoneInput" class = "input">
+					<input type="text" tabindex="1" required autocomplete="off" placeholder = "Имя и фамилия" name="customerNameInput" class = "input mt10">								
+					<div class="sexRadioButtons mt10">
+						<input type="radio" id="sexMale" name="selector" class="sexRadioButton" checked="true">
+							<label for="sexMale">Мужчина</label>
+						<input type="radio" id="sexFemale" name="selector" class="sexRadioButton">
+							<label for="sexFemale">Женщина</label>
+				  	</div>					
+					<input type="date" tabindex="2" placeholder = "Дата рождения" name="customerBirthInput" class = "input mt10">
+					<input type="text" tabindex="3" required autocomplete="off" placeholder = "Телефон рекомендателя" name="customerRefPhoneInput" class = "input mt30">					
+
+				</div>
+					
+			</div>
+
+			<div class="controlSection">
+				<div class="controlSection__buttonsVertical">			
+					<button class="button mt20" href="#">Добавить клиента</button>
+					<button class="invisible button lh1 mt20">Добавить клиента<br><span class="f14">и начислить <b>150</b> баллов</button>						
+				</div>
+			</div>
+
+		</form>
+	</div>
+</body>
+</html>

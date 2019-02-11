@@ -18,86 +18,77 @@
 			<a href="index.html">
 				<div class="toolbar__backButton"></div>
 			</a>
-			<div class="toolbar__title textAlignCenter">
-				<h1>Выбери магазин</h1>	
-			</div>				
+			<div class="toolbar__title textAlignLeft ml20">
+				<h1>Василий Петроновский</h1>
+				<h2>+7 926 631 83 91</h2>
+			</div>
+				
 		</div>
 
 
 		<div class="workSection mt40">
 			<div class="listView">
 
-
-
-
-
-                {% for shop in shops %}
-
 				<a href=#>
 					<div class="listView__item">
-						<div class="listView__item__leftPart">
+						<div class="listView__item__leftPart w50p">
 							<div class="listView__item__leftPart__title">
-								Магазин {{ shop.id }}
+								12 октября
 							</div>
-							<div class="listView__item__leftPart__detail">
-								{{ shop.title }}
-							</div>
-						</div>
-
-						<div class="listView__item__rightPart">
-							<div class="listView__item__moreButton">
-
-								<form  method="post">
-									<input type="hidden" name="shop_id" value="{{ shop.id }}">
-									<input type="submit" value=">>" class="button mt20" >
-								</form>
-							</div>
-						</div>
-					</div>
-				</a>
-                {% endfor %}
-
-
-
-
-
-				{% if 1 %}
-				<a href=#>
-					<div class="listView__item">
-						<div class="listView__item__leftPart">
-							<div class="listView__item__leftPart__title">
-								Магазин №1
-							</div>
-							<div class="listView__item__leftPart__detail">
-								Сокольническая наб., д.3
+							<div class="listView__item__leftPart__detail green">
+								+75 баллов
 							</div>
 						</div>	
 
 						<div class="listView__item__rightPart">	
 							<div class="listView__item__moreButton"></div>
+							<div class="listView__item__rightPart__detail mt10">
+								1 500 &#8381
+							</div>							
 						</div>
 					</div>
 				</a>
 
 				<a href=#>
 					<div class="listView__item">
-
-						<div class="listView__item__leftPart">
+						<div class="listView__item__leftPart w50p">
 							<div class="listView__item__leftPart__title">
-								Салон Уралочка
+								11 октября
 							</div>
-							<div class="listView__item__leftPart__detail">
-								Чусовская ул., д.15
+							<div class="listView__item__leftPart__detail green">
+								+54 баллов
 							</div>
 						</div>	
 
 						<div class="listView__item__rightPart">	
 							<div class="listView__item__moreButton"></div>
+							<div class="listView__item__rightPart__detail mt10">
+								540 &#8381
+							</div>							
 						</div>
 					</div>
 				</a>
-				{% endif %}
 
+
+				<a href=#>
+					<div class="listView__item">
+						<div class="listView__item__leftPart w50p">
+							<div class="listView__item__leftPart__title">
+								8 октября
+							</div>
+							<div class="listView__item__leftPart__detail red">
+								-413 баллов
+							</div>
+						</div>	
+
+						<div class="listView__item__rightPart">	
+							<div class="listView__item__moreButton"></div>
+							<div class="listView__item__rightPart__detail mt10">
+								1 210 &#8381
+							</div>							
+						</div>
+					</div>
+				</a>
 
 			</div>
 		</div>
