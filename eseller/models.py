@@ -29,6 +29,32 @@ class SellerXS(object):
         loyalty = self.get_loyalty()
         return self.seller.calculate_revards_balls_for_order(order, loyalty)
 
+    def _create_customer(self, phone_number, title, sex, birthday, phone_number_referee, entrance_ball):
+        executor = self.get_executor()
+        if self.seller.has_shop_client_with_phone_number(executor, phone_number):
+            raise ValidationError(u"Error : Сustomer already exists.")
+        self.seller.create_customer(executor, phone_number, title, sex, birthday)
+
+        if phone_number_referee:
+            customer = self.seller.get_client_shop_with_phone_number(executor, phone_number)
+            if self.seller.has_shop_client_with_phone_number(executor, phone_number_referee):
+                referee = self.seller.get_client_shop_with_phone_number(executor, phone_number_referee)
+                self.seller.add_referee(customer, referee)
+            else:
+                print 'Error : Not Find referee with phone_number_referee'
+
+        if entrance_ball:
+            customer = self.seller.get_client_shop_with_phone_number(executor, phone_number)
+            self.seller.add_entrance_ball(customer, entrance_ball)
+
+    def create_customer(self, phone_number, title, sex, birthday, phone_number_referee):
+        entrance_ball = 0
+        self._create_customer(phone_number, title, sex, birthday, phone_number_referee, entrance_ball)
+
+    def create_customer_100(self, phone_number, title, sex, birthday, phone_number_referee):
+        entrance_ball = 100
+        self._create_customer(phone_number, title, sex, birthday, phone_number_referee, entrance_ball)
+
     def create_order(self, phone_number, price):
         pickup_point = self.get_pickup_point()
         self._create_order_pickup_point(phone_number, price, pickup_point)
@@ -94,6 +120,10 @@ class SellerXS(object):
     def get_product(self, product_id):
         #TODO Нужна проверка прав доступа к заказу.
         return Product.objects.get(id=product_id)
+
+    def has_customer_with_phone_number(self, phone_number):
+        executor = self.get_executor()
+        return self.seller.has_shop_client_with_phone_number(executor, phone_number)
 
     def has_order(self, order_id):
         return self.seller.has_order(order_id)
@@ -239,6 +269,16 @@ class Seller(models.Model):
         self.shop.clients.add(client)
         purchaser = Purchaser(title=u"Default purchaser when Seller create Client.", shop=client, phone_number=phone_number)
         purchaser.save()
+
+    def create_customer(self, executor, phone_number, title, sex, birthday):
+        if not self.is_work_in_shop(executor):
+            raise ValidationError(u"Выбранный прожавец не работает в указханном магазине.")
+        client = Shop(phone_number=phone_number, title=title, sex=sex, birthday=birthday)
+        client.save()
+        self.shop.clients.add(client)
+        purchaser = Purchaser(title=u"Default purchaser when Seller create Client.", shop=client, phone_number=phone_number)
+        purchaser.save()
+
 
     #def create_easy_order_xs(self, phone_number, price):
     #    pickup_point = self.get_pickup_point_xs()
