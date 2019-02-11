@@ -254,9 +254,9 @@ class TestELoyalty(TestCase):
         self.assertTrue(seller_shop_1.check_payment_for_last_order())
 
 
-        #reward_balls = seller_shop_1.calculate_revards_balls_for_last_order(loyalty_1, client_2)
+        #reward_balls = seller_shop_1.calculate_rewards_balls_for_last_order(loyalty_1, client_2)
         last_order_for_client_2 = seller_shop_1.get_last_order_client(client_2)
-        reward_balls = seller_shop_1.calculate_revards_balls_for_order(last_order_for_client_2, loyalty_1)
+        reward_balls = seller_shop_1.calculate_rewards_balls_for_order(last_order_for_client_2, loyalty_1)
         #self.assertEqual(3000, reward_balls)
         #self.assertEqual(57, reward_balls)
         self.assertEqual(Decimal('11.561'), reward_balls)
@@ -353,9 +353,9 @@ class TestELoyalty(TestCase):
 
         self.assertTrue(seller_shop_2.check_payment_for_last_order())
 
-        #reward_balls = seller_shop_2.calculate_revards_balls_for_last_order(loyalty_1, client_2)
+        #reward_balls = seller_shop_2.calculate_rewards_balls_for_last_order(loyalty_1, client_2)
         last_order_for_client_2 = seller_shop_2.get_last_order_client(client_2)
-        reward_balls = seller_shop_2.calculate_revards_balls_for_order(last_order_for_client_2, loyalty_1)
+        reward_balls = seller_shop_2.calculate_rewards_balls_for_order(last_order_for_client_2, loyalty_1)
         #self.assertEqual(65, reward_balls)
         self.assertEqual(Decimal('13.00'), reward_balls)
         #actor_executor.confirm_out_payment_for_loyalty(shop_1, client_1, loyalty_1, 3000, 90)
