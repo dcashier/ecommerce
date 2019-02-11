@@ -386,7 +386,6 @@ class TransHistoryPage(View):
             return redirect('/')
         actor = get_actor_for_request_if_login(request)
         seller = actor.get_seller()
-        executor = seller.get_executor()
         if not request.session.get('shop_id'):
             return redirect('/')
         shop = get_shop_for_request_if_login(request)
@@ -398,8 +397,6 @@ class TransHistoryPage(View):
         answer['orders'] = seller.list_order_for_customer(customer)
         answer['seller'] = seller.get_object()
         answer['client'] = customer
-        print answer['orders']
-        #answer['executor'] = executor
 
         template = loader.get_template('dcashier/static/transHistoryPage.html')
         context = RequestContext(request, answer)
