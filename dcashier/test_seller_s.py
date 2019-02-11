@@ -179,7 +179,8 @@ class TestESellerS(TestCase):
         self.assertEqual(list(Product.objects.filter(id__in=[3,5])), response.context['selected_products'])
 
         response = client.post('/newDealPage.html', {'action': 'write_off'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
 
         response = client.get('/sellerDealPage.html')
         self.assertEqual(200, response.status_code)
@@ -201,17 +202,23 @@ class TestESellerS(TestCase):
 
         # После внедрения процесинга и статусов этот кусок развалится
         response = client.post('/newDealPage.html', {'action': 'save_up'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
         response = client.post('/newDealPage.html', {'action': 'save_up'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
         response = client.post('/newDealPage.html', {'action': 'save_up'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
         response = client.post('/newDealPage.html', {'action': 'save_up'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
         response = client.post('/newDealPage.html', {'action': 'save_up'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
         response = client.post('/newDealPage.html', {'action': 'save_up'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
 
         response = client.get('/sellerDealPage.html')
         self.assertEqual(200, response.status_code)
@@ -232,7 +239,8 @@ class TestESellerS(TestCase):
         self.assertEqual(list(Product.objects.filter(id__in=[3,5])), response.context['selected_products'])
 
         response = client.post('/newDealPage.html', {'action': 'write_off'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
 
         response = client.get('/sellerDealPage.html')
         self.assertEqual(200, response.status_code)
@@ -269,7 +277,8 @@ class TestESellerS(TestCase):
         self.assertEqual([], response.context['selected_products'])
 
         response = client.post('/newDealPage.html', {'action': 'write_off'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
 
         response = client.get('/newDealPage.html')
         self.assertEqual(200, response.status_code)
@@ -366,7 +375,8 @@ class TestESellerS(TestCase):
         self.assertEqual(list(Product.objects.filter(id__in=[3,5])), response.context['selected_products'])
 
         response = client.post('/newDealPage.html', {'action': 'write_off'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
 
         response = client.get('/sellerDealPage.html')
         self.assertEqual(200, response.status_code)
@@ -388,17 +398,23 @@ class TestESellerS(TestCase):
 
         # После внедрения процесинга и статусов этот кусок развалится
         response = client.post('/newDealPage.html', {'action': 'save_up'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
         response = client.post('/newDealPage.html', {'action': 'save_up'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
         response = client.post('/newDealPage.html', {'action': 'save_up'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
         response = client.post('/newDealPage.html', {'action': 'save_up'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
         response = client.post('/newDealPage.html', {'action': 'save_up'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
         response = client.post('/newDealPage.html', {'action': 'save_up'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
 
         response = client.get('/sellerDealPage.html')
         self.assertEqual(200, response.status_code)
@@ -419,7 +435,8 @@ class TestESellerS(TestCase):
         self.assertEqual(list(Product.objects.filter(id__in=[3,5])), response.context['selected_products'])
 
         response = client.post('/newDealPage.html', {'action': 'write_off'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
 
         response = client.get('/sellerDealPage.html')
         self.assertEqual(200, response.status_code)
@@ -456,7 +473,8 @@ class TestESellerS(TestCase):
         self.assertEqual([], response.context['selected_products'])
 
         response = client.post('/newDealPage.html', {'action': 'write_off'})
-        self.assertEqual(302, response.status_code)
+        #self.assertEqual(302, response.status_code)
+        self.assertEqual(200, response.status_code)
 
         response = client.get('/newDealPage.html')
         self.assertEqual(200, response.status_code)
