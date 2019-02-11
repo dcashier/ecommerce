@@ -308,6 +308,58 @@ class CustomerAddPage(View):
         context = RequestContext(request, answer)
         return HttpResponse(template.render(context.flatten()))
 
+    def post(self, request, *args, **kwargs):
+        actor = get_actor_for_request_if_login(request)
+        if not request.session.get('actor_id'):
+            return redirect('/')
+
+        seller = actor.get_seller()
+        phone_number = request.POST['customerPhoneInput']
+        title = request.POST['customerNameInput']
+        sex = request.POST['selector']
+        birthday = request.POST['customerBirthInput']
+        phone_number_referee = request.POST['customerRefPhoneInput']
+
+        answer = {}
+        if not phone_number or \
+            not title or \
+            not sex or \
+            not birthday:
+            template = loader.get_template('dcashier/static/customerAddPage.html')
+            answer = {'error': 'Не коеректно заполнены поля'}
+            context = RequestContext(request, answer)
+            return HttpResponse(template.render(context.flatten()))
+
+        if seller.has_customer_with_phone_number(phone_number):
+            template = loader.get_template('dcashier/static/customerAddPage.html')
+            answer = {'error': 'Клиент с таким номером уже существует'}
+            context = RequestContext(request, answer)
+            return HttpResponse(template.render(context.flatten()))
+
+        if request.POST['registration'] == 'zero':
+            if seller.get_executor().is_size_xs() or \
+                seller.get_executor().is_size_s():
+                seller.create_customer(phone_number, title, sex, birthday, phone_number_referee)
+            else:
+                assert False
+        elif request.POST['registration'] == '100':
+            if seller.get_executor().is_size_xs() or \
+                seller.get_executor().is_size_s():
+                seller.create_customer_100(phone_number, title, sex, birthday, phone_number_referee)
+                answer['registration_ball'] = 100
+            else:
+                assert False
+        else:
+            assert False
+
+        client = seller.get_client_with_phone_number(phone_number)
+        request.session['client_id'] = client.id
+
+        template = loader.get_template('dcashier/static/customerAddedPage.html')
+        answer['client'] = client
+        context = RequestContext(request, answer)
+        return HttpResponse(template.render(context.flatten()))
+
 class CustomerAddedPage(View):
     def get(self, request, *args, **kwargs):
         actor = get_actor_for_request_if_login(request)

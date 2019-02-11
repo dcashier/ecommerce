@@ -25,8 +25,11 @@
 				
 		</div>
 
+        {% if error %}
+            <h2>{{ error }}</h2>
+        {% endif %}
 
-		<form action="">
+		<form action="" method="post">
 			<div class="workSection mt40">
 				<div class="workSection__layout">
 					<input type="number" tabindex="0" required autocomplete="off" placeholder = "Номер телефона" name="customerPhoneInput" class = "input">
@@ -46,8 +49,8 @@
 
 			<div class="controlSection">
 				<div class="controlSection__buttonsVertical">			
-					<button class="button mt20" href="#">Добавить клиента</button>
-					<button class="invisible button lh1 mt20">Добавить клиента<br><span class="f14">и начислить <b>150</b> баллов</button>						
+					<button class="button mt20" name="registration" value="zero" href="#">Добавить клиента</button>
+					<button class="invisible button lh1 mt20" name="registration" value="100">Добавить клиента<br><span class="f14">и начислить <b>150</b> баллов</button>						
 				</div>
 			</div>
 

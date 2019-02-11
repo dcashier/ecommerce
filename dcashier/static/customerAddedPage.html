@@ -19,8 +19,13 @@
 				<div class="toolbar__backButton"></div>
 			</a>
 			<div class="toolbar__title textAlignLeft ml20">
+                {% if 0 %}
 				<h1>Василий Петроновский</h1>
 				<h2>+7 926 631 83 91</h2>
+                {% endif %}
+                <h1>{{ client.title }}</h1>
+				<h2>{{ client.phone_number }}</h2>
+ 
 			</div>
 				
 		</div>
@@ -30,7 +35,9 @@
 		<div class="workSection mt120">
 			<div class="workSection__layout">
 				<h1 class="textAlignCenter f30">Добавили!</h1>
-				<h2 class="textAlignCenter mt20">На счету клиента<br><b>498</b> баллов</h2>				
+                {% if registration_ball %}
+				<h2 class="textAlignCenter mt20">На счету клиента<br><b>{{ registration_ball }}</b> баллов</h2>
+                {% endif %}
 			</div>
 		</div>
 	
