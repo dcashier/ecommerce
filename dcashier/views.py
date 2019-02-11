@@ -320,6 +320,17 @@ class CustomerAddPage(View):
         birthday = request.POST['customerBirthInput']
         phone_number_referee = request.POST['customerRefPhoneInput']
 
+        if phone_number and \
+            seller.has_customer_with_phone_number(phone_number):
+            client = seller.get_client_with_phone_number(phone_number)
+            request.session['client_id'] = client.id
+
+            template = loader.get_template('dcashier/static/customerAddPage.html')
+            answer = {'error': 'Клиент с таким номером уже существует'}
+            context = RequestContext(request, answer)
+            return HttpResponse(template.render(context.flatten()))
+
+
         answer = {}
         if not phone_number or \
             not title or \
@@ -331,6 +342,9 @@ class CustomerAddPage(View):
             return HttpResponse(template.render(context.flatten()))
 
         if seller.has_customer_with_phone_number(phone_number):
+            client = seller.get_client_with_phone_number(phone_number)
+            request.session['client_id'] = client.id
+
             template = loader.get_template('dcashier/static/customerAddPage.html')
             answer = {'error': 'Клиент с таким номером уже существует'}
             context = RequestContext(request, answer)
