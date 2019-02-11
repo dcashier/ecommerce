@@ -15,6 +15,7 @@ class Shop(models.Model):
     pickup_points = models.ManyToManyField(PickupPoint, blank=True)
     storages = models.ManyToManyField(Storage, blank=True)
     is_person = models.BooleanField(verbose_name=u'Персона или Юр. лицо', default=False)
+    sex = models.BooleanField(verbose_name=u'Пол', default=True)
     birthday = models.DateField(u'Дата рождения', null=True, blank=True)
     phone_number = models.CharField(verbose_name=u'Номер мобильного', max_length=128, null=True, blank=True)
     phone_m_type = models.CharField(verbose_name=u'Тип номера мобильного', max_length=128, null=True, blank=True)
