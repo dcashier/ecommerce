@@ -382,11 +382,26 @@ class TransConfirmSmsPage(View):
 
 class TransHistoryPage(View):
     def get(self, request, *args, **kwargs):
-        actor = get_actor_for_request_if_login(request)
         if not request.session.get('actor_id'):
             return redirect('/')
-        template = loader.get_template('dcashier/static/transHistoryPage.html')
+        actor = get_actor_for_request_if_login(request)
+        seller = actor.get_seller()
+        executor = seller.get_executor()
+        if not request.session.get('shop_id'):
+            return redirect('/')
+        shop = get_shop_for_request_if_login(request)
+        if shop.is_null():
+            return redirect('/')
+
+        customer = seller.get_customer(request.session.get('client_id'))
         answer = {}
+        answer['orders'] = seller.list_order_for_customer(customer)
+        answer['seller'] = seller.get_object()
+        answer['client'] = customer
+        print answer['orders']
+        #answer['executor'] = executor
+
+        template = loader.get_template('dcashier/static/transHistoryPage.html')
         context = RequestContext(request, answer)
         return HttpResponse(template.render(context.flatten()))
 

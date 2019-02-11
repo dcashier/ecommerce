@@ -19,8 +19,12 @@
 				<div class="toolbar__backButton"></div>
 			</a>
 			<div class="toolbar__title textAlignLeft ml20">
+                {% if 0 %}
 				<h1>Василий Петроновский</h1>
 				<h2>+7 926 631 83 91</h2>
+                {% endif %}
+				<h1>{{ client.title }}</h1>
+				<h2>{{ client.phone_number }}</h2>
 			</div>
 				
 		</div>
@@ -28,6 +32,40 @@
 
 		<div class="workSection mt40">
 			<div class="listView">
+
+                {% for order in orders %}
+
+				<a href=#>
+					<div class="listView__item">
+						<div class="listView__item__leftPart w50p">
+							<div class="listView__item__leftPart__title">
+                                {{ order.create_datetime }}
+							</div>
+							<div class="listView__item__leftPart__detail green"> 
+								+{{ order.revards_ball }} баллов
+							</div>
+                            {% if order.loyalty_ball %}
+							<div class="listView__item__leftPart__detail red">
+								-{{ order.loyalty_ball }} баллов
+							</div>
+                            {% endif %}
+                            ~ {% for product in order.list_easy_product %}{{ product.title }}. {% endfor %}
+						</div>	
+
+						<div class="listView__item__rightPart">	
+							<div class="listView__item__moreButton"></div>
+							<div class="listView__item__rightPart__detail mt10">
+								{{ order.calculate_price }} &#8381
+							</div>							
+						</div>
+					</div>
+				</a>
+
+
+
+                {% endfor %}
+
+                {% if 0 %}
 
 				<a href=#>
 					<div class="listView__item">
@@ -89,6 +127,7 @@
 						</div>
 					</div>
 				</a>
+                {% endif %}
 
 			</div>
 		</div>
