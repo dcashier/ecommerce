@@ -296,3 +296,66 @@ class NewDealPage(View):
             request.session['price_last_order'] = int(order.calculate_price())
             request.session['reward_ball_last_order'] = int(reward_ball)
             return redirect('/')
+
+
+class CustomerAddPage(View):
+    def get(self, request, *args, **kwargs):
+        actor = get_actor_for_request_if_login(request)
+        if not request.session.get('actor_id'):
+            return redirect('/')
+        template = loader.get_template('dcashier/static/customerAddPage.html')
+        answer = {}
+        context = RequestContext(request, answer)
+        return HttpResponse(template.render(context.flatten()))
+
+class CustomerAddedPage(View):
+    def get(self, request, *args, **kwargs):
+        actor = get_actor_for_request_if_login(request)
+        if not request.session.get('actor_id'):
+            return redirect('/')
+        template = loader.get_template('dcashier/static/customerAddedPage.html')
+        answer = {}
+        context = RequestContext(request, answer)
+        return HttpResponse(template.render(context.flatten()))
+
+class TransConfirmSmsPage(View):
+    def get(self, request, *args, **kwargs):
+        actor = get_actor_for_request_if_login(request)
+        if not request.session.get('actor_id'):
+            return redirect('/')
+        template = loader.get_template('dcashier/static/transConfirmSmsPage.html')
+        answer = {}
+        context = RequestContext(request, answer)
+        return HttpResponse(template.render(context.flatten()))
+
+class TransHistoryPage(View):
+    def get(self, request, *args, **kwargs):
+        actor = get_actor_for_request_if_login(request)
+        if not request.session.get('actor_id'):
+            return redirect('/')
+        template = loader.get_template('dcashier/static/transHistoryPage.html')
+        answer = {}
+        context = RequestContext(request, answer)
+        return HttpResponse(template.render(context.flatten()))
+
+class TransCompletedBallSavePage(View):
+    def get(self, request, *args, **kwargs):
+        actor = get_actor_for_request_if_login(request)
+        if not request.session.get('actor_id'):
+            return redirect('/')
+        template = loader.get_template('dcashier/static/transCompletedBallSavePage.html')
+        answer = {}
+        context = RequestContext(request, answer)
+        return HttpResponse(template.render(context.flatten()))
+
+class TransCompletedBallSpendPage(View):
+    def get(self, request, *args, **kwargs):
+        actor = get_actor_for_request_if_login(request)
+        if not request.session.get('actor_id'):
+            return redirect('/')
+        template = loader.get_template('dcashier/static/transCompletedBallSpendPage.html')
+        answer = {}
+        context = RequestContext(request, answer)
+        return HttpResponse(template.render(context.flatten()))
+
+

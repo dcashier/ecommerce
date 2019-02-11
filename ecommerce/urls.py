@@ -31,6 +31,12 @@ urlpatterns = [
     url(r'^shopPage.html$', ShopPage.as_view(), name='my-view'),
     url(r'^newDealPage.html$', NewDealPage.as_view(), name='my-view'),
     url(r'^sellerDealPage.html$', SellerDealPage.as_view(), name='my-view'),
+    url(r'^customerAddPage.html$', CustomerAddPage.as_view(), name='my-view'),
+    url(r'^customerAddedPage.html$', CustomerAddedPage.as_view(), name='my-view'),
+    url(r'^transConfirmSmsPage.html$', TransConfirmSmsPage.as_view(), name='my-view'),
+    url(r'^transHistoryPage.html$', TransHistoryPage.as_view(), name='my-view'),
+    url(r'^transCompletedBallSavePage.html$', TransCompletedBallSavePage.as_view(), name='my-view'),
+    url(r'^transCompletedBallSpendPage.html$', TransCompletedBallSpendPage.as_view(), name='my-view'),
 
 
     url(r'^login/$', Login.as_view(), name='login'),
