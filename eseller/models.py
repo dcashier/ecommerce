@@ -25,9 +25,9 @@ class Owner(object):
         pass
 
 class SellerXS(object):
-    def calculate_revards_balls_for_order(self, order):
+    def calculate_rewards_balls_for_order(self, order):
         loyalty = self.get_loyalty()
-        return self.seller.calculate_revards_balls_for_order(order, loyalty)
+        return self.seller.calculate_rewards_balls_for_order(order, loyalty)
 
     def _create_customer(self, phone_number, title, sex, birthday, phone_number_referee, entrance_ball):
         executor = self.get_executor()
@@ -237,20 +237,20 @@ class Seller(models.Model):
     price_policies = models.ManyToManyField(PricePolicy, blank=True) # политики которые может использовать данный продавец ему назанчаются свыше
 
     def __accumulate_customer_ball_for_order(self, order, purchaser, customer, executor, loyalty):
-        reward_ball = self.calculate_revards_balls_for_order(order, loyalty)
+        reward_ball = self.calculate_rewards_balls_for_order(order, loyalty)
         available_day = 90
         loyalty.transfer_ball(self, executor, customer, reward_ball, available_day)
         self.__change_status_for_order(order, u'Начислии балы клиенту по заказа')
-        order.revards_ball = reward_ball
+        order.rewards_ball = reward_ball
         order.save()
 
     def add_product_in_basket(self, basket, product, quantity, price, currency):
         basket.add(product, quantity, price, currency)
 
-    def calculate_revards_balls_for_order(self, order, loyalty):
+    def calculate_rewards_balls_for_order(self, order, loyalty):
         return loyalty.calculate_reward(None, order.calculate_price())['ball']
 
-    #def calculate_revards_balls_for_order_xs(self, order):
+    #def calculate_rewards_balls_for_order_xs(self, order):
     #    loyalty = self.get_loyalty_xs()
     #    return loyalty.calculate_reward(None, order.calculate_price())['ball']
 
@@ -795,7 +795,7 @@ class Order(models.Model):
     pickup_dateteme = models.DateTimeField(u'дата и время вручения всего заказа(т.е. последней партии)', auto_now_add=True)
 
     loyalty_ball = models.IntegerField(u"Оплаено балами.", null=True, blank=True)
-    revards_ball = models.IntegerField(u"Накопленно балов.", null=True, blank=True)
+    rewards_ball = models.IntegerField(u"Накопленно балов.", null=True, blank=True)
 
     def add(self, product, quantity, price, currency):
         """
