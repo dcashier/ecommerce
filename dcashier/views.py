@@ -284,6 +284,9 @@ class NewDealPage(View):
                 context = RequestContext(request, answer)
                 return HttpResponse(template.render(context.flatten()))
 
+            else:
+                assert False
+
             reward_ball = seller.calculate_rewards_balls_for_order(order)
             request.session['price_last_order'] = int(order.calculate_price())
             request.session['reward_ball_last_order'] = int(reward_ball)
