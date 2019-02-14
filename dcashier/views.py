@@ -12,36 +12,37 @@ class MyView(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'dcashier/static/index.html')
 
-def index(request):
-    answer = {}
-    if request.session.get('actor_id'):
-        auth_system = AuthSystem()
-        actor = auth_system.get_actor_by_id(request.session.get('actor_id'))
-        answer['actor'] = actor
-        answer['is_login'] = True
-        if request.session.get('shop_id'):
-            shop_id = request.session.get('shop_id')
-            actor = get_actor_for_request_if_login(request)
-            seller = actor.get_seller()
-            shops = seller.list_shop()
-            for shop in shops:
-                if str(shop.id) == str(shop_id):
-                    answer['shop'] = shop
-                    break
-            if request.session.get('order_id'):
-                answer['is_order'] = True
-    else:
-        answer['is_login'] = False
+class Index(View):
+    def get(self, request, *args, **kwargs):
+        answer = {}
+        if request.session.get('actor_id'):
+            auth_system = AuthSystem()
+            actor = auth_system.get_actor_by_id(request.session.get('actor_id'))
+            answer['actor'] = actor
+            answer['is_login'] = True
+            if request.session.get('shop_id'):
+                shop_id = request.session.get('shop_id')
+                actor = get_actor_for_request_if_login(request)
+                seller = actor.get_seller()
+                shops = seller.list_shop()
+                for shop in shops:
+                    if str(shop.id) == str(shop_id):
+                        answer['shop'] = shop
+                        break
+                if request.session.get('order_id'):
+                    answer['is_order'] = True
+        else:
+            answer['is_login'] = False
 
-    if request.session.get('price_last_order') and \
-        request.session.get('reward_ball_last_order'):
-        answer['price_last_order'] = int(request.session['price_last_order'])
-        answer['reward_ball_last_order'] = int(request.session['reward_ball_last_order'])
-        del request.session['price_last_order']
-        del request.session['reward_ball_last_order']
-    template = loader.get_template('dcashier/static/index.html')
-    context = RequestContext(request, answer)
-    return HttpResponse(template.render(context.flatten()))
+        if request.session.get('price_last_order') and \
+            request.session.get('reward_ball_last_order'):
+            answer['price_last_order'] = int(request.session['price_last_order'])
+            answer['reward_ball_last_order'] = int(request.session['reward_ball_last_order'])
+            del request.session['price_last_order']
+            del request.session['reward_ball_last_order']
+        template = loader.get_template('dcashier/static/index.html')
+        context = RequestContext(request, answer)
+        return HttpResponse(template.render(context.flatten()))
 
 class ActorNone(object):
     seller = None
