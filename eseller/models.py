@@ -277,7 +277,8 @@ class Seller(models.Model):
     #    return loyalty.calculate_reward(None, order.calculate_price())['ball']
 
     def __change_status_for_order(self, order, status):
-        pass
+        order.status = status
+        order.save()
 
     def check_payment_for_last_order(self):
         print 'Alert : Not work check_payment_for_last_order'
@@ -518,6 +519,11 @@ class Seller(models.Model):
         #    return False
         return True
 
+    def __is_nead_process(self, order):
+        if order.status != u'Ожидает выдачи позиций заказа клиенту':
+            return True
+        return False
+
     def is_work_in_shop(self, shop):
         if self.shop and self.shop == shop:
             return True
@@ -707,6 +713,9 @@ class Seller(models.Model):
         # shop - executor
         # client - customer
 
+        if not self.__is_nead_process(order):
+            raise ValidationError(u"Данный заказ не требует обработки.")
+
         if ball_for_spend:
             self.__spend_customer_ball_for_order(order, purchaser, customer, executor, loyalty, ball_for_spend)
         else:
@@ -818,6 +827,8 @@ class Order(models.Model):
 
     loyalty_ball = models.IntegerField(u"Оплаено балами.", null=True, blank=True)
     rewards_ball = models.IntegerField(u"Накопленно балов.", null=True, blank=True)
+
+    status = models.CharField(u"Статус заказ", max_length=254)
 
     def add(self, product, quantity, price, currency):
         """
