@@ -203,11 +203,14 @@ class ShopPage(View):
 
 class NewDealPage(View):
     def get(self, request, *args, **kwargs):
+        """
+        Продавец запрашивает информацию по сделке.
+        Может вызывть только методы у объекта продавец(т.е. только у самого себе - отдавать приказы только себе и подчиненным).
+        """
         actor = get_actor_for_request_if_login(request)
         shop = get_shop_for_request_if_login(request)
         if shop.is_null():
             return redirect('/')
-        #seller = actor.seller
         seller = actor.get_seller()
         executor = seller.get_executor()
         if not request.session.get('order_id'):
@@ -217,17 +220,12 @@ class NewDealPage(View):
         order = seller.get_order(request.session.get('order_id'))
         client = seller.get_customer(request.session.get('client_id'))
 
-        from eloyalty.models import ServiceRepositoryLoyalty
-        srl = ServiceRepositoryLoyalty()
-        loyalties = srl.list_loyalty_for_owner(seller, executor)
-        loyalty = loyalties[0]
-        if not loyalty.is_registration(seller, client):
-            loyalty.register_in_loyalty_hello_0(seller, client, executor)
+        if not seller.is_registration_in_loyalty(client):
+            seller.registration_in_loyalty(client)
 
-        datetime_for_check = None
-        all_ball = loyalty.get_balance(actor, client, datetime_for_check)
+        all_ball = seller.get_balance_in_loyalty(actor, client)
 
-        max_ball_for_pay = loyalty.create_range_ball(actor, int(order.calculate_price_without_loyalty_balls()))[1]
+        max_ball_for_pay = seller.create_max_ball_in_loyalty(actor, int(order.calculate_price_without_loyalty_balls()))
         if max_ball_for_pay > all_ball:
             max_ball_for_pay = all_ball
 
@@ -239,7 +237,7 @@ class NewDealPage(View):
         answer['client'] = client
         answer['all_ball'] = all_ball
         answer['max_ball_for_pay'] = max_ball_for_pay
-        answer['max_percent_in_loyalty'] = loyalty.get_max_percent()
+        answer['max_percent_in_loyalty'] = seller.get_max_percent_in_loyalty()
         answer['order_sum_with_ball'] = int(order.calculate_price_without_loyalty_balls()) - max_ball_for_pay
         answer['special_products'] = special_products
         answer['selected_products'] = selected_products
@@ -302,24 +300,13 @@ class NewDealPage(View):
                 answer = {}
                 reward_ball = seller.calculate_rewards_balls_for_order(order)
 
-                from eloyalty.models import ServiceRepositoryLoyalty
-                srl = ServiceRepositoryLoyalty()
-                loyalties = srl.list_loyalty_for_owner(seller, executor)
-                loyalty = loyalties[0]
-
-                datetime_for_check = None
-                all_ball = loyalty.get_balance(actor, client, datetime_for_check)
+                all_ball = seller.get_balance_in_loyalty(actor, client)
 
                 answer['reward_ball_last_order'] = int(order.rewards_ball)
                 answer['all_ball'] = int(all_ball)
                 context = RequestContext(request, answer)
                 return HttpResponse(template.render(context.flatten()))
 
-            #from eloyalty.models import ServiceRepositoryLoyalty
-            #srl = ServiceRepositoryLoyalty()
-            #loyalties = srl.list_loyalty_for_owner(seller, executor)
-            #loyalty = loyalties[0]
-            #reward_ball = seller.calculate_rewards_balls_for_order(order, loyalty)
             reward_ball = seller.calculate_rewards_balls_for_order(order)
             request.session['price_last_order'] = int(order.calculate_price())
             request.session['reward_ball_last_order'] = int(reward_ball)
