@@ -79,6 +79,15 @@ class SellerXS(object):
         self.seller.create_order_from_busket_and_pickup_point(customer, executor, purchaser, basket, pickup_point)
         basket.delete()
 
+    def create_max_ball_in_loyalty(self, actor, price):
+        loyalty = self.get_loyalty()
+        return loyalty.create_range_ball(actor, price)[1]
+
+    def get_balance_in_loyalty(self, actor, client):
+        loyalty = self.get_loyalty()
+        datetime_for_check = None
+        return loyalty.get_balance(actor, client, datetime_for_check)
+
     def get_customer_order(self, order):
         return order.customer
 
@@ -109,6 +118,10 @@ class SellerXS(object):
     def get_object(self):
         return self.seller
 
+    def get_max_percent_in_loyalty(self):
+        loyalty = self.get_loyalty()
+        return loyalty.get_max_percent()
+
     def get_order(self, order_id):
         return self.seller.get_order(order_id)
 
@@ -127,6 +140,10 @@ class SellerXS(object):
 
     def has_order(self, order_id):
         return self.seller.has_order(order_id)
+
+    def is_registration_in_loyalty(self, client):
+        loyalty = self.get_loyalty()
+        return True if loyalty.is_registration(self, client) else False
 
     def __init__(self, seller):
         self.seller = seller
@@ -171,6 +188,11 @@ class SellerXS(object):
         elif ball_type == 'ZERO':
             ball_for_spend = 0
         self.seller.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point)
+
+    def registration_in_loyalty(self, client):
+        loyalty = self.get_loyalty()
+        executor = self.get_executor()
+        loyalty.register_in_loyalty_hello_0(self, client, executor)
 
 
 class SellerS(SellerXS):
