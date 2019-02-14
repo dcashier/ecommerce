@@ -6,6 +6,8 @@ from eactor.models import AuthSystem
 from django.template import RequestContext, loader
 from django.shortcuts import redirect
 
+from decimal import Decimal
+
 class MyView(View):
     def get(self, request, *args, **kwargs):
         return render(request, 'dcashier/static/index.html')
@@ -20,7 +22,6 @@ def index(request):
         if request.session.get('shop_id'):
             shop_id = request.session.get('shop_id')
             actor = get_actor_for_request_if_login(request)
-            #shops = actor.shops()
             seller = actor.get_seller()
             shops = seller.list_shop()
             for shop in shops:
@@ -40,7 +41,6 @@ def index(request):
         del request.session['reward_ball_last_order']
     template = loader.get_template('dcashier/static/index.html')
     context = RequestContext(request, answer)
-    #return HttpResponse(template.render(context))
     return HttpResponse(template.render(context.flatten()))
 
 class ActorNone(object):
@@ -71,7 +71,6 @@ class AuthPage(View):
         answer['is_error_login'] = request.session.get('is_error_login')
         template = loader.get_template('dcashier/static/authPage.html')
         context = RequestContext(request, answer)
-        #return HttpResponse(template.render(context))
         return HttpResponse(template.render(context.flatten()))
 
 def get_actor_for_request_if_login(request):
@@ -86,7 +85,6 @@ def get_shop_for_request_if_login(request):
     if actor:
         shop_id = request.session.get('shop_id')
         if shop_id:
-            #shops = actor.shops()
             seller = actor.get_seller()
             shops = seller.list_shop()
             for shop in shops:
@@ -119,7 +117,6 @@ class Logout(View):
 class SelectShopPage(View):
     def get(self, request, *args, **kwargs):
         actor = get_actor_for_request_if_login(request)
-        #shops = actor.shops()
         if not request.session.get('actor_id'):
             return redirect('/')
         seller = actor.get_seller()
@@ -128,13 +125,11 @@ class SelectShopPage(View):
         answer['shops'] = shops
         template = loader.get_template('dcashier/static/selectShopPage.html')
         context = RequestContext(request, answer)
-        #return HttpResponse(template.render(context))
         return HttpResponse(template.render(context.flatten()))
 
     def post(self, request, *args, **kwargs):
         shop_id = request.POST['shop_id']
         actor = get_actor_for_request_if_login(request)
-        #shops = actor.shops()
         seller = actor.get_seller()
         shops = seller.list_shop()
         for shop in shops:
@@ -148,7 +143,6 @@ class SellerDealPage(View):
         if not request.session.get('actor_id'):
             return redirect('/')
         actor = get_actor_for_request_if_login(request)
-        #seller = actor.seller
         seller = actor.get_seller()
         executor = seller.get_executor()
         if not request.session.get('shop_id'):
@@ -157,7 +151,6 @@ class SellerDealPage(View):
         if shop.is_null():
             return redirect('/')
         answer = {}
-        #answer['orders'] = seller.list_order_for_shop(executor, shop)
         answer['orders'] = seller.list_order()
         answer['seller'] = seller.get_object()
         answer['executor'] = executor
@@ -165,7 +158,6 @@ class SellerDealPage(View):
         answer['actor'] = actor
         template = loader.get_template('dcashier/static/sellerDealPage.html')
         context = RequestContext(request, answer)
-        #return HttpResponse(template.render(context))
         return HttpResponse(template.render(context.flatten()))
 
 class ShopPage(View):
@@ -176,16 +168,13 @@ class ShopPage(View):
         answer['shop'] = shop
         template = loader.get_template('dcashier/static/shopPage.html')
         context = RequestContext(request, answer)
-        #return HttpResponse(template.render(context))
         return HttpResponse(template.render(context.flatten()))
 
     def post(self, request, *args, **kwargs):
         actor = get_actor_for_request_if_login(request)
-        #seller = actor.seller
         seller = actor.get_seller()
         phone_number = request.POST['customerPhoneInput']
         order_sum = request.POST['dealSummInput']
-        from decimal import Decimal
         price = Decimal(order_sum)
         if seller.get_executor().is_size_xs():
             seller.create_order(phone_number, price)
@@ -198,7 +187,6 @@ class ShopPage(View):
         client = seller.get_client_with_phone_number(phone_number)
         request.session['order_id'] = order.id
         request.session['client_id'] = client.id
-        #request.session['purchaser_id'] = None
         return redirect('/newDealPage.html')
 
 class NewDealPage(View):
@@ -243,12 +231,10 @@ class NewDealPage(View):
         answer['selected_products'] = selected_products
         template = loader.get_template('dcashier/static/newDealPage.html')
         context = RequestContext(request, answer)
-        #return HttpResponse(template.render(context))
         return HttpResponse(template.render(context.flatten()))
 
     def post(self, request, *args, **kwargs):
         actor = get_actor_for_request_if_login(request)
-        #seller = actor.seller
         seller = actor.get_seller()
         executor = seller.get_executor()
         order = seller.get_order(request.session.get('order_id'))
@@ -266,8 +252,6 @@ class NewDealPage(View):
             return redirect('/newDealPage.html')
         else:
             if request.POST['action']  == 'write_off':
-                #seller.process_order_with_ball_type_xs(order, client, 'MAX')
-                #seller.process_order_with_ball_type(order, client, 'MAX', shop)
                 if seller.get_executor().is_size_xs():
                     seller.process_order_with_ball_type(order, 'MAX')
                 elif seller.get_executor().is_size_s():
@@ -275,19 +259,14 @@ class NewDealPage(View):
                     seller.process_order_with_ball_type(order, 'MAX', pickup_point)
                 else:
                     assert False
-
                 template = loader.get_template('dcashier/static/transCompletedBallSpendPage.html')
                 answer = {}
                 reward_ball = seller.calculate_rewards_balls_for_order(order)
-
-                #answer['reward_ball_last_order'] = int(reward_ball)
                 answer['reward_ball_last_order'] = int(order.rewards_ball)
                 context = RequestContext(request, answer)
                 return HttpResponse(template.render(context.flatten()))
 
             elif request.POST['action']  == 'save_up':
-                #seller.process_order_with_ball_type_xs(order, client, 'ZERO')
-                #seller.process_order_with_ball_type(order, client, 'ZERO', shop)
                 if seller.get_executor().is_size_xs():
                     seller.process_order_with_ball_type(order, 'ZERO')
                 elif seller.get_executor().is_size_s():
@@ -295,13 +274,10 @@ class NewDealPage(View):
                     seller.process_order_with_ball_type(order, 'ZERO', pickup_point)
                 else:
                     assert False
-
                 template = loader.get_template('dcashier/static/transCompletedBallSavePage.html')
                 answer = {}
                 reward_ball = seller.calculate_rewards_balls_for_order(order)
-
                 all_ball = seller.get_balance_in_loyalty(actor, client)
-
                 answer['reward_ball_last_order'] = int(order.rewards_ball)
                 answer['all_ball'] = int(all_ball)
                 context = RequestContext(request, answer)
@@ -344,7 +320,6 @@ class CustomerAddPage(View):
             answer = {'error': 'Клиент с таким номером уже существует'}
             context = RequestContext(request, answer)
             return HttpResponse(template.render(context.flatten()))
-
 
         answer = {}
         if not phone_number or \
