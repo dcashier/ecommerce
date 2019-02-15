@@ -180,12 +180,13 @@ class ShopPage(View):
         if seller.get_executor().is_size_xs():
             seller.create_order(phone_number, price)
         elif seller.get_executor().is_size_s():
-            pickup_point = seller.get_pickup_point_by_id(int(request.session.get('shop_id')))
+            pickup_point = seller.get_pickup_point_spec_id(int(request.session.get('shop_id')))
             seller.create_order(phone_number, price, pickup_point)
         else:
             assert False
-        order = seller.get_last_order_for_client_with_phone_number(phone_number)
-        client = seller.get_client_with_phone_number(phone_number)
+        #order = seller.get_last_order_for_client_with_phone_number(phone_number)
+        client = seller.get_customer_spec_phone_number(phone_number)
+        order = seller.get_last_order_spec_customer(client)
         request.session['order_id'] = order.id
         request.session['client_id'] = client.id
         return redirect('/newDealPage.html')
@@ -204,17 +205,17 @@ class NewDealPage(View):
         executor = seller.get_executor()
         if not request.session.get('order_id'):
             return redirect('/')
-        if not seller.has_order(request.session.get('order_id')):
+        if not seller.has_order_spec_id(request.session.get('order_id')):
             return redirect('/')
-        order = seller.get_order(request.session.get('order_id'))
-        client = seller.get_customer(request.session.get('client_id'))
+        order = seller.get_order_spec_id(request.session.get('order_id'))
+        client = seller.get_customer_spec_id(request.session.get('client_id'))
 
         if not seller.is_registration_in_loyalty(client):
             seller.registration_in_loyalty(client)
 
-        all_ball = seller.get_balance_in_loyalty(actor, client)
+        all_ball = seller.get_balance_customer_in_loyalty(client)
 
-        max_ball_for_pay = seller.create_max_ball_in_loyalty(actor, int(order.calculate_price_without_loyalty_balls()))
+        max_ball_for_pay = seller.get_max_ball_in_loyalty(actor, int(order.calculate_price_without_loyalty_balls()))
         if max_ball_for_pay > all_ball:
             max_ball_for_pay = all_ball
 
@@ -238,8 +239,8 @@ class NewDealPage(View):
         actor = get_actor_for_request_if_login(request)
         seller = actor.get_seller()
         executor = seller.get_executor()
-        order = seller.get_order(request.session.get('order_id'))
-        client = seller.get_customer(request.session.get('client_id'))
+        order = seller.get_order_spec_id(request.session.get('order_id'))
+        client = seller.get_customer_spec_id(request.session.get('client_id'))
         shop = get_shop_for_request_if_login(request)
 
         if not request.POST.get('action'):
@@ -248,7 +249,7 @@ class NewDealPage(View):
         if request.POST['action']  == 'set_product':
             order.delete_easy_products()
             for product_id in request.POST.getlist('products'):
-                product = seller.get_product(product_id)
+                product = seller.get_product_spec_id(product_id)
                 order.add(product, 1, 0, 'RUS')
             return redirect('/newDealPage.html')
         else:
@@ -256,13 +257,13 @@ class NewDealPage(View):
                 if seller.get_executor().is_size_xs():
                     seller.process_order_with_ball_type(order, 'MAX')
                 elif seller.get_executor().is_size_s():
-                    pickup_point = seller.get_pickup_point_by_id(int(request.session.get('shop_id')))
+                    pickup_point = seller.get_pickup_point_spec_id(int(request.session.get('shop_id')))
                     seller.process_order_with_ball_type(order, 'MAX', pickup_point)
                 else:
                     assert False
                 template = loader.get_template('dcashier/static/transCompletedBallSpendPage.html')
                 answer = {}
-                reward_ball = seller.calculate_rewards_balls_for_order(order)
+                reward_ball = seller.get_rewards_balls_for_order(order)
                 answer['reward_ball_last_order'] = int(order.rewards_ball)
                 context = RequestContext(request, answer)
                 return HttpResponse(template.render(context.flatten()))
@@ -271,14 +272,14 @@ class NewDealPage(View):
                 if seller.get_executor().is_size_xs():
                     seller.process_order_with_ball_type(order, 'ZERO')
                 elif seller.get_executor().is_size_s():
-                    pickup_point = seller.get_pickup_point_by_id(int(request.session.get('shop_id')))
+                    pickup_point = seller.get_pickup_point_spec_id(int(request.session.get('shop_id')))
                     seller.process_order_with_ball_type(order, 'ZERO', pickup_point)
                 else:
                     assert False
                 template = loader.get_template('dcashier/static/transCompletedBallSavePage.html')
                 answer = {}
-                reward_ball = seller.calculate_rewards_balls_for_order(order)
-                all_ball = seller.get_balance_in_loyalty(actor, client)
+                reward_ball = seller.get_rewards_balls_for_order(order)
+                all_ball = seller.get_balance_customer_in_loyalty(client)
                 answer['reward_ball_last_order'] = int(order.rewards_ball)
                 answer['all_ball'] = int(all_ball)
                 context = RequestContext(request, answer)
@@ -287,7 +288,7 @@ class NewDealPage(View):
             else:
                 assert False
 
-            reward_ball = seller.calculate_rewards_balls_for_order(order)
+            reward_ball = seller.get_rewards_balls_for_order(order)
             request.session['price_last_order'] = int(order.calculate_price())
             request.session['reward_ball_last_order'] = int(reward_ball)
             return redirect('/')
@@ -316,8 +317,8 @@ class CustomerAddPage(View):
         phone_number_referee = request.POST['customerRefPhoneInput']
 
         if phone_number and \
-            seller.has_customer_with_phone_number(phone_number):
-            client = seller.get_client_with_phone_number(phone_number)
+            seller.has_customer_spec_phone_number(phone_number):
+            client = seller.get_customer_spec_phone_number(phone_number)
             request.session['client_id'] = client.id
 
             template = loader.get_template('dcashier/static/customerAddPage.html')
@@ -335,8 +336,8 @@ class CustomerAddPage(View):
             context = RequestContext(request, answer)
             return HttpResponse(template.render(context.flatten()))
 
-        if seller.has_customer_with_phone_number(phone_number):
-            client = seller.get_client_with_phone_number(phone_number)
+        if seller.has_customer_spec_phone_number(phone_number):
+            client = seller.get_customer_spec_phone_number(phone_number)
             request.session['client_id'] = client.id
 
             template = loader.get_template('dcashier/static/customerAddPage.html')
@@ -360,7 +361,7 @@ class CustomerAddPage(View):
         else:
             assert False
 
-        client = seller.get_client_with_phone_number(phone_number)
+        client = seller.get_customer_spec_phone_number(phone_number)
         request.session['client_id'] = client.id
 
         template = loader.get_template('dcashier/static/customerAddedPage.html')
@@ -400,9 +401,9 @@ class TransHistoryPage(View):
         if shop.is_null():
             return redirect('/')
 
-        customer = seller.get_customer(request.session.get('client_id'))
+        customer = seller.get_customer_spec_id(request.session.get('client_id'))
         answer = {}
-        answer['orders'] = seller.list_order_for_customer(customer)
+        answer['orders'] = seller.list_order_spec_customer(customer)
         answer['seller'] = seller.get_object()
         answer['client'] = customer
 
