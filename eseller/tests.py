@@ -110,7 +110,7 @@ class TestESeller(TestCase):
         city_spb = City(title=u"SPB", region=region_center)
         city_spb.save()
 
-        storage_1 = Storage(title=u"main storage")
+        storage_1 = Storage(title=u"main storage", size=10000)
         storage_1.save()
 
         pickup_point_1 = PickupPoint(title=u"pickup 1", city=city_moscow)
@@ -152,8 +152,8 @@ class TestESeller(TestCase):
         part_number_1.save()
         element_purchase = ElemetPurchase(system_purchase=system_purchase, quantity=quantity_mi8, product=product_mi8, part_number=part_number_1, purchase_cost=purchase_cost_mi8, purchase_currency=currency_mi8)
         element_purchase.save()
-        #storage_1.load(product_mi8, quantity_mi8, purchase_cost_mi8, currency_mi8)
-        storage_1.load(product_mi8, quantity_mi8, part_number_1)
+        #storage_1.push(product_mi8, quantity_mi8, purchase_cost_mi8, currency_mi8)
+        storage_1.push(product_mi8, quantity_mi8, part_number_1)
         quantity = seller.quantity_for_sale(product_mi8)
         self.assertEqual(10, quantity)
         # закупка прошла успешно
@@ -168,7 +168,7 @@ class TestESeller(TestCase):
         system_purchase.save()
         element_purchase = ElemetPurchase(system_purchase=system_purchase, quantity=quantity_mi8_2, product=product_mi8, part_number=part_number_2, purchase_cost=purchase_cost_mi8_2, purchase_currency=currency_mi8_2)
         element_purchase.save()
-        storage_1.load(product_mi8, quantity_mi8_2, part_number_2)
+        storage_1.push(product_mi8, quantity_mi8_2, part_number_2)
         quantity = seller.quantity_for_sale(product_mi8)
         # с учетом предыдущих 10 ми8 суммарно получили 30
         self.assertEqual(30, quantity)
@@ -311,7 +311,7 @@ class TestESeller(TestCase):
         part_number_3.save()
         element_purchase_3 = ElemetPurchase(system_purchase=system_purchase_3, quantity=quantity_case_noname, product=product_case_noname, part_number=part_number_3, purchase_cost=purchase_cost_case_noname, purchase_currency=currency_case_noname)
         element_purchase_3.save()
-        storage_1.load(product_case_noname, quantity_case_noname, part_number_3)
+        storage_1.push(product_case_noname, quantity_case_noname, part_number_3)
         quantity = seller.quantity_for_sale(product_case_noname)
         self.assertEqual(1000, quantity)
         # закупка прошла успешно
@@ -381,20 +381,28 @@ class TestESeller(TestCase):
         self.assertTrue(seller_2_1.is_work_in_shop(shop_2))
         self.assertFalse(seller_1.is_work_in_shop(shop_2))
         self.assertFalse(seller_2_1.is_work_in_shop(shop_1))
-        try:
-            seller_1.has_shop_client_with_phone_number(shop_2, client_phone_number)
-        except:
-            pass
-        else:
-            # Если появилось исключение значит права нарушены
-            self.assertFalse(True)
-        try:
-            seller_1.create_client_shop_with_phone_number(shop_2, client_phone_number)
-        except:
-            pass
-        else:
-            # Если появилось исключение значит права нарушены
-            self.assertFalse(True)
+        #try:
+        #    seller_1.has_shop_client_with_phone_number(shop_2, client_phone_number)
+        #except:
+        #    pass
+        #else:
+        #    # Если появилось исключение значит права нарушены
+        #    self.assertFalse(True)
+
+        #self.assertRaises(ValidationError(u"Выбранный прожавец не работает в указханном магазине."), seller_1.has_shop_client_with_phone_number, shop_2, client_phone_number)
+        self.assertRaises(ValidationError, seller_1.has_shop_client_with_phone_number, shop_2, client_phone_number)
+
+        #try:
+        #    seller_1.create_client_shop_with_phone_number(shop_2, client_phone_number)
+        #except:
+        #    pass
+        #else:
+        #    # Если появилось исключение значит права нарушены
+        #    self.assertFalse(True)
+
+        #self.assertRaises(ValidationError(u"Выбранный прожавец не работает в указханном магазине."), seller_1.create_client_shop_with_phone_number, shop_2, client_phone_number)
+        self.assertRaises(ValidationError, seller_1.create_client_shop_with_phone_number, shop_2, client_phone_number)
+
         self.assertFalse(seller_2_1.has_shop_client_with_phone_number(shop_2, client_phone_number))
         seller_2_1.create_client_shop_with_phone_number(shop_2, client_phone_number)
 
@@ -561,6 +569,239 @@ class TestESeller(TestCase):
 
         # list_easy_product
         self.assertEqual([], order_2.list_easy_product())
+
+    def test_storekeeper(self):
+        """
+        В чем заключается работа кладовщика?
+        Сопсотавить накладную и реально приехавший товар
+        Принять на ответственное хранние какое то количество товаров.
+        Выдать по накладной.
+        """
+        brand_1 = Brand(title=u"Базовый")
+        brand_1.save()
+        product_1 = Product(title="Позиция для списывания суммы", brand=brand_1)
+        product_1.save()
+        shop_1 = Shop(title=u"main shop")
+        shop_1.save()
+        storage_1 = Storage(title=u"main storage", size=10000)
+        storage_1.save()
+        part_number_1 = PartNumber()
+        part_number_1.save()
+        storekeeper_1 = Storekeeper(title='Keeper Storage 1', shop=shop_1)
+        storekeeper_1.save()
+        storekeeper_1.storages.add(storage_1)
+        self.assertEqual(0, storekeeper_1.quantity_all())
+
+        shipper_1 = Shop(title=u"shipper 1")
+        shipper_1.save()
+
+        invoice = {
+            'type': 'IN',
+            'title': 'title 1',
+            'cargo': [
+                {
+                    'product': product_1,
+                    'quantity': 10,
+                    #'price': 250,
+                },
+            ],
+            'price': [
+                {
+                    'product': product_1,
+                    'price': 250,
+                },
+            ],
+            'executor': shipper_1,
+            'customer': shop_1,
+        }
+        cargo = [
+            {
+                'product': product_1,
+                'quantity': 9,
+            },
+        ]
+        self.assertFalse(storekeeper_1.is_match_cargo_and_invoice(cargo, invoice))
+        cargo = [
+            {
+                'product': product_1,
+                'quantity': 10,
+            },
+        ]
+        self.assertTrue(storekeeper_1.is_match_cargo_and_invoice(cargo, invoice))
+        storekeeper_1.push(storage_1, cargo)
+        self.assertEqual(10, storekeeper_1.quantity_all())
+
+        brand_2 = Brand(title=u"Samsung")
+        brand_2.save()
+        product_2 = Product(title="S7", brand=brand_1)
+        product_2.save()
+        shipper_2 = Shop(title=u"shipper 2")
+        shipper_2.save()
+
+        invoice = {
+            'type': 'IN',
+            'title': 'title 2 1',
+            'cargo': [
+                {
+                    'product': product_2,
+                    'quantity': 10,
+                    #'price': 77050,
+                },
+            ],
+            'price': [
+                {
+                    'product': product_2,
+                    'price': 77050,
+                },
+            ],
+            'executor': shipper_2,
+            'customer': shop_1,
+        }
+        cargo = [
+            {
+                'product': product_2,
+                'quantity': 10,
+            },
+        ]
+        self.assertTrue(storekeeper_1.is_match_cargo_and_invoice(cargo, invoice))
+        storekeeper_1.push(storage_1, cargo)
+        self.assertEqual(20, storekeeper_1.quantity_all())
+
+        invoice = {
+            'type': 'IN',
+            'title': 'title 2 2',
+            'cargo': [
+                {
+                    'product': product_2,
+                    'quantity': 10,
+                    #'price': 77050,
+                },
+            ],
+            'price': [
+                {
+                    'product': product_2,
+                    'price': 77050,
+                },
+            ],
+            'executor': shipper_2,
+            'customer': shop_1,
+        }
+        cargo = [
+            {
+                'product': product_2,
+                'quantity': 10,
+            },
+        ]
+        self.assertTrue(storekeeper_1.is_match_cargo_and_invoice(cargo, invoice))
+        storekeeper_1.push(storage_1, cargo)
+        self.assertEqual(30, storekeeper_1.quantity_all())
+
+        customer_1 = Shop(title=u"customer 1")
+        customer_1.save()
+        invoice = {
+            'type': 'OUT',
+            'title': 'title 3',
+            'cargo': [
+                {
+                    'product': product_2,
+                    'quantity': 3,
+                    #'price': 77050,
+                },
+            ],
+            'price': [
+                {
+                    'product': product_2,
+                    'price': 90100,
+                },
+            ],
+            'executor': shop_1,
+            'customer': customer_1,
+        }
+        cargo = [
+            {
+                'product': product_2,
+                'quantity': 3,
+            },
+        ]
+        self.assertTrue(storekeeper_1.is_match_cargo_and_invoice(cargo, invoice))
+        storekeeper_1.pull(storage_1, cargo)
+        self.assertEqual(27, storekeeper_1.quantity_all())
+
+
+        customer_2 = Shop(title=u"customer 2")
+        customer_2.save()
+        invoice = {
+            'type': 'OUT',
+            'title': 'title 4',
+            'cargo': [
+                {
+                    'product': product_2,
+                    'quantity': 14,
+                    #'price': 77050,
+                },
+            ],
+            'price': [
+                {
+                    'product': product_2,
+                    'price': 87000,
+                },
+            ],
+            'executor': shop_1,
+            'customer': customer_2,
+        }
+        cargo = [
+            {
+                'product': product_2,
+                'quantity': 14,
+            },
+        ]
+        self.assertTrue(storekeeper_1.is_match_cargo_and_invoice(cargo, invoice))
+        storekeeper_1.pull(storage_1, cargo)
+        self.assertEqual(13, storekeeper_1.quantity_all())
+
+        invoice = {
+            'type': 'OUT',
+            'title': 'title 4',
+            'cargo': [
+                {
+                    'product': product_1,
+                    'quantity': 11,
+                },
+            ],
+            'price': [
+                {
+                    'product': product_1,
+                    'price': 10000,
+                },
+            ],
+            'executor': shop_1,
+            'customer': customer_2,
+        }
+        cargo = [
+            {
+                'product': product_1,
+                'quantity': 11,
+            },
+        ]
+        self.assertTrue(storekeeper_1.is_match_cargo_and_invoice(cargo, invoice))
+        #try:
+        #    # Выбрасывается исключение так как пытаемся списать товара больше чем есть вналичии
+        #    storekeeper_1.pull(storage_1, cargo)
+        #except:
+        #    pass
+        #else:
+        #    self.assertFalse(True)
+        # Выбрасывается исключение так как пытаемся списать товара больше чем есть вналичии
+        self.assertRaises(AssertionError, storekeeper_1.pull, storage_1, cargo)
+
+
+    def test_logistician(self):
+        """
+        В чем заключается работа логиста?
+        Знает и умеет оптимально перемещать товары между складами.
+        Отправить груз с одно склада на другой.
+        """
+        pass
 
 #    def test_list_shop_for_user_with_pickup_in_city(self):
 #        """
