@@ -224,7 +224,7 @@ class TestESeller(TestCase):
 
         # Из всего списка Вове понравился только Mi8
         # Вова спрашивает у продавца какая цна на Mi8, если он придет на одну из Московских точек самовывоза?
-        prices = seller.prices(product_mi8, client_city, client_type)
+        prices = seller.list_price_of_product_for_customer(product_mi8, client_city, client_type)
         self.assertEqual([Decimal('115.61'), Decimal('132.00'), 150], prices)
 
         # а много у вас осталось Mi8 сейчас?
@@ -240,7 +240,7 @@ class TestESeller(TestCase):
                 'currency': "USD",
             },
         ]
-        pickup_points = seller.list_pickup_points(params_basket, client_city, client_type)
+        pickup_points = seller.list_pickup_point_spec_basket_customer(params_basket, client_city, client_type)
         self.assertEqual([pickup_point_1, pickup_point_2], pickup_points)
 
         #Вова решил купить Ми8 за цену 115.61, оформляет заказ.
@@ -319,7 +319,7 @@ class TestESeller(TestCase):
         # Но мы еще не создали правило для продажи чехлов
         self.assertFalse(seller.is_allow_order(order_params))
 
-        prices = seller.prices(product_case_noname, client_city, client_type)
+        prices = seller.list_price_of_product_for_customer(product_case_noname, client_city, client_type)
         self.assertEqual([], prices)
 
         # Создаем правило для продажи чехлов
@@ -337,7 +337,7 @@ class TestESeller(TestCase):
 
 	seller.price_policies.add(price_policy_2)
 
-        prices = seller.prices(product_case_noname, client_city, client_type)
+        prices = seller.list_price_of_product_for_customer(product_case_noname, client_city, client_type)
         self.assertEqual([Decimal('10.00')], prices)
         # Правило отработало и вернуло допустимую цену
 
@@ -362,7 +362,7 @@ class TestESeller(TestCase):
 
         client_phone_number = '+71002003040'
         self.assertTrue(seller_1.is_work_in_shop(shop_1))
-        self.assertFalse(seller_1.has_shop_client_with_phone_number(shop_1, client_phone_number))
+        self.assertFalse(seller_1.has_customer_spec_executor_phone_number(shop_1, client_phone_number))
 
         shop_2 = Shop(title=u"shop two")
         shop_2.save()
@@ -382,47 +382,47 @@ class TestESeller(TestCase):
         self.assertFalse(seller_1.is_work_in_shop(shop_2))
         self.assertFalse(seller_2_1.is_work_in_shop(shop_1))
         #try:
-        #    seller_1.has_shop_client_with_phone_number(shop_2, client_phone_number)
+        #    seller_1.has_customer_spec_executor_phone_number(shop_2, client_phone_number)
         #except:
         #    pass
         #else:
         #    # Если появилось исключение значит права нарушены
         #    self.assertFalse(True)
 
-        #self.assertRaises(ValidationError(u"Выбранный прожавец не работает в указханном магазине."), seller_1.has_shop_client_with_phone_number, shop_2, client_phone_number)
-        self.assertRaises(ValidationError, seller_1.has_shop_client_with_phone_number, shop_2, client_phone_number)
+        #self.assertRaises(ValidationError(u"Выбранный прожавец не работает в указханном магазине."), seller_1.has_customer_spec_executor_phone_number, shop_2, client_phone_number)
+        self.assertRaises(ValidationError, seller_1.has_customer_spec_executor_phone_number, shop_2, client_phone_number)
 
         #try:
-        #    seller_1.create_client_shop_with_phone_number(shop_2, client_phone_number)
+        #    seller_1.create_customer_shop_with_phone_number(shop_2, client_phone_number)
         #except:
         #    pass
         #else:
         #    # Если появилось исключение значит права нарушены
         #    self.assertFalse(True)
 
-        #self.assertRaises(ValidationError(u"Выбранный прожавец не работает в указханном магазине."), seller_1.create_client_shop_with_phone_number, shop_2, client_phone_number)
-        self.assertRaises(ValidationError, seller_1.create_client_shop_with_phone_number, shop_2, client_phone_number)
+        #self.assertRaises(ValidationError(u"Выбранный прожавец не работает в указханном магазине."), seller_1.create_customer_shop_with_phone_number, shop_2, client_phone_number)
+        self.assertRaises(ValidationError, seller_1.create_customer_shop_with_phone_number, shop_2, client_phone_number)
 
-        self.assertFalse(seller_2_1.has_shop_client_with_phone_number(shop_2, client_phone_number))
-        seller_2_1.create_client_shop_with_phone_number(shop_2, client_phone_number)
+        self.assertFalse(seller_2_1.has_customer_spec_executor_phone_number(shop_2, client_phone_number))
+        seller_2_1.create_customer_shop_with_phone_number(shop_2, client_phone_number)
 
-        client = seller_2_1.get_client_shop_with_phone_number(shop_2, client_phone_number)
+        client = seller_2_1.get_customer_spec_executor_phone_number(shop_2, client_phone_number)
         self.assertEqual(client_phone_number, client.get_phone_number())
 
-        self.assertFalse(seller_1.has_shop_client_with_phone_number(shop_1, client_phone_number))
-        self.assertTrue(seller_2_1.has_shop_client_with_phone_number(shop_2, client_phone_number))
+        self.assertFalse(seller_1.has_customer_spec_executor_phone_number(shop_1, client_phone_number))
+        self.assertTrue(seller_2_1.has_customer_spec_executor_phone_number(shop_2, client_phone_number))
 
-        self.assertFalse(seller_1.has_shop_client(shop_1, client))
-        self.assertTrue(seller_2_1.has_shop_client(shop_2, client))
+        self.assertFalse(seller_1.has_customer_spec_executor(shop_1, client))
+        self.assertTrue(seller_2_1.has_customer_spec_executor(shop_2, client))
 
         seller_2_2 = Seller(shop=shop_2)
         seller_2_2.save()
 
         self.assertFalse(seller_2_2.is_work_in_shop(shop_1))
         self.assertTrue(seller_2_2.is_work_in_shop(shop_2))
-        self.assertTrue(seller_2_2.has_shop_client_with_phone_number(shop_2, client_phone_number))
-        self.assertTrue(seller_2_2.has_shop_client(shop_2, client))
-        self.assertEqual(client_phone_number, seller_2_2.get_client_shop_with_phone_number(shop_2, client_phone_number).get_phone_number())
+        self.assertTrue(seller_2_2.has_customer_spec_executor_phone_number(shop_2, client_phone_number))
+        self.assertTrue(seller_2_2.has_customer_spec_executor(shop_2, client))
+        self.assertEqual(client_phone_number, seller_2_2.get_customer_spec_executor_phone_number(shop_2, client_phone_number).get_phone_number())
 
         # создадим заказ
         brand_my = Brand(title=u"Реализация заказа")
@@ -434,11 +434,11 @@ class TestESeller(TestCase):
         currency = "USD"
 
         # клиент просит продавца положить в корзину колиенту товар
-        self.assertFalse(seller_2_1.has_basket_for_client_in_shop(client, shop_2))
+        self.assertFalse(seller_2_1.has_basket_spec_customer_executor(client, shop_2))
         purchaser = Purchaser.get_purchaser_with_phone_number_for_client(client_phone_number, client)
         seller_2_1.create_basket_for_client_in_shop(client, shop_2, purchaser)
-        self.assertTrue(seller_2_1.has_basket_for_client_in_shop(client, shop_2))
-        basket_client = seller_2_1.get_basket_for_client_in_shop(client, shop_2)
+        self.assertTrue(seller_2_1.has_basket_spec_customer_executor(client, shop_2))
+        basket_client = seller_2_1.get_basket_spec_executor_customer(client, shop_2)
 
         seller_2_1.add_product_in_basket(basket_client, product_my, quantity, price, currency)
 
@@ -450,7 +450,7 @@ class TestESeller(TestCase):
         #pickup_point.save()
 
         seller_2_1.create_order_from_busket_and_pickup_point(client, shop_2, purchaser, basket_client, pickup_point)
-        order_client = seller_2_1.get_last_order_client(client)
+        order_client = seller_2_1.get_last_order_spec_customer(client)
         ball = 1
         #purchaser.pay_ball(order_client, ball)
 
@@ -485,49 +485,49 @@ class TestESeller(TestCase):
             self.assertFalse(True)
 
 
-        self.assertEqual(1, seller_2_1.count_order_customer(client))
+        self.assertEqual(1, seller_2_1.count_order_spec_customer(client))
 
         #seller_2_1.process_order_with_max_allow_ball_without_customer_security(order_client, purchaser, client, shop_2, loyalty, pickup_point)
         #self.assertEqual(Decimal('3.00'), order_client.calculate_price())
 
         ball_for_spend = 2
         seller_2_1.create_order_from_busket_and_pickup_point(client, shop_2, purchaser, basket_client, pickup_point)
-        order_client_2 = seller_2_1.get_last_order_client(client)
+        order_client_2 = seller_2_1.get_last_order_spec_customer(client)
         seller_2_1.process_order_without_customer_security(order_client_2, purchaser, client, shop_2, loyalty, ball_for_spend, pickup_point)
         self.assertEqual(Decimal('3.00'), order_client_2.calculate_price())
 
         seller_2_1.create_order_from_busket_and_pickup_point(client, shop_2, purchaser, basket_client, pickup_point)
-        order_client_3 = seller_2_1.get_last_order_client(client)
+        order_client_3 = seller_2_1.get_last_order_spec_customer(client)
         SellerXS(seller_2_1).process_order_with_ball_type(order_client_3, 'MAX')
         self.assertEqual(Decimal('3.00'), order_client_3.calculate_price())
 
-        basket = seller_2_1.get_basket_for_client_in_shop(client, shop_2)
+        basket = seller_2_1.get_basket_spec_executor_customer(client, shop_2)
         basket.delete()
 
         # create_easy_order_by_phone_number_of_customer
         price = Decimal('15.00')
-        self.assertEqual(3, seller_2_1.count_order_customer(client))
+        self.assertEqual(3, seller_2_1.count_order_spec_customer(client))
 	#seller_2_1.create_easy_order_by_phone_number_of_customer(client_phone_number, price, pickup_point)
 	SellerXS(seller_2_1).create_order(client_phone_number, price)
-        self.assertEqual(4, seller_2_1.count_order_customer(client))
-        self.assertEqual(Decimal('15.00'), seller_2_1.get_last_order_client(client).calculate_price_without_loyalty_balls())
+        self.assertEqual(4, seller_2_1.count_order_spec_customer(client))
+        self.assertEqual(Decimal('15.00'), seller_2_1.get_last_order_spec_customer(client).calculate_price_without_loyalty_balls())
 
         # get_my_order
-        #order_2 = seller_2_1.get_last_order_client(client)
-        order_2 = SellerXS(seller_2_1).get_last_order_for_client(client)
+        #order_2 = seller_2_1.get_last_order_spec_customer(client)
+        order_2 = SellerXS(seller_2_1).get_last_order_spec_customer(client)
         #self.assertEqual(order_2, seller_2_1.get_my_order(order_2.id))
-        self.assertEqual(order_2, SellerXS(seller_2_1).get_order(order_2.id))
+        self.assertEqual(order_2, SellerXS(seller_2_1).get_order_spec_id(order_2.id))
 
         # get_my_customer
         #self.assertEqual(client, seller_2_1.get_my_customer(client.id))
-        self.assertEqual(client, SellerXS(seller_2_1).get_customer(client.id))
+        self.assertEqual(client, SellerXS(seller_2_1).get_customer_spec_id(client.id))
 
         # get_easy_product
         #self.assertEqual(product_my, seller_2_1.get_easy_product(product_my.id))
-        self.assertEqual(product_my, SellerXS(seller_2_1).get_product(product_my.id))
+        self.assertEqual(product_my, SellerXS(seller_2_1).get_product_spec_id(product_my.id))
 
-        # list_order_for_shop
-        self.assertEqual([order_client, order_client_2, order_client_3, order_2], list(seller_2_1.list_order_for_shop(shop_2, pickup_point)))
+        # list_order_spec_executor_pickup_point 
+        self.assertEqual([order_client, order_client_2, order_client_3, order_2], list(seller_2_1.list_order_spec_executor_pickup_point(shop_2, pickup_point)))
 
         # list_easy_product
         #self.assertEqual([product_my], seller_2_1.list_easy_product())
@@ -550,7 +550,7 @@ class TestESeller(TestCase):
         # process_order_easy_with_zero_ball_without_customer_security
         #seller_2_1.process_order_easy_with_zero_ball_without_customer_security(order_2, client, shop_2, loyalty, pickup_point)
 	SellerXS(seller_2_1).create_order(client_phone_number, price)
-        order_2_1 = seller_2_1.get_last_order_client(client)
+        order_2_1 = seller_2_1.get_last_order_spec_customer(client)
         SellerXS(seller_2_1).process_order_with_ball_type(order_2_1, 'ZERO')
         self.assertEqual(0, order_2_1.loyalty_ball)
 
@@ -559,7 +559,7 @@ class TestESeller(TestCase):
 
         #seller_2_1.process_order_with_ball_type_xs(order_2, client, 'ZERO')
 	SellerXS(seller_2_1).create_order(client_phone_number, price)
-        order_2_2 = seller_2_1.get_last_order_client(client)
+        order_2_2 = seller_2_1.get_last_order_spec_customer(client)
         SellerXS(seller_2_1).process_order_with_ball_type(order_2_2, 'ZERO')
         self.assertEqual(0, order_2_2.loyalty_ball)
 

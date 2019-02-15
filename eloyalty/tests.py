@@ -143,7 +143,7 @@ class TestELoyalty(TestCase):
         client_new.phone_m_type = params.get('phone_m_type')
         client_new.save()
 
-        #seller_shop_1.create_client_shop_with_phone_number(shop_1, client_new['phone_number'])
+        #seller_shop_1.create_customer_shop_with_phone_number(shop_1, client_new['phone_number'])
         purchaser = Purchaser(
             title=u"Default purchaser when Seller create Client.",
             shop=client_new,
@@ -226,11 +226,11 @@ class TestELoyalty(TestCase):
             'status': ['create'],
         }
         #seller_shop_1.create_order(order_params)
-        self.assertFalse(seller_shop_1.has_basket_for_client_in_shop(client_2, shop_1))
+        self.assertFalse(seller_shop_1.has_basket_spec_customer_executor(client_2, shop_1))
         purchaser = Purchaser.get_purchaser_with_phone_number_for_client(client_2.phone_number, client_2)
         seller_shop_1.create_basket_for_client_in_shop(client_2, shop_1, purchaser)
-        self.assertTrue(seller_shop_1.has_basket_for_client_in_shop(client_2, shop_1))
-        basket_client = seller_shop_1.get_basket_for_client_in_shop(client_2, shop_1)
+        self.assertTrue(seller_shop_1.has_basket_spec_customer_executor(client_2, shop_1))
+        basket_client = seller_shop_1.get_basket_spec_executor_customer(client_2, shop_1)
         seller_shop_1.add_product_in_basket(basket_client, product_mi8, 1, Decimal('115.61'), 'USD')
         seller_shop_1.create_order_from_busket_and_pickup_point(client_2, shop_1, purchaser, basket_client, pickup_point_1)
         basket_client.delete()
@@ -255,8 +255,8 @@ class TestELoyalty(TestCase):
 
 
         #reward_balls = seller_shop_1.calculate_rewards_balls_for_last_order(loyalty_1, client_2)
-        last_order_for_client_2 = seller_shop_1.get_last_order_client(client_2)
-        reward_balls = seller_shop_1.calculate_rewards_balls_for_order(last_order_for_client_2, loyalty_1)
+        last_order_for_client_2 = seller_shop_1.get_last_order_spec_customer(client_2)
+        reward_balls = seller_shop_1.get_rewards_balls_for_order(last_order_for_client_2, loyalty_1)
         #self.assertEqual(3000, reward_balls)
         #self.assertEqual(57, reward_balls)
         self.assertEqual(Decimal('11.561'), reward_balls)
@@ -320,11 +320,11 @@ class TestELoyalty(TestCase):
             'status': ['create'],
         }
         #seller_shop_2.create_order(order_params)
-        self.assertFalse(seller_shop_2.has_basket_for_client_in_shop(client_2, shop_1))
+        self.assertFalse(seller_shop_2.has_basket_spec_customer_executor(client_2, shop_1))
         purchaser = Purchaser.get_purchaser_with_phone_number_for_client(client_2.phone_number, client_2)
         seller_shop_2.create_basket_for_client_in_shop(client_2, shop_1, purchaser)
-        self.assertTrue(seller_shop_2.has_basket_for_client_in_shop(client_2, shop_1))
-        basket_client = seller_shop_2.get_basket_for_client_in_shop(client_2, shop_1)
+        self.assertTrue(seller_shop_2.has_basket_spec_customer_executor(client_2, shop_1))
+        basket_client = seller_shop_2.get_basket_spec_executor_customer(client_2, shop_1)
         seller_shop_2.add_product_in_basket(basket_client, product_mi8, 1, Decimal('130'), 'USD')
         seller_shop_2.create_order_from_busket_and_pickup_point(client_2, shop_1, purchaser, basket_client, pickup_point_1)
 
@@ -354,8 +354,8 @@ class TestELoyalty(TestCase):
         self.assertTrue(seller_shop_2.check_payment_for_last_order())
 
         #reward_balls = seller_shop_2.calculate_rewards_balls_for_last_order(loyalty_1, client_2)
-        last_order_for_client_2 = seller_shop_2.get_last_order_client(client_2)
-        reward_balls = seller_shop_2.calculate_rewards_balls_for_order(last_order_for_client_2, loyalty_1)
+        last_order_for_client_2 = seller_shop_2.get_last_order_spec_customer(client_2)
+        reward_balls = seller_shop_2.get_rewards_balls_for_order(last_order_for_client_2, loyalty_1)
         #self.assertEqual(65, reward_balls)
         self.assertEqual(Decimal('13.00'), reward_balls)
         #actor_executor.confirm_out_payment_for_loyalty(shop_1, client_1, loyalty_1, 3000, 90)
