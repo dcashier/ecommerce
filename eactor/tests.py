@@ -55,19 +55,19 @@ class TestEActor(TestCase):
         self.assertEqual(actor_2, auth_system.get_actor_by_phone_numnber_password(phone_number_2, password_2))
 
         client_phone_number = '+71002003040'
-        self.assertFalse(actor_1.has_shop_client_with_phone_number(shop_1, client_phone_number))
-        self.assertFalse(actor_2.has_shop_client_with_phone_number(shop_2, client_phone_number))
+        self.assertFalse(actor_1.has_customer_spec_executor_phone_number(shop_1, client_phone_number))
+        self.assertFalse(actor_2.has_customer_spec_executor_phone_number(shop_2, client_phone_number))
         self.assertTrue(actor_2.is_seller_shop(shop_2))
-        actor_2.create_client_shop_with_phone_number(shop_2, client_phone_number)
+        actor_2.create_customer_shop_with_phone_number(shop_2, client_phone_number)
 
-        client = actor_2.get_client_shop_with_phone_number(shop_2, client_phone_number)
+        client = actor_2.get_customer_spec_executor_phone_number(shop_2, client_phone_number)
         self.assertEqual(client_phone_number, client.get_phone_number())
 
-        self.assertFalse(actor_1.has_shop_client_with_phone_number(shop_1, client_phone_number))
-        self.assertTrue(actor_2.has_shop_client_with_phone_number(shop_2, client_phone_number))
+        self.assertFalse(actor_1.has_customer_spec_executor_phone_number(shop_1, client_phone_number))
+        self.assertTrue(actor_2.has_customer_spec_executor_phone_number(shop_2, client_phone_number))
 
-        self.assertFalse(actor_1.has_shop_client(shop_1, client))
-        self.assertTrue(actor_2.has_shop_client(shop_2, client))
+        self.assertFalse(actor_1.has_customer_spec_executor(shop_1, client))
+        self.assertTrue(actor_2.has_customer_spec_executor(shop_2, client))
 
         seller_3 = Seller(shop=shop_2)
         seller_3.save()
@@ -82,8 +82,8 @@ class TestEActor(TestCase):
         self.assertTrue(auth_system.has_actor_by_phone_numnber_password(phone_number_3, password_3))
         self.assertEqual(actor_3, auth_system.get_actor_by_phone_numnber_password(phone_number_3, password_3))
 
-        self.assertTrue(actor_3.has_shop_client_with_phone_number(shop_2, client_phone_number))
-        self.assertTrue(actor_3.has_shop_client(shop_2, client))
+        self.assertTrue(actor_3.has_customer_spec_executor_phone_number(shop_2, client_phone_number))
+        self.assertTrue(actor_3.has_customer_spec_executor(shop_2, client))
 
 
 #    def test_seller(self):
@@ -208,7 +208,7 @@ class TestEActor(TestCase):
 #
 #        # Из всего списка Вове понравился только Mi8
 #        # Вова спрашивает у продавца какая цна на Mi8, если он придет на одну из Московских точек самовывоза?
-#        prices = seller.prices(product_mi8, client_city, client_type)
+#        prices = seller.list_price_of_product_for_customer(product_mi8, client_city, client_type)
 #        self.assertEqual([Decimal('115.61'), Decimal('132.00'), 150], prices)
 #
 #        # а много у вас осталось Mi8 сейчас?
@@ -224,7 +224,7 @@ class TestEActor(TestCase):
 #                'currency': "USD",
 #            },
 #        ]
-#        pickup_points = seller.list_pickup_points(params_basket, client_city, client_type)
+#        pickup_points = seller.list_pickup_point_spec_basket_customer(params_basket, client_city, client_type)
 #        self.assertEqual([pickup_point_1, pickup_point_2], pickup_points)
 #
 #        #Вова решил купить Ми8 за цену 115.61, оформляет заказ.
@@ -303,7 +303,7 @@ class TestEActor(TestCase):
 #        # Но мы еще не создали правило для продажи чехлов
 #        self.assertFalse(seller.is_allow_order(order_params))
 #
-#        prices = seller.prices(product_case_noname, client_city, client_type)
+#        prices = seller.list_price_of_product_for_customer(product_case_noname, client_city, client_type)
 #        self.assertEqual([], prices)
 #
 #        # Создаем правило для продажи чехлов
@@ -321,7 +321,7 @@ class TestEActor(TestCase):
 #
 #	seller.price_policies.add(price_policy_2)
 #
-#        prices = seller.prices(product_case_noname, client_city, client_type)
+#        prices = seller.list_price_of_product_for_customer(product_case_noname, client_city, client_type)
 #        self.assertEqual([Decimal('10.00')], prices)
 #        # Правило отработало и вернуло допустимую цену
 #

@@ -19,11 +19,11 @@ class Actor(models.Model):
     seller = models.ForeignKey(Seller, null=True, blank=True)
     purchaser = models.ForeignKey(Purchaser, null=True, blank=True)
 
-    def create_client_shop_with_phone_number(self, shop, phone_number):
-        self.seller.create_client_shop_with_phone_number(shop, phone_number)
+    def create_customer_shop_with_phone_number(self, shop, phone_number):
+        self.seller.create_customer_shop_with_phone_number(shop, phone_number)
 
-    def get_client_shop_with_phone_number(self, shop, phone_number):
-        return self.seller.get_client_shop_with_phone_number(shop, phone_number)
+    def get_customer_spec_executor_phone_number(self, shop, phone_number):
+        return self.seller.get_customer_spec_executor_phone_number(shop, phone_number)
         #from eshop.models import *
         #return Shop(phone_number='+71002003040')
 
@@ -34,13 +34,13 @@ class Actor(models.Model):
             return SellerS(self.seller)
         assert False
 
-    def has_shop_client(self, shop, client):
-        if self.seller.has_shop_client(shop, client):
+    def has_customer_spec_executor(self, shop, client):
+        if self.seller.has_customer_spec_executor(shop, client):
             return True
         return False
 
-    def has_shop_client_with_phone_number(self, shop, phone_number):
-        if self.seller.has_shop_client_with_phone_number(shop, phone_number):
+    def has_customer_spec_executor_phone_number(self, shop, phone_number):
+        if self.seller.has_customer_spec_executor_phone_number(shop, phone_number):
             return True
         return False
 

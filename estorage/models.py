@@ -26,12 +26,14 @@ class Storage(models.Model):
 
     def quantity(self, product):
         quantity = 0
-        for stock in Stock.objects.filter(storage=self, product=product):
-            #quantity += stock.quantity
-            if stock.has:
-                quantity += stock.quantity
-            else:
-                quantity -= stock.quantity
+        #for stock in Stock.objects.filter(storage=self, product=product):
+        #    #quantity += stock.quantity
+        #    if stock.has:
+        #        quantity += stock.quantity
+        #    else:
+        #        quantity -= stock.quantity
+        for stock in self.__stocks(product):
+            quantity += stock.quantity
         return quantity
 
     def __has(self, product, quantity):
@@ -82,7 +84,8 @@ class Storage(models.Model):
 
     def list_part_number_for_product(self, product):
         part_numbers = set()
-        for stock in Stock.objects.filter(storage=self, product=product):
+        #for stock in Stock.objects.filter(storage=self, product=product):
+        for stock in self.__stocks(product):
             part_numbers.add(stock.part_number)
         return list(part_numbers)
 
