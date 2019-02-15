@@ -780,6 +780,40 @@ class Seller(models.Model):
         return u"Seller (%s) : %s [shop : %s]" % (self.id, self.title, self.shop)
 
 
+class Storekeeper(models.Model):
+    """
+    Кладовщик
+    """
+    title = models.CharField(max_length=100)
+    shop = models.ForeignKey(Shop)
+    storages = models.ManyToManyField(Storage, blank=True)
+
+    def is_match_cargo_and_invoice(self, cargo, invoice):
+        if cargo == invoice['cargo']:
+            return True
+        return False
+
+    def push(self, storage, cargo):
+        if not storage in self.storages.all():
+            assert False
+        part_number = PartNumber.objects.get(id=1)
+        for element in cargo:
+            storage.push(element['product'], element['quantity'], part_number)
+
+    def quantity_all(self):
+        quantity = 0
+        for storage in self.storages.all():
+            quantity += storage.quantity_all()
+        return quantity
+
+    def pull(self, storage, cargo):
+        if not storage in self.storages.all():
+            assert False
+        for element in cargo:
+            storage.pull(element['product'], element['quantity'])
+
+
+
 #class Customer(object):
 #    """
 #    Используется в системе лояльности для связывания клиента и счета

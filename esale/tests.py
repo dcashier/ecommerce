@@ -63,7 +63,7 @@ class TestESale(TestCase):
         #self.assertTrue(Order.is_allow_order(order_params))
         #order = Order.create_order(order_params)
 
-        storage_1 = Storage(title=u"main storage")
+        storage_1 = Storage(title=u"main storage", size=10000)
         storage_1.save()
 
         part_number_1 = PartNumber()
