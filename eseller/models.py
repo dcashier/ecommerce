@@ -95,15 +95,8 @@ class SellerXS(object):
             raise ValidationError(u"Error : Do not use size XS.")
         return self.seller.list_executor()[0]
 
-    #def get_last_order_for_client_with_phone_number(self, phone_number):
-    #    client = self.get_customer_spec_phone_number(phone_number)
-    #    return self.get_last_order_for_client(client)
-
     def get_last_order_spec_customer(self, customer):
         return self.seller.get_last_order_spec_customer(customer)
-
-    #def get_last_order_for_client(self, client):
-    #    return self.seller.get_last_order_spec_customer(client)
 
     def get_loyalty(self):
         loyalties = self.seller.list_loyalty(self.get_executor())
@@ -217,7 +210,6 @@ class SellerS(SellerXS):
         self.seller = seller
         self.order_repositiry = Order
 
-    #def list_order(self, order_specification):
     def list_order(self):
         executor = self.get_executor()
         #pickup_point = self.get_pickup_point()
@@ -305,28 +297,6 @@ class Seller(models.Model):
         self.shop.clients.add(client)
         purchaser = Purchaser(title=u"Default purchaser when Seller create Client.", shop=client, phone_number=phone_number)
         purchaser.save()
-
-    #def create_easy_order_xs(self, phone_number, price):
-    #    pickup_point = self.get_pickup_point_xs()
-    #    self.create_easy_order_by_phone_number_of_customer(phone_number, price, pickup_point)
-
-    #def create_easy_order_by_phone_number_of_customer(self, phone_number, price, pickup_point):
-    #    executor = self.get_executor()
-    #    if not self.has_customer_spec_executor_phone_number(executor, phone_number):
-    #        self.create_customer_shop_with_phone_number(executor, phone_number)
-    #    customer = self.get_customer_spec_executor_phone_number(executor, phone_number)
-    #    default_product = Product.objects.get(id=1)
-    #    quantity = 1
-    #    currency = "RUS"
-    #    purchaser = Purchaser.get_purchaser_with_phone_number_for_client(phone_number, customer)
-    #    if not self.has_basket_spec_customer_executor(customer, executor):
-    #        self.create_basket_for_client_in_shop(customer, executor, purchaser)
-    #    self.create_basket_for_client_in_shop(customer, executor, purchaser)
-    #    basket = self.get_basket_spec_executor_customer(customer, executor)
-    #    self.add_product_in_basket(basket, default_product, quantity, price, currency)
-    #    #pickup_point = PickupPoint.objects.get(id=1)
-    #    self.create_order_from_busket_and_pickup_point(customer, executor, purchaser, basket, pickup_point)
-    #    basket.delete()
 
     def create_order_from_busket_and_pickup_point(self, client, shop, purchaser, basket, pickup_point):
         """
@@ -423,19 +393,9 @@ class Seller(models.Model):
             return client
         raise ValidationError(u"У магазина ент клиента с таким телефоном.")
 
-    #def get_customer_spec_phone_number_xs(self, phone_number):
-    #    return self.get_customer_spec_executor_phone_number(self.get_executor(), phone_number)
-
     def get_customer_spec_id(self, customer_id):
         #TODO Нужна проверка прав доступа к заказу.
         return Shop.objects.get(id=customer_id)
-
-    #def get_easy_product(self, product_id):
-    #    #TODO Нужна проверка прав доступа к заказу.
-    #    return Product.objects.get(id=product_id)
-
-    #def get_executor(self):
-    #    return self.shop
 
     def get_last_order_spec_customer(self, customer):
         if Order.objects.filter(customer=customer).count() > 1:
@@ -444,26 +404,6 @@ class Seller(models.Model):
             raise ValidationError(u"У клиента нет ни одного закзаза.")
         return Order.objects.filter(customer=customer).order_by('-id')[0]
 
-    #def get_last_order_for_client_with_phone_number_xs(self, phone_number):
-    #    client = self.get_customer_spec_executor_phone_number(self.get_executor(), phone_number)
-    #    return self.get_last_order_spec_customer(client)
-
-    #def get_loyalty_xs(self):
-    #    from eloyalty.models import ServiceRepositoryLoyalty
-    #    srl = ServiceRepositoryLoyalty()
-    #    loyalties = srl.list_loyalty_for_owner(self, self.get_executor())
-    #    if len(loyalties) > 1:
-    #        raise ValidationError(u"Error : Do not use size XS.")
-    #    return loyalties[0]
-
-    #def get_my_customer(self, customer_id):
-    #    #TODO Нужна проверка прав доступа к заказу.
-    #    return Shop.objects.get(id=customer_id)
-
-    #def get_my_order(self, order_id):
-    #    #TODO проверка прав доступа к заказу.
-    #    return Order.objects.get(id=order_id, seller=self)
-
     def get_shop_size(self):
         return self.shop.size
 
@@ -471,17 +411,8 @@ class Seller(models.Model):
         #TODO проверка прав доступа к заказу.
         return Order.objects.get(id=order_id, seller=self)
 
-    #def get_pickup_point_xs(self):
-    #    if self.pickup_points.all().count() > 1:
-    #        raise ValidationError(u"Error : Do not use size XS.")
-    #    return self.pickup_points.all()[0]
-
     def get_rewards_balls_for_order(self, order, loyalty):
         return loyalty.calculate_reward(None, order.calculate_price())['ball']
-
-    #def get_rewards_balls_for_order_xs(self, order):
-    #    loyalty = self.get_loyalty_xs()
-    #    return loyalty.calculate_reward(None, order.calculate_price())['ball']
 
     def has_basket_spec_customer_executor(self, customer, executor):
         for basket in Basket.objects.filter(customer=customer, executor=executor):
@@ -563,21 +494,14 @@ class Seller(models.Model):
         return link_price_product_storage_pickup_point
 
     def list_allow_product_for_client(self, products, client_city, client_type):
+        #TODO У каждого магазина должен быть свой набор продуктов или можно испоьзовать общий.
+        # но не давать возможноть изменять никакой инфы по продуктам в базе, только создавать.
+        # тогда будет общая база продуктов и в дальнейшем мапить не надо будет.
         allow_products = []
         for product in products:
             if self.__is_allow_product_for_client(product, client_city, client_type):
                 allow_products.append(product)
         return allow_products
-
-    #def list_easy_product(self):
-    #    #TODO У каждого магазина должен быть свой набор продуктов или можно испоьзовать общий.
-    #    # но не давать возможноть изменять никакой инфы по продуктам в базе, только создавать.
-    #    # тогда будет общая база продуктов и в дальнейшем мапить не надо будет.
-    #    products = []
-    #    for product in Product.objects.all():
-    #        if product.id != 1:
-    #            products.append(product)
-    #    return products
 
     def list_executor(self):
         return [self.shop]
@@ -594,11 +518,6 @@ class Seller(models.Model):
 
     def list_order_spec_executor_pickup_point(self, executor, pickup_point):
         return Order.objects.filter(executor=executor, pickup_point=pickup_point, seller=self)
-
-    #def list_order_xs(self):
-    #    executor = self.get_executor_xs()
-    #    pickup_point = self.get_pickup_point_xs()
-    #    return Order.objects.filter(executor=executor, pickup_point=pickup_point, seller=self)
 
     def list_pickup_point(self):
         return self.pickup_points.all()
@@ -673,49 +592,6 @@ class Seller(models.Model):
             for price_factory in price_policy.allow_price_factory(product, quantity, storage, pickup_point):
                 price_factories.append(price_factory)
         return price_factories
-
-    #def process_order_with_ball_type_xs(self, order, customer, ball_type):
-    #    pickup_point = self.get_pickup_point_xs()
-    #    self.process_order_with_ball_type_s(order, customer, ball_type, pickup_point)
-
-    #def process_order_with_ball_type_s(self, order, customer, ball_type, pickup_point):
-    #    purchaser = Purchaser.objects.get(shop=customer)
-    #    executor = self.get_executor()
-    #    loyalty = self.get_loyalty_xs()
-    #    if ball_type == 'MAX':
-    #        ball_for_spend = self.__max_allow_ball_for_spend_for_order(order, purchaser, customer, executor, loyalty)
-    #    elif ball_type == 'ZERO':
-    #        ball_for_spend = 0
-    #    self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point)
-
-    #def process_order_max_ball_xs(self, order, customer):
-    #    purchaser = Purchaser.objects.get(shop=customer)
-    #    executor = self.get_executor()
-    #    loyalty = self.get_loyalty()
-    #    pickup_point = self.get_pickup_point()
-    #    ball_for_spend = self.__max_allow_ball_for_spend_for_order(order, purchaser, customer, executor, loyalty)
-    #    self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point)
-
-    #def process_order_zero_ball_xs(self, order, customer):
-    #    purchaser = Purchaser.objects.get(shop=customer)
-    #    executor = self.get_executor()
-    #    loyalty = self.get_loyalty()
-    #    pickup_point = self.get_pickup_point()
-    #    ball_for_spend = 0
-    #    self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point)
-
-    #def process_order_easy_with_max_allow_ball_without_customer_security(self, order, customer, executor, loyalty, pickup_point):
-    #    purchaser = Purchaser.objects.get(shop=customer)
-    #    self.process_order_with_max_allow_ball_without_customer_security(order, purchaser, customer, executor, loyalty, pickup_point)
-
-    #def process_order_easy_with_zero_ball_without_customer_security(self, order, customer, executor, loyalty, pickup_point):
-    #    ball = 0
-    #    purchaser = Purchaser.objects.get(shop=customer)
-    #    self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball, pickup_point)
-
-    #def process_order_with_max_allow_ball_without_customer_security(self, order, purchaser, customer, executor, loyalty, pickup_point):
-    #    ball_for_spend = self.__max_allow_ball_for_spend_for_order(order, purchaser, customer, executor, loyalty)
-    #    self.process_order_without_customer_security(order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point)
 
     def process_order_without_customer_security(self, order, purchaser, customer, executor, loyalty, ball_for_spend, pickup_point):
         # actor - аккаунт для purchaser
@@ -820,11 +696,6 @@ class Storekeeper(models.Model):
 #    """
 #    Используется в системе лояльности для связывания клиента и счета
 #    """
-#    def set_payment_balls_for_last_order(self, balls):
-#        pass
-#
-#    def pay_by(self, link_for_payment):
-#        pass
 
 class Basket(models.Model):
     customer = models.ForeignKey(Shop, related_name='customer_shop')
