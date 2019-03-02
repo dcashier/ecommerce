@@ -20,7 +20,7 @@ from django.contrib import admin
 from dcashier.views import *
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
 
     #url(r'^$', MyView.as_view(), name='my-view'),
     #url(r'^index.html$', MyView.as_view(), name='my-view'),

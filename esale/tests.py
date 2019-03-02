@@ -12,7 +12,7 @@ import datetime
 
 class TestESale(TestCase):
     def setUp(self):
-        print "SETUP DATA FOR ..."
+        print("SETUP DATA FOR ...")
         self.assertEqual.__self__.maxDiff = None
 
     def test_seller(self):
@@ -35,7 +35,7 @@ class TestESale(TestCase):
         pickup_point_in_moscow = PickupPoint(title=u"pickup in moscow", city=city_moscow)
         pickup_point_in_moscow.save()
 
-        interval = [datetime.datetime(2000, 01, 01, 12, 30, 00), datetime.datetime(2000, 01, 01, 20, 00, 00)]
+        interval = [datetime.datetime(2000, 1, 1, 12, 30, 00), datetime.datetime(2000, 1, 1, 20, 00, 00)]
 
         order_params = {
             'version': 'v1',

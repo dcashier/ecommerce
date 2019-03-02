@@ -38,7 +38,7 @@ class Loyalty(object):
 
     def get_balance(self, actor, samebody, datetime_for_check):
         if not self.__has_account_for_samebody(samebody):
-            print u'Error : Пользователь не зарегестрирован в системе лояльности.'
+            print(u'Error : Пользователь не зарегестрирован в системе лояльности.')
             assert False
         account_record = self.__get_account_for_samebody(samebody)
         ball_sum = 0
@@ -122,7 +122,7 @@ class Loyalty(object):
 
     def list_transaction(self, actor, samebody):
         if not samebody.is_allow_list_transaction_this(actor):
-            print u'Error : Нет прав'
+            print(u'Error : Нет прав')
             assert False
         account_record = self.__get_account_for_samebody(samebody)
         balls = []
@@ -145,9 +145,9 @@ class Loyalty(object):
             if hello_ball > 0:
                 self.transfer_ball(actor, executor, customer, hello_ball, available_day)
             else:
-                print 'Error : customer registration without hello ball.'
+                print('Error : customer registration without hello ball.')
         else:
-            print 'Error : customer is not registration'
+            print('Error : customer is not registration')
             assert False
 
     def register_in_loyalty_executor(self, executor, reward_percent, available_day, start_ball, start_ball_available_day):
@@ -164,7 +164,7 @@ class Loyalty(object):
 
     def register_in_loyalty_hello_0(self, actor, customer, executor):
         if self.is_registration(actor, customer):
-            print 'Error : customer is already registration in loyalty'
+            print('Error : customer is already registration in loyalty')
             assert False
         hello_ball = 0
         available_day = 30
@@ -172,7 +172,7 @@ class Loyalty(object):
 
     def register_in_loyalty_hello_1000(self, actor, customer, executor):
         if self.is_registration(actor, customer):
-            print 'Error : customer is already registration in loyalty'
+            print('Error : customer is already registration in loyalty')
             assert False
         hello_ball = 1000
         available_day = 30
@@ -185,22 +185,22 @@ class Loyalty(object):
         # открыли транзакцию
         datetime_for_check = datetime.datetime.now()
         if ball <= 0:
-            print u'Error : Разрешен перевод только положительной суммы балов'
+            print(u'Error : Разрешен перевод только положительной суммы балов')
             assert False
         if self.get_balance(actor, samebody_from, datetime_for_check) < ball:
-            print u'Error : Нельзя уходить в минуc'
+            print(u'Error : Нельзя уходить в минуc')
             assert False
             return
         if not samebody_from.is_allow_send_ball_this(actor):
             if self.__is_need_auth():
-                print u'Error : Нет прав у %s для изменний в %s' % (actor, samebody_from)
+                print(u'Error : Нет прав у %s для изменний в %s' % (actor, samebody_from))
                 assert False
             elif not self.__is_need_auth():
                 text_p = u'Alert : Хотя нет прав у %s для изменний в %s, '% (actor, samebody_from)
                 text_p += u'данная система лояльности позвоялет переводить балы между объектам без их согласия.'
-                print text_p.encode('utf-8')
+                print(text_p.encode('utf-8'))
         if not self.__is_registration(samebody_to):
-            print u'Error : Пользователь не зарегистрированн в системе лойльности'
+            print(u'Error : Пользователь не зарегистрированн в системе лойльности')
             assert False
         transaction_record = LoyaltyTransactionRecord(title=u'Перевод балов кем %s откуда %s куда %s сколько %s' % (actor, samebody_from, samebody_to, ball), loyalty=self.__record)
         transaction_record.save()
@@ -213,7 +213,7 @@ class Loyalty(object):
         transaction_record.is_ok = True
         transaction_record.save()
         # закрыли транзакцию
-        print 'Info : transfer_ball is OK'
+        print('Info : transfer_ball is OK')
 
     def __unicode__(self):
         return u"Loyalty : %s" % (self.__record.title)
@@ -243,7 +243,7 @@ class ServiceRepositoryLoyalty(object):
         """
         if not owner.is_allow_all_loyalty_for_client(client):
             raise u""
-            print 'Error : list_loyalty_for_owner'
+            print('Error : list_loyalty_for_owner')
         loyalties = []
         #for loyalty_record in LoyaltyRecord.objects.filter(owner=owner.get_record()):
         for loyalty_record in LoyaltyRecord.objects.filter(owner=owner):
@@ -256,7 +256,7 @@ class ServiceRepositoryLoyalty(object):
 
 
 class LoyaltyRecord(models.Model):
-    owner = models.ForeignKey(Shop, null=True, blank=True)
+    owner = models.ForeignKey(Shop, null=True, blank=True, on_delete=models.CASCADE)
     title = models.CharField(verbose_name=u'Название', max_length=128, null=True, blank=True)
     max_percent = models.IntegerField(u'Максимальный процент от суммы заказа для оплаты балами')
     start_ball = models.IntegerField(u'Стартовые былы')
@@ -264,7 +264,7 @@ class LoyaltyRecord(models.Model):
 
 
 class LoyaltyPaymentPolicyRecord(models.Model):
-    loyalty = models.ForeignKey(LoyaltyRecord)
+    loyalty = models.ForeignKey(LoyaltyRecord, on_delete=models.CASCADE)
 
     def add_part(self, reward_percent, available_day):
         payment_policy_part_record = LoyaltyPaymentPolicyPartRecord(payment_policy=self, percent=reward_percent, available_day=available_day)
@@ -279,33 +279,33 @@ class LoyaltyPaymentPolicyRecord(models.Model):
                 day = payment_policy_part_record.available_day
                 break
         else:
-            print 'Error : Not set reward for money range'
+            print('Error : Not set reward for money range')
             assert False
         return {'ball': reward_money, 'day': day}
 
 
 class LoyaltyPaymentPolicyPartRecord(models.Model):
-    #loyalty = models.ForeignKey(LoyaltyRecord)
-    payment_policy = models.ForeignKey(LoyaltyPaymentPolicyRecord)
+    #loyalty = models.ForeignKey(LoyaltyRecord, on_delete=models.CASCADE)
+    payment_policy = models.ForeignKey(LoyaltyPaymentPolicyRecord, on_delete=models.CASCADE)
     percent = models.IntegerField(u'Процент начисления')
     min_money = models.IntegerField(u'Начало диапазона', null=True, blank=True)
     max_money = models.IntegerField(u'Конец диапазона(включая данное значение)', null=True, blank=True)
     available_day = models.IntegerField(u'Возможность потратить балы на протяжении стольких дней с момента их начисления')
 
     def is_allow_money(self, money):
-        if (not self.min_money or self.min_money < money) and (money <= self.max_money or not self.max_money):
+        if (not self.min_money or self.min_money < money) and (not self.max_money or money <= self.max_money):
             return True
         return False
 
 
 class LoyaltyAccountRecord(models.Model):
-    loyalty = models.ForeignKey(LoyaltyRecord)
-    owner = models.ForeignKey(Shop)
+    loyalty = models.ForeignKey(LoyaltyRecord, on_delete=models.CASCADE)
+    owner = models.ForeignKey(Shop, on_delete=models.CASCADE)
 
 
 class LoyaltyAccountBallInRecord(models.Model): # приход
-    loyalty = models.ForeignKey(LoyaltyRecord)
-    account = models.ForeignKey(LoyaltyAccountRecord)
+    loyalty = models.ForeignKey(LoyaltyRecord, on_delete=models.CASCADE)
+    account = models.ForeignKey(LoyaltyAccountRecord, on_delete=models.CASCADE)
     ball = models.IntegerField(u'колличество')
     datetime_create = models.DateTimeField(u'Дата и время создания', auto_now_add=True)
     available_day = models.IntegerField(u'Возможность потратить балы на протяжении стольких дней с момента их начисления', null=True, blank=True)
@@ -313,18 +313,18 @@ class LoyaltyAccountBallInRecord(models.Model): # приход
 
 
 class LoyaltyAccountBallOutRecord(models.Model): # расход
-    loyalty = models.ForeignKey(LoyaltyRecord)
-    account = models.ForeignKey(LoyaltyAccountRecord)
+    loyalty = models.ForeignKey(LoyaltyRecord, on_delete=models.CASCADE)
+    account = models.ForeignKey(LoyaltyAccountRecord, on_delete=models.CASCADE)
     ball = models.IntegerField(u'колличество')
     datetime_create = models.DateTimeField(u'Дата и время создания', auto_now_add=True)
 
 
 class LoyaltyTransactionRecord(models.Model):
-    loyalty = models.ForeignKey(LoyaltyRecord)
-    ball_in = models.ForeignKey(LoyaltyAccountBallInRecord, null=True, blank=True)
-    #account_in = models.ForeignKey(LoyaltyAccountRecord, related_name="%(app_label)s_%(class)s_in_relate")
-    ball_out = models.ForeignKey(LoyaltyAccountBallOutRecord, null=True, blank=True)
-    #account_out = models.ForeignKey(LoyaltyAccountRecord, related_name="%(app_label)s_%(class)s_out_relate")
+    loyalty = models.ForeignKey(LoyaltyRecord, on_delete=models.CASCADE)
+    ball_in = models.ForeignKey(LoyaltyAccountBallInRecord, null=True, blank=True, on_delete=models.CASCADE)
+    #account_in = models.ForeignKey(LoyaltyAccountRecord, related_name="%(app_label)s_%(class)s_in_relate", on_delete=models.CASCADE)
+    ball_out = models.ForeignKey(LoyaltyAccountBallOutRecord, null=True, blank=True, on_delete=models.CASCADE)
+    #account_out = models.ForeignKey(LoyaltyAccountRecord, related_name="%(app_label)s_%(class)s_out_relate", on_delete=models.CASCADE)
     title = models.CharField(verbose_name=u'Название', max_length=255, null=True, blank=True)
     is_ok = models.BooleanField(u'Транзакция закончена успешно', default=False)
 

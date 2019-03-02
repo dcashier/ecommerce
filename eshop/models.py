@@ -27,8 +27,8 @@ class Shop(models.Model):
         return self.phone_number
 
     def __has_link_with_actor(self, actor):
-	print 'Nead fix __has_link_with_actor'
-	return True
+        print('Nead fix __has_link_with_actor')
+        return True
         #for l in EntityLinkActor.objects.filter(actor=actor.get_record(), entity=self.get_record()):
         #    return True
         return False
@@ -43,8 +43,8 @@ class Shop(models.Model):
         return self.__is_owner(actor) or self.__has_link_with_actor(actor)
 
     def __is_owner(self, actor):
-	print 'Nead fix __is_owner'
-	return True
+        print( 'Nead fix __is_owner')
+        return True
         if self.__entity == actor.get_record():
             return True
         return False
