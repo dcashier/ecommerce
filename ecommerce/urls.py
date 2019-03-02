@@ -42,3 +42,4 @@ urlpatterns = [
     url(r'^login/$', Login.as_view(), name='login'),
     url(r'^logout/$', Logout.as_view(), name='my-view'),
 ]
+#+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -3,9 +3,9 @@ version: '3'
 services:
   web:
     build: .
-    command: ./manage.py test
-    #command: uwsgi --ini dcashier/uwsgi.ini
-    #ports:
-    #  - "8000:8081"
+    #command: ./manage.py test
+    command: uwsgi --ini dcashier/uwsgi.ini
+    ports:
+      - "8000:8081"
     volumes:
       - .:/code
