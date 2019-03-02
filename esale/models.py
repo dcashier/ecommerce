@@ -98,7 +98,7 @@ class Order(models.Model):
     """
     client_title = models.CharField(u"Название клиента", max_length=128)
     create_datetime = models.DateTimeField(u'дата и время создание заказа')
-    pickup_point = models.ForeignKey(PickupPoint)
+    pickup_point = models.ForeignKey(PickupPoint, on_delete=models.CASCADE)
     pickup_dateteme = models.DateTimeField(u'дата и время вручения всего заказа(т.е. последней партии)')
 
     def calculate_price(self):
@@ -127,9 +127,9 @@ class Order(models.Model):
 
 
 class NotImportantInformation(models.Model):
-    order = models.ForeignKey(Order)
-    part_number = models.ForeignKey(PartNumber)
-    product = models.ForeignKey(Product)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    part_number = models.ForeignKey(PartNumber, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(u"Количество")
 
 class ElementSale(models.Model):
@@ -150,8 +150,8 @@ class ElementSale(models.Model):
             (не учитываем случай получения части заказа в разных метсах)
 
     """
-    order = models.ForeignKey(Order)
-    product = models.ForeignKey(Product)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(u"Количество")
     sale_price = models.DecimalField(u"стоимость продажи одной штуки", decimal_places=2, max_digits=7)
     sale_currency = models.CharField(u"Валюта", max_length=5)

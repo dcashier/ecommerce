@@ -15,7 +15,7 @@ from eseller.models import *
 
 class TestELoyalty(TestCase):
     def setUp(self):
-        print "SETUP DATA FOR TestELoyalty..."
+        print("SETUP DATA FOR TestELoyalty...")
         self.assertEqual.__self__.maxDiff = None
 
     def test_seller(self):
@@ -71,9 +71,9 @@ class TestELoyalty(TestCase):
 
         #seller_shop_1 = None
         seller_shop_1 = Seller(shop=shop_1)
-	seller_shop_1.save()
+        seller_shop_1.save()
 
-	srl = ServiceRepositoryLoyalty()
+        srl = ServiceRepositoryLoyalty()
 
         # пока у репозитория спрашивает сам магазин
         self.assertEqual(0, len(srl.list_loyalty_for_owner(seller_shop_1, shop_1)))
@@ -202,7 +202,7 @@ class TestELoyalty(TestCase):
         city_moscow.save()
         pickup_point_1 = PickupPoint(title=u"pickup 1", city=city_moscow)
         pickup_point_1.save()
-        interval = [datetime.datetime(2000, 01, 01, 12, 30, 00), datetime.datetime(2000, 01, 01, 20, 00, 00)]
+        interval = [datetime.datetime(2000, 1, 1, 12, 30, 00), datetime.datetime(2000, 1, 1, 20, 00, 00)]
         order_params = {
             'version': 'v1',
             'basket': [
@@ -273,11 +273,11 @@ class TestELoyalty(TestCase):
 
         # Проведем еще одну закоупку теперь чать ее Вава оплатит балами.
 
-	srl = ServiceRepositoryLoyalty()
+        srl = ServiceRepositoryLoyalty()
         shop_1
-	seller_shop_1 = None
+        seller_shop_1 = None
         seller_shop_2 = Seller(shop=shop_1)
-	seller_shop_2.save()
+        seller_shop_2.save()
 
 
         loyalties = srl.list_loyalty_for_owner(seller_shop_2, shop_1)
@@ -296,7 +296,7 @@ class TestELoyalty(TestCase):
 
         product_mi8
         pickup_point_1
-        interval = [datetime.datetime(2000, 01, 01, 12, 30, 00), datetime.datetime(2000, 01, 01, 20, 00, 00)]
+        interval = [datetime.datetime(2000, 1, 1, 12, 30, 00), datetime.datetime(2000, 1, 1, 20, 00, 00)]
         order_params = {
             'version': 'v1',
             'basket': [

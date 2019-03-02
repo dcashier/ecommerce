@@ -11,7 +11,7 @@ from decimal import Decimal
 
 class TestEStorage(TestCase):
     def setUp(self):
-        print "SETUP DATA FOR ..."
+        print("SETUP DATA FOR ...")
         self.assertEqual.__self__.maxDiff = None
 
     def test_seller(self):

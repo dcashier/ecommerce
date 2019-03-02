@@ -12,7 +12,7 @@ import datetime
 
 class TestEActor(TestCase):
     def setUp(self):
-        print "SETUP DATA FOR ..."
+        print("SETUP DATA FOR ...")
         self.assertEqual.__self__.maxDiff = None
 
     def test_login(self):

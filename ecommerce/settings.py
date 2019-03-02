@@ -131,7 +131,7 @@ STATIC_URL = '/static/'
 
 import sys
 if 'test' in sys.argv:
-    print 'Test from art Start!!!'
+    print('Test from art Start!!!')
 
 WITHOUT_OLD_INIT = True
 

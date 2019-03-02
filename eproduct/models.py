@@ -13,7 +13,7 @@ class Category(models.Model):
 class Product(models.Model):
     title = models.CharField(max_length=200)
     categories = models.ManyToManyField(Category, blank=True)
-    brand = models.ForeignKey(Brand)
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE,)
 
     def __unicode__(self):
         return u"%s: %s - %s" % (self.id, self.title, self.brand)

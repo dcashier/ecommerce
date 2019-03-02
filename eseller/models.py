@@ -37,7 +37,7 @@ class SellerXS(object):
                 referee = self.seller.get_customer_spec_executor_phone_number(executor, phone_number_referee)
                 self.seller.add_referee(customer, referee)
             else:
-                print 'Error : Not Find referee with phone_number_referee'
+                print('Error : Not Find referee with phone_number_referee')
 
         if entrance_ball:
             customer = self.seller.get_customer_spec_executor_phone_number(executor, phone_number)
@@ -231,7 +231,7 @@ class SellerS(SellerXS):
 
 class Purchaser(models.Model):
     title = models.CharField(max_length=100)
-    shop = models.ForeignKey(Shop)
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
     phone_number = models.CharField(verbose_name=u'Телефонный номер', max_length=128, null=True, blank=True)
 
     @classmethod
@@ -249,7 +249,7 @@ class Seller(models.Model):
     Продавец это может быть и человек в магазине на улице, и сайт, и телеграм бот, и человек в кол центре
     """
     title = models.CharField(max_length=100)
-    shop = models.ForeignKey(Shop)
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
     pickup_points = models.ManyToManyField(PickupPoint, blank=True)
     #shop = models.ManyToManyField(Shop, blank=True)
     price_policies = models.ManyToManyField(PricePolicy, blank=True) # политики которые может использовать данный продавец ему назанчаются свыше
@@ -270,7 +270,7 @@ class Seller(models.Model):
         order.save()
 
     def check_payment_for_last_order(self):
-        print 'Alert : Not work check_payment_for_last_order'
+        print('Alert : Not work check_payment_for_last_order')
         return True
 
     def count_order_spec_customer(self, customer):
@@ -399,7 +399,7 @@ class Seller(models.Model):
 
     def get_last_order_spec_customer(self, customer):
         if Order.objects.filter(customer=customer).count() > 1:
-            print 'Error : Too many orderi get_last_order_spec_customer()', Order.objects.filter(customer=customer).count()
+            print('Error : Too many orderi get_last_order_spec_customer()', Order.objects.filter(customer=customer).count())
         elif Order.objects.filter(customer=customer).count() == 0:
             raise ValidationError(u"У клиента нет ни одного закзаза.")
         return Order.objects.filter(customer=customer).order_by('-id')[0]
@@ -443,9 +443,9 @@ class Seller(models.Model):
         return True
 
     def __is_allow_product_for_client(self, product, client_city, client_type):
-        print 'check Rule'
-        print 'check Delivery'
-        print 'check Quantity for Sale'
+        print('check Rule')
+        print('check Delivery')
+        print('check Quantity for Sale')
         return True
 
     def is_delivery(self, product, storage, point_pickup):
@@ -670,7 +670,7 @@ class Storekeeper(models.Model):
     Кладовщик
     """
     title = models.CharField(max_length=100)
-    shop = models.ForeignKey(Shop)
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
     storages = models.ManyToManyField(Storage, blank=True)
 
     def is_match_cargo_and_invoice(self, cargo, invoice):
@@ -704,17 +704,17 @@ class Storekeeper(models.Model):
 #    """
 
 class Basket(models.Model):
-    customer = models.ForeignKey(Shop, related_name='customer_shop')
-    executor = models.ForeignKey(Shop, related_name='executor_shop')
-    purchaser = models.ForeignKey(Purchaser)
-    seller = models.ForeignKey(Seller)
+    customer = models.ForeignKey(Shop, related_name='customer_shop', on_delete=models.CASCADE)
+    executor = models.ForeignKey(Shop, related_name='executor_shop', on_delete=models.CASCADE)
+    purchaser = models.ForeignKey(Purchaser, on_delete=models.CASCADE)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
 
     def add(self, product, quantity, price, currency):
         """
         При наличии такого продукта в корзине пол тойже ценет и в той же валюте - нужно увеличить quantity
         баскет уже должен быть сохранен(иметь id)
         """
-        print 'Error : Nead fix.'
+        print('Error : Nead fix.')
         basket_element = BasketElement(basket=self, product=product, quantity=quantity, price=price, currency=currency)
         basket_element.save()
 
@@ -722,20 +722,20 @@ class Basket(models.Model):
         return list(BasketElement.objects.filter(basket=self))
 
 class BasketElement(models.Model):
-    product = models.ForeignKey(Product)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,)
     quantity = models.IntegerField(u"Цена")
     price = models.DecimalField(u"стоимость продажи одной штуки", decimal_places=2, max_digits=7)
     currency = models.CharField(u"Валюта", max_length=5)
-    basket = models.ForeignKey(Basket)
+    basket = models.ForeignKey(Basket, on_delete=models.CASCADE)
 
 class Order(models.Model):
-    customer = models.ForeignKey(Shop, related_name='order_customer_shop')
-    executor = models.ForeignKey(Shop, related_name='order_executor_shop')
-    purchaser = models.ForeignKey(Purchaser)
-    seller = models.ForeignKey(Seller)
+    customer = models.ForeignKey(Shop, related_name='order_customer_shop', on_delete=models.CASCADE)
+    executor = models.ForeignKey(Shop, related_name='order_executor_shop', on_delete=models.CASCADE)
+    purchaser = models.ForeignKey(Purchaser, on_delete=models.CASCADE)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
 
     create_datetime = models.DateTimeField(u'дата и время создание заказа', auto_now_add=True)
-    pickup_point = models.ForeignKey(PickupPoint)
+    pickup_point = models.ForeignKey(PickupPoint, on_delete=models.CASCADE)
     pickup_dateteme = models.DateTimeField(u'дата и время вручения всего заказа(т.е. последней партии)', auto_now_add=True)
 
     loyalty_ball = models.IntegerField(u"Оплаено балами.", null=True, blank=True)
@@ -748,8 +748,8 @@ class Order(models.Model):
         При наличии такого продукта в корзине пол тойже ценет и в той же валюте - нужно увеличить quantity
         баскет уже должен быть сохранен(иметь id)
         """
-        print 'Error : Nead fix.'
-        print '+++++', product, quantity, price, currency
+        print('Error : Nead fix.')
+        print('+++++', product, quantity, price, currency)
         order_element = OrderElement(order=self, product=product, quantity=quantity, price=price, currency=currency)
         order_element.save()
 
@@ -793,11 +793,11 @@ class Order(models.Model):
         return u"Order (%s) : %s %s %s %s" % (self.id, self.purchaser, self.customer, self.executor, self.seller)
 
 class OrderElement(models.Model):
-    product = models.ForeignKey(Product)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(u"Цена")
     price = models.DecimalField(u"стоимость продажи одной штуки", decimal_places=2, max_digits=7)
     currency = models.CharField(u"Валюта", max_length=5)
-    order = models.ForeignKey(Order)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
 
 class OrderSpecification(object):
     def __init__(self):

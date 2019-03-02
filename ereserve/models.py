@@ -16,9 +16,9 @@ class Reserve(models.Model):
         2. При перемещении остатков резер тоже должен перемещаться?
     Важно чтобы резервировался товар с опредененной ценой закупки? Да.
     """
-    product = models.ForeignKey(Product)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(u"Количество")
-    storage = models.ForeignKey(Storage)
-    part_number = models.ForeignKey(PartNumber)
+    storage = models.ForeignKey(Storage, on_delete=models.CASCADE)
+    part_number = models.ForeignKey(PartNumber, on_delete=models.CASCADE)
 
 

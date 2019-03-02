@@ -12,7 +12,7 @@ class Region(models.Model):
 
 class City(models.Model):
     title = models.CharField(max_length=200)
-    region = models.ForeignKey(Region)
+    region = models.ForeignKey(Region, on_delete=models.CASCADE)
 
 class FilterCityIdRegion(models.Model):
     pickup_points = models.ManyToManyField(City)
@@ -193,10 +193,10 @@ class Storage(models.Model):
 
 
 class Stock(models.Model):
-    product = models.ForeignKey(Product)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(u"Количество")
-    storage = models.ForeignKey(Storage)
-    part_number = models.ForeignKey(PartNumber)
+    storage = models.ForeignKey(Storage, on_delete=models.CASCADE)
+    part_number = models.ForeignKey(PartNumber, on_delete=models.CASCADE)
     has = models.BooleanField(verbose_name=u'Пришоло на склад', default=True)
 
 class FilterStorageId(models.Model):
@@ -206,7 +206,7 @@ class FilterStorageId(models.Model):
 
 class PickupPoint(models.Model):
     title = models.CharField(max_length=200)
-    city = models.ForeignKey(City)
+    city = models.ForeignKey(City, on_delete=models.CASCADE)
 
     def get_city(self):
         return self.city

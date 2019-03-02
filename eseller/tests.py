@@ -14,7 +14,7 @@ from eloyalty.models import *
 
 class TestESeller(TestCase):
     def setUp(self):
-        print "SETUP DATA FOR ..."
+        print("SETUP DATA FOR ...")
         self.assertEqual.__self__.maxDiff = None
 
     def test_1(self):
@@ -140,7 +140,7 @@ class TestESeller(TestCase):
         system_purchase.save()
 
         seller = Seller(shop=shop_1)
-	seller.save()
+        seller.save()
 
         # Закупка пратии Mi8
         #stock_1 = Stock(product=product_mi8, quantity=10, storage=storage_1, purchase_cost=105.1, currency="RUR")
@@ -182,31 +182,31 @@ class TestESeller(TestCase):
         self.assertEqual(28, quantity)
         # Зарезервировали
 
-	filter_produce_1 = FilterProductCrossIdCategoryBrand()
+        filter_produce_1 = FilterProductCrossIdCategoryBrand()
         filter_produce_1.save()
         filter_produce_1.products.add(product_mi8)
-	filter_storage_1 = FilterStorageId()
+        filter_storage_1 = FilterStorageId()
         filter_storage_1.save()
-	filter_pickup_point_1 = FilterPickupPointIdCity()
+        filter_pickup_point_1 = FilterPickupPointIdCity()
         filter_pickup_point_1.save()
-	#price_factory_part_purchase_cost_from_stock_1 = PriceFactoryPartPurchaseCostFromStock(precent=10)
+        #price_factory_part_purchase_cost_from_stock_1 = PriceFactoryPartPurchaseCostFromStock(precent=10)
         #price_factory_part_purchase_cost_from_stock_1.save()
-	price_factory_part_purchase_cost_1 = PriceFactoryPartPurchaseCost(precent=10)
+        price_factory_part_purchase_cost_1 = PriceFactoryPartPurchaseCost(precent=10)
         price_factory_part_purchase_cost_1.save()
-	price_factory_fix_1 = PriceFactoryFix(price=150)
+        price_factory_fix_1 = PriceFactoryFix(price=150)
         price_factory_fix_1.save()
 
-	price_policy_1 = PricePolicy()
+        price_policy_1 = PricePolicy()
         price_policy_1.save()
-	price_policy_1.filter_produce.add(filter_produce_1)
-	price_policy_1.filter_storage.add(filter_storage_1)
-	price_policy_1.filter_pickup_point.add(filter_pickup_point_1)
-	#price_policy_1.price_factory_part_purchase_cost_from_stock.add(price_factory_part_purchase_cost_from_stock_1)
-	price_policy_1.price_factory_part_purchase_cost.add(price_factory_part_purchase_cost_1)
+        price_policy_1.filter_produce.add(filter_produce_1)
+        price_policy_1.filter_storage.add(filter_storage_1)
+        price_policy_1.filter_pickup_point.add(filter_pickup_point_1)
+        #price_policy_1.price_factory_part_purchase_cost_from_stock.add(price_factory_part_purchase_cost_from_stock_1)
+        price_policy_1.price_factory_part_purchase_cost.add(price_factory_part_purchase_cost_1)
         price_policy_1.price_factory_fix.add(price_factory_fix_1)
 
-	seller.price_policies.add(price_policy_1)
-	#seller.price_policies.add(price_policy_2)
+        seller.price_policies.add(price_policy_1)
+        #seller.price_policies.add(price_policy_2)
 
         client_city = city_moscow
         client_type = 'onliner'
@@ -244,7 +244,7 @@ class TestESeller(TestCase):
         self.assertEqual([pickup_point_1, pickup_point_2], pickup_points)
 
         #Вова решил купить Ми8 за цену 115.61, оформляет заказ.
-        interval = [datetime.datetime(2000, 01, 01, 12, 30, 00), datetime.datetime(2000, 01, 01, 20, 00, 00)]
+        interval = [datetime.datetime(2000, 1, 1, 12, 30, 00), datetime.datetime(2000, 1, 1, 20, 00, 00)]
         order_params = {
             'version': 'v1',
             'basket': [
@@ -323,19 +323,19 @@ class TestESeller(TestCase):
         self.assertEqual([], prices)
 
         # Создаем правило для продажи чехлов
-	filter_produce_2 = FilterProductCrossIdCategoryBrand()
+        filter_produce_2 = FilterProductCrossIdCategoryBrand()
         filter_produce_2.save()
         filter_produce_2.brands.add(brand_noname)
 
-	price_factory_part_purchase_cost_2 = PriceFactoryPartPurchaseCost(precent=100)
+        price_factory_part_purchase_cost_2 = PriceFactoryPartPurchaseCost(precent=100)
         price_factory_part_purchase_cost_2.save()
 
-	price_policy_2 = PricePolicy()
+        price_policy_2 = PricePolicy()
         price_policy_2.save()
-	price_policy_2.filter_produce.add(filter_produce_2)
-	price_policy_2.price_factory_part_purchase_cost.add(price_factory_part_purchase_cost_2)
+        price_policy_2.filter_produce.add(filter_produce_2)
+        price_policy_2.price_factory_part_purchase_cost.add(price_factory_part_purchase_cost_2)
 
-	seller.price_policies.add(price_policy_2)
+        seller.price_policies.add(price_policy_2)
 
         prices = seller.list_price_of_product_for_customer(product_case_noname, client_city, client_type)
         self.assertEqual([Decimal('10.00')], prices)
@@ -507,8 +507,8 @@ class TestESeller(TestCase):
         # create_easy_order_by_phone_number_of_customer
         price = Decimal('15.00')
         self.assertEqual(3, seller_2_1.count_order_spec_customer(client))
-	#seller_2_1.create_easy_order_by_phone_number_of_customer(client_phone_number, price, pickup_point)
-	SellerXS(seller_2_1).create_order(client_phone_number, price)
+        #seller_2_1.create_easy_order_by_phone_number_of_customer(client_phone_number, price, pickup_point)
+        SellerXS(seller_2_1).create_order(client_phone_number, price)
         self.assertEqual(4, seller_2_1.count_order_spec_customer(client))
         self.assertEqual(Decimal('15.00'), seller_2_1.get_last_order_spec_customer(client).calculate_price_without_loyalty_balls())
 
@@ -549,7 +549,7 @@ class TestESeller(TestCase):
 
         # process_order_easy_with_zero_ball_without_customer_security
         #seller_2_1.process_order_easy_with_zero_ball_without_customer_security(order_2, client, shop_2, loyalty, pickup_point)
-	SellerXS(seller_2_1).create_order(client_phone_number, price)
+        SellerXS(seller_2_1).create_order(client_phone_number, price)
         order_2_1 = seller_2_1.get_last_order_spec_customer(client)
         SellerXS(seller_2_1).process_order_with_ball_type(order_2_1, 'ZERO')
         self.assertEqual(0, order_2_1.loyalty_ball)
@@ -558,7 +558,7 @@ class TestESeller(TestCase):
         #self.assertEqual(0, order_2.loyalty_ball)
 
         #seller_2_1.process_order_with_ball_type_xs(order_2, client, 'ZERO')
-	SellerXS(seller_2_1).create_order(client_phone_number, price)
+        SellerXS(seller_2_1).create_order(client_phone_number, price)
         order_2_2 = seller_2_1.get_last_order_spec_customer(client)
         SellerXS(seller_2_1).process_order_with_ball_type(order_2_2, 'ZERO')
         self.assertEqual(0, order_2_2.loyalty_ball)
@@ -822,7 +822,7 @@ class TestESeller(TestCase):
         shop_sp.pickup_points.add(pickup_point_1)
         shop_sp.storages.add(storage_1)
         seller = Seller(shop=shop_sp)
-	seller.save()
+        seller.save()
 
         brand_xiaomy = Brand(title="Xiaomy")
         brand_xiaomy.save()
@@ -980,14 +980,14 @@ class TestESeller(TestCase):
         self.assertEqual(28, quantity)
         # Зарезервировали
 
-	filter_produce_1 = FilterProductCrossIdCategoryBrand()
+        filter_produce_1 = FilterProductCrossIdCategoryBrand()
         filter_produce_1.save()
         filter_produce_1.products.add(product_mi8)
-	filter_storage_1 = FilterStorageId()
+        filter_storage_1 = FilterStorageId()
         filter_storage_1.save()
-	filter_pickup_point_1 = FilterPickupPointIdCity()
+        filter_pickup_point_1 = FilterPickupPointIdCity()
         filter_pickup_point_1.save()
-	#
+        #
     def test_logistician(self):
         """
         В чем заключается работа логиста?

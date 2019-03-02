@@ -16,8 +16,8 @@ class Actor(models.Model):
     phone_m_type = models.CharField(verbose_name=u'Тип номера мобильного', max_length=128, null=True, blank=True)
     fio = models.CharField(verbose_name=u'Ф.И.О.', max_length=128, null=True, blank=True)
     password_hash = models.CharField(verbose_name=u'Хеш пароля', max_length=128, null=True, blank=True)
-    seller = models.ForeignKey(Seller, null=True, blank=True)
-    purchaser = models.ForeignKey(Purchaser, null=True, blank=True)
+    seller = models.ForeignKey(Seller, null=True, blank=True, on_delete=models.CASCADE)
+    purchaser = models.ForeignKey(Purchaser, null=True, blank=True, on_delete=models.CASCADE)
 
     def create_customer_shop_with_phone_number(self, shop, phone_number):
         self.seller.create_customer_shop_with_phone_number(shop, phone_number)
@@ -45,8 +45,8 @@ class Actor(models.Model):
         return False
 
     def __has_link_with_actor(self, actor):
-	print 'Nead fix __has_link_with_actor'
-	return True
+        print('Nead fix __has_link_with_actor')
+        return True
 
     def is_password(self, password):
         if self.password_hash == Actor.make_password_hash(password):
