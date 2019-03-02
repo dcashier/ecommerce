@@ -795,6 +795,199 @@ class TestESeller(TestCase):
         self.assertRaises(AssertionError, storekeeper_1.pull, storage_1, cargo)
 
 
+    def test_offers_for_customer(self):
+        """
+        У стороннего поставщика есть CSV с офферами, а резервы и заказы он подтвержает через админку.
+        Подходы:
+            1) добавить все офферы с датой начала и датой окончания(оставив прошлые офферы)
+            2) удалить те офферы что которых нет в CSV и добавить те что есть в CSV(Обновлять не имеет сыска так как оффер вобщем то не сущность).
+                Удалять - занчит указать что в момент аггрузки они стали не активны(если через несколько выгрузок он станет активным то мы должны видеть это)
+                Что делать если изменились остатки по офферу? Или цена?
+
+        Резервы стаятся на офферы или на остатки продукции? или и туда и туда.
+        """
+
+        return
+
+        region_center = Region(title=u"Центральный")
+        region_center.save()
+        city_moscow = City(title=u"Moscow", region=region_center)
+        city_moscow.save()
+        storage_1 = Storage(title=u"SP storage", size=10000)
+        storage_1.save()
+        pickup_point_1 = PickupPoint(title=u"SP pickup", city=city_moscow)
+        pickup_point_1.save()
+        shop_sp = Shop(title=u"SP shop")
+        shop_sp.save()
+        shop_sp.pickup_points.add(pickup_point_1)
+        shop_sp.storages.add(storage_1)
+        seller = Seller(shop=shop_sp)
+	seller.save()
+
+        brand_xiaomy = Brand(title="Xiaomy")
+        brand_xiaomy.save()
+        product_mi8 = Product(title='Mi 8', brand=brand_xiaomy)
+        product_mi8.save()
+        product_lite = Product(title='Lite', brand=brand_xiaomy)
+        product_lite.save()
+
+        shop_customer = Shop(title=u"Customer shop")
+        shop_customer.save()
+
+        #system_purchase = SystemPurchase()
+        #system_purchase.save()
+
+        # Что содержит самая простая форма CSV ? 
+        # Executor(Магазин прелдоставивший данное предложение)
+        # Seller(Лицо уполномеченное магазином реализации)
+        # Customer(Орагнизация преобретающая)
+        # Storage(точка с которой будут забирать -  нужно точено соответствие)
+        # Product(title, params, categoies, brand, id)
+        # Quantity(Сколько можно продать)
+        # Price(Цена за единицу позиции)
+        # Диапазон валидности данного передложения - пока не удаится
+        # DayInWay через сколько деней после заказа можно забрать на складе
+        # DeliveryCostСтоимость доставки на склад
+
+        # так как CSV грузится через админку то там уже есть поставщик и ответственное лицо
+        shop_sp
+        seller
+        # также выбран клиент для которго будут сформированны офферы на основе CSV
+        shop_customer
+        # также выбран склад(точка забора) с которого нужно забирать
+        pickup_point_1
+        # дата начала действия передлодений основанны на данном csv
+        valid_from = '2019-02-19'
+        valid_through = '2050-01-01'
+        # весь товар на остатках склада
+        in_stock = True
+        csv = [
+            {
+                'product_id': 1201,
+                'product_title': 'title 1',
+                'product_categories': 'category 1, category 44',
+                'product_brand': 'brand 1',
+                'prodcut_params': 'Wedth 100, height 300, color red, ...',
+                'quantity': 10,
+                'price': Decimal(9000),
+            },
+            {
+                'product_id': 1202,
+                'product_title': 'title 2',
+                'product_categories': None,
+                'product_brand': 'brand 2',
+                'prodcut_params': None,
+                'quantity': 1000,
+                'price': Decimal(110),
+            },
+            {
+                'product_id': 1203,
+                'product_title': 'title 3',
+                'product_categories': 'category 3',
+                'product_brand': 'brand 1',
+                'prodcut_params': None,
+                'quantity': 220,
+                'price': Decimal(534),
+            },
+        ]
+
+        # обоготим текущий CSV теми активными позициями что сейчас есть в системе но нет в CSV с quantity = None и price = None и флагом не активно
+        csv.append(
+            {
+                'product_id': 1204,
+                'product_title': 'title 4',
+                'product_categories': 'category 44',
+                'product_brand': 'brand 1',
+                'prodcut_params': None,
+                'quantity': None,
+                'price': None,
+            }
+        )
+
+
+        # "executor", "seller", "customer", "pruchaser", "valid_from", "valid_through", "product", "quantity", "price",
+        # В случае продукат наверно нужно место выдачи, дата выдачи, стоимость доставки "pickup_point", "delivery_datetime", "cost_delivery"
+        seller.add_offer({
+            "executor": shop_sp,
+            # Стоит указывать продажника или нет?
+            "seller": seller,
+            "customer": shop_customer,
+            # Стоит указывать закупщика или нет?
+            #"pruchaser": "pruchaser",
+            "valid_from": None, # начало действи данного пределожения
+            "valid_through": None,
+            # Сумма по всему предложению
+            "price": Decimal(90000),
+            "list": [
+            # Услуга
+                {
+                # Предоставленная услуга
+                "product": None,
+                "quantity": None,
+                "price": None,
+                },
+            # часть относится к физическому продукту 
+                {
+                # нужно включать или нет? как быть когда несколько продуктов или услуг?
+                "product": product_mi8,
+                # нужно включать или нет? как быть когда несколько продуктов или услуг?
+                # Как оно связано с остатками?
+                # Не должно быть больше чем остатки, или мы знаем что скоро приедет партия и значит офферов можем реализовать больше но с другим сроком
+                "quantity": 1,
+                "price": Decimal(90000),
+
+                "pickup_point": pickup_point_1,
+                "delivery_datetime": None,
+                "cost_delivery": None,
+                },
+            ],
+        })
+
+
+        quantity_mi8 = 10
+        purchase_cost_mi8 = Decimal('105.1')
+        currency_mi8 = "USD"
+        part_number_1 = PartNumber()
+        part_number_1.save()
+        element_purchase = ElemetPurchase(system_purchase=system_purchase, quantity=quantity_mi8, product=product_mi8, part_number=part_number_1, purchase_cost=purchase_cost_mi8, purchase_currency=currency_mi8)
+        element_purchase.save()
+        storage_1.push(product_mi8, quantity_mi8, part_number_1)
+        quantity = seller.quantity_for_sale(product_mi8)
+        self.assertEqual(10, quantity)
+        # закупка прошла успешно
+
+        # Через несколько дней планируя высокий обем спроса на Ми8, закупили еще Mi8 но по чуть большей цене
+        quantity_mi8_2 = 20
+        purchase_cost_mi8_2 = Decimal('120')
+        currency_mi8_2 = "USD"
+        part_number_2 = PartNumber()
+        part_number_2.save()
+        system_purchase = SystemPurchase()
+        system_purchase.save()
+        element_purchase = ElemetPurchase(system_purchase=system_purchase, quantity=quantity_mi8_2, product=product_mi8, part_number=part_number_2, purchase_cost=purchase_cost_mi8_2, purchase_currency=currency_mi8_2)
+        element_purchase.save()
+        storage_1.push(product_mi8, quantity_mi8_2, part_number_2)
+        quantity = seller.quantity_for_sale(product_mi8)
+        # с учетом предыдущих 10 ми8 суммарно получили 30
+        self.assertEqual(30, quantity)
+        # закупка прошла успешно
+
+        info_text = u"продавца попросили зарезервирвать для большиз босов"
+        reserve_for_big_boss_quantity = 2
+        #seller.reserve_product_on_storage(product_mi8, reserve_for_big_boss_quantity, storage_1, info_text)
+        seller.reserve_product_on_storage(product_mi8, reserve_for_big_boss_quantity, storage_1, info_text, part_number_1)
+        quantity = seller.quantity_for_sale(product_mi8)
+        self.assertEqual(28, quantity)
+        # Зарезервировали
+
+	filter_produce_1 = FilterProductCrossIdCategoryBrand()
+        filter_produce_1.save()
+        filter_produce_1.products.add(product_mi8)
+	filter_storage_1 = FilterStorageId()
+        filter_storage_1.save()
+	filter_pickup_point_1 = FilterPickupPointIdCity()
+        filter_pickup_point_1.save()
+	#
     def test_logistician(self):
         """
         В чем заключается работа логиста?

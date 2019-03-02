@@ -539,7 +539,7 @@ class Seller(models.Model):
                     if quantity <= quantity_was_delivery:
                         break
                     if self.is_delivery(product, storage, point_pickup):
-                        quantity_was_delivery += self.__quantity_for_sale_on_storage(product, storage)
+                        quantity_was_delivery += self.quantity_for_sale_on_storage(product, storage)
 
                 if quantity <= quantity_was_delivery:
                     pickup_points_and_count_product_was_delivery.setdefault(point_pickup, 0)
@@ -552,6 +552,9 @@ class Seller(models.Model):
 
         return pickup_points_allow_for_basket
 
+    def list_price_for_customer(self, product, customer):
+        return []
+
     def list_price_of_product_for_customer(self, product, client_city, client_type):
         pickup_points = self.shop.pickup_points.all()
         storages = self.shop.storages.all()
@@ -562,6 +565,9 @@ class Seller(models.Model):
             price = link['price']
             prices.add(price)
         return sorted(list(prices))
+
+    def list_price_spec_product_customer_point_pickup(self, product, customer, pickup_point):
+        return []
 
     def list_product_in_stock(self, category):
         storages = self.shop.storages.all()
@@ -624,10 +630,10 @@ class Seller(models.Model):
         storages = self.shop.storages.all()
         quantity = 0
         for storage in storages:
-            quantity += self.__quantity_for_sale_on_storage(product, storage)
+            quantity += self.quantity_for_sale_on_storage(product, storage)
         return quantity
 
-    def __quantity_for_sale_on_storage(self, product, storage):
+    def quantity_for_sale_on_storage(self, product, storage):
         quantity = storage.quantity(product)
         for reserve in Reserve.objects.filter(storage=storage, product=product):
             quantity -= reserve.quantity
