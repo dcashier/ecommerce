@@ -1,4 +1,4 @@
-#!-*-coding: utf-8 -*-
+﻿#!-*-coding: utf-8 -*-
 """
 Django settings for ecommerce project.
 
@@ -30,6 +30,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'malvina8.fvds.ru',
     '0.0.0.0',
+    'localhost',
 ]
 
 
