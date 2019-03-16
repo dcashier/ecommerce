@@ -23,7 +23,7 @@ class TestESellerS(TestCase):
         """
         --DoOwner2@yandex.ru s--
         """
-        print "SETUP DATA FOR ..."
+        print("SETUP DATA FOR ...")
         self.assertEqual.__self__.maxDiff = None
 
         size = 's'
