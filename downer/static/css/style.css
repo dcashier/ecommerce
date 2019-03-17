@@ -1,0 +1,499 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+
+
+body{
+	font-family: 'Open Sans', sans-serif;
+	font-size: 14px;
+	font-weight: 400;
+	color: #181818;
+	background-color: white;
+}
+
+.displayBlock{display: block !important;}
+.displayInlineBlock{display: inline-block !important;}
+
+.f30{font-size: 30px !important}
+.f26{font-size: 26px !important}
+.f18{font-size: 18px !important}
+.f16{font-size: 16px !important}
+.f14{font-size: 14px !important}
+.f12{font-size: 12px !important}
+
+.mt5{margin-top: 5px !important}
+.mt10{margin-top: 10px !important}
+.mt20{margin-top: 20px !important}
+.mt30{margin-top: 30px !important}
+.mt40{margin-top: 40px !important}
+.mt60{margin-top: 60px !important}
+.mt80{margin-top: 80px !important}
+.mt100{margin-top: 100px !important}
+.mt120{margin-top: 120px !important}
+
+.ml10{margin-left: 10px !important}
+.ml20{margin-left: 20px !important}
+
+.w50p{width: 50% !important}
+.w60p{width: 60% !important}
+
+.h300{height: 300px !important}
+.h500{height: 500px !important}
+
+
+.lh1{line-height:1}
+
+.textAlignCenter{text-align: center !important}
+.textAlignLeft{text-align: left !important}
+
+.colorRed{color: #ff3333;}
+
+.red{
+  border-color: #ff3b30;
+  color: #ff3b30 !important;  
+}
+
+.orange{
+  border-color: #ff9500;
+  color: #ff9500;  
+}
+
+.yellow{
+  border-color: #ffcc00;
+  color: #ffcc00; 
+}
+
+.green{
+  border-color: #4cd964;
+  color: #4cd964 !important;
+}
+
+.tealBlue{
+  border-color: #5ac8fa;
+  color: #5ac8fa;
+}
+
+.blue{
+  border-color: #007aff;
+  color: #007aff;
+}
+
+.purple{
+  border-color: #5856d6;
+  color: #5856d6;
+}
+
+.pink{
+  border-color: #ff2d55;
+  color: #ff2d55;
+}
+
+
+
+
+h1{
+	font-size: 26px;
+	font-weight: 500;
+	line-height: 1.3;
+	text-align: center;
+}
+
+h2{
+	font-size: 20px;
+	font-weight: 300;
+	line-height:1.3;
+	color: #f4f4f4;
+}
+
+a{
+	color: #243241;
+	border-bottom: 1px solid;
+	text-decoration: none;
+	font-weight: 600;
+}
+
+form{
+	width: inherit;
+	margin: 0 auto;
+}
+
+.invisible {
+	display: none !important;
+}
+
+
+.container {
+	width: 100%;
+}
+
+
+/* Authentication page
+/*-------------------------------------------*/
+
+.authPanel{
+	margin: auto;
+	margin-top: 10vh;
+	width: 400px;
+	height: 400px;
+	background-color: #f6f6f6;
+    border-radius: 5px;
+    padding: 30px;
+    padding-top: 40px;
+    box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.5);	
+}
+
+.authPanel__switchMode{
+	display: block;
+	margin-top: 30px;
+	height: 50px;
+}
+
+.authPanel__switchMode__leftPart{
+	display: inline-block;
+	float:left;
+	margin-left: 10px;
+}
+
+.authPanel__switchMode__rightPart{
+	display: inline-block;
+	float:right;
+	margin-right: 10px;
+}
+
+.authPanel__switchMode__button{
+	color: rgb(32, 130, 251);
+	border-bottom-color: rgb(32, 130, 251);
+	
+}
+
+.authPanel__switchMode__title{
+	font-weight: 600;
+	font-size: 18px;
+}
+
+.authPanel__controls{
+	display: block;
+	margin-top: 20px;
+}
+
+
+/* Navigation panel on the left
+/*-------------------------------------------*/
+.navbarSide{
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 200px;
+	height: 100%;
+	text-align: left;
+	background: #393836;
+	color: #fff;
+	z-index: 999;
+	overflow-y: auto;
+
+}
+
+.navbarSide__header{
+	background: #292929;
+	padding: 20px;
+	height: 100px;	
+}
+
+
+
+/* Controls                                  */
+/*-------------------------------------------*/
+
+
+.input{
+	width: 100%;
+	display: block;
+	height: 46px;
+	border-style:solid;
+	border-width: 1px;
+	border-radius: 5px;
+	border-color: gray;
+	padding: 3px 3px 3px 3px;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 18px;
+	font-weight: 400;
+	color: #181818;
+	background-color: white;
+	box-sizing: border-box;
+}
+
+.button{
+	width: 100%;
+	height: 44px;
+	display: block;
+	border-style:solid;
+	border-width: 1px;
+	border-radius: 5px;
+	border-color: #ffdb4d;
+	padding: 3px 3px 3px 3px;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 18px;
+	font-weight: 400;
+	color: #181818;
+	background-color: #ffdb4d;
+	text-decoration: none;
+	text-align: center;
+	cursor: pointer;
+}
+
+
+.button:active{
+	border-color: #ffe47a;
+	color: #181818;
+	background-color: #ffe47a;
+}
+
+
+.inverseButton{
+	width: 100%;	
+	display: block;
+	height: 44px;
+	border-style:solid;
+	border-width: 1px;
+	border-radius: 5px;
+	border-color: #f4f4f4;
+	padding: 3px 3px 3px 3px;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 18px;
+	font-weight: 400;
+	color: #f4f4f4;
+	background-color: #181818;
+	text-decoration: none;
+	text-align: center;	
+}
+
+.inverseButton:active{
+	border-color: #f4f4f4;
+	color: #181818;
+	background-color: #f4f4f4;
+}
+
+.linkButton{
+	width: 100%;
+	display: block;
+	height: 33px;
+	display: block;
+	border-style:solid;
+	border-width: 1px;
+	border-radius: 5px;
+	border-color: #ffdb4d;
+	padding: 8px 3px 3px 3px;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 18px;
+	font-weight: 400;
+	color: #181818;
+	background-color: #ffdb4d;
+	text-decoration: none;
+	text-align: center;
+}
+
+.linkButton:active{
+	border-color: #ffdb4d;
+	color: #ffdb4d;
+	background-color: #181818;
+}
+
+
+.inverseLinkButton{
+	width: 100%;
+	display: block;
+	height: 33px;
+	border-style:solid;
+	border-width: 1px;
+	border-radius: 5px;
+	border-color: #f4f4f4;
+	padding: 8px 3px 3px 3px;
+	font-family: 'Open Sans', sans-serif;
+	font-size: 18px;
+	font-weight: 400;
+	color: #f4f4f4;
+	background-color: #181818;
+	text-decoration: none;
+	text-align: center;	
+}
+
+.inverseLinkButton:active{
+	border-color: #f4f4f4;
+	color: #181818;
+	background-color: #f4f4f4;
+}
+
+.toggle{
+}
+
+.toggle input{
+  opacity: 0;
+  width: 0;
+  height: 0;  
+}
+
+.toggle__button{
+  font-weight: 300;
+  text-align: center;
+  display: inline-block;
+  margin-top: 5px;
+  margin-right: 3px;
+  padding: 3px 5px 3px 5px;
+  border: solid 1px;  
+  border-radius: 5px;  
+}
+
+.toggle input:checked + .red{
+  background-color: #ff3b30;
+  color: #f4f4f4;
+}
+
+.toggle input:checked + .orange{
+  background-color: #ff9500;
+  color: #f4f4f4;
+}
+
+.toggle input:checked + .yellow{
+  background-color: #ffcc00;
+  color: #f4f4f4;
+}
+
+.toggle input:checked + .green{
+  background-color: #4cd964;
+  color: #f4f4f4;
+}
+
+.toggle input:checked + .tealBlue{
+  background-color: #5ac8fa;
+  color: #f4f4f4;
+}
+
+.toggle input:checked + .blue{
+  background-color: #007aff;
+  color: #f4f4f4;
+}
+
+.toggle input:checked + .purple{
+  background-color: #5856d6;
+  color: #f4f4f4;
+}
+
+.toggle input:checked + .pink{
+  background-color: #ff2d55;
+  color: #f4f4f4;
+}
+
+
+.sexRadioButtons {
+	border: solid 1px gray;
+	display: inline-block;
+	border-radius: 10px;
+	overflow: hidden;
+	height: 46px;
+}
+
+.sexRadioButtons input[type=radio] {
+	position: absolute;
+	visibility: hidden;
+	display: none;
+}
+
+.sexRadioButtons label {
+	color: #f4f4f4;
+	display: inline-block;
+	padding: 10px 20px 5px 20px;
+	text-align: center;
+	height: 46px;	
+	font-size: 18px;
+}
+
+.sexRadioButtons input[type=radio]:checked + label{
+	color: #181818;
+	background: #f4f4f4;
+}
+
+
+
+/* List View                                */
+/*------------------------------------------*/
+
+.listView{
+	border-style: solid;
+	border-width: 1px 0 0 0;
+	border-color: #464646;
+}
+
+.listView a{
+	text-decoration: none;
+}
+
+
+.listView__item{
+	border-style: solid;
+	border-width: 0 0 1px 0;
+	border-color: #464646;
+	height: 56px;
+	width: 100%;
+}
+
+.listView__item:active{
+	background-color: #2b2b2b;
+}
+
+
+.listView__item__leftPart{
+	width: 70%;
+	display: inline-block;
+	margin-top: 5px;
+	margin-left: 15px;	
+	height: 44px;
+
+}
+
+.listView__item__leftPart__title{
+	font-size: 18px;
+	width: 100%;
+	font-weight: 600;
+ 	white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.listView__item__leftPart__detail{
+	width: 100%;
+	font-weight: 400;
+	font-size: 13px;
+	color: gray;
+ 	white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis 	
+}
+
+.listView__item__rightPart{
+	display: inline-block;	
+	margin-top: 5px;
+	margin-right: 	10px;
+	float:right;
+	height: 44px;	
+}
+
+.listView__item__rightPart__detail{
+	font-size: 18px;
+	display: inline-block;	
+	float:right;
+	height: 44px;	
+}
+
+.listView__item__moreButton{
+	font-size: 38px;
+	color: #676767;
+	float: right;
+}
+
+.listView__item__moreButton:before{
+	font-family:'Material Icons';
+	content: 'navigate_next';	
+}
+
+

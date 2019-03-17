@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Дисконт Онлайн</title>
+	<link rel="stylesheet" href="css/style.css" type="text/css">
+	<link rel="stylesheet" href="css/response.css" type="text/css">	
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,700,800&amp;subset=cyrillic" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+	      rel="stylesheet">	
+</head>
+
+<body ontouchstart="">
+	<div class="container">
+
+		<form>
+
+			<div class="authPanel">
+				<h1>
+					Дисконт Онлайн
+				</h1>
+				
+				<div class="authPanel__switchMode">	
+					<div class="authPanel__switchMode__leftPart">
+						<div class="authPanel__switchMode__title">
+							Вход	
+						</div>					
+					</div>	
+
+					<div class="authPanel__switchMode__rightPart">
+						<a href="authRegistration.html" class="authPanel__switchMode__button">
+							Регистрация
+						</a>					
+					</div>	
+				</div>
+
+				<div class="authPanel__controls">
+					<p class="colorRed invisible">Пользователь не найден</p>
+					<p class="colorRed invisible">Неверный пароль</p>
+					<input type="email" tabindex="0" required autocomplete="on" placeholder = "Ваш электронный адрес" name="authNameInput" class = "input">
+					<input type="password" tabindex="1" required autocomplete="on" placeholder = "Пароль" name="authPasswordInput" class = "input mt20">
+					<button class="button mt20">Войти</button>
+					<a class="displayInlineBlock mt20" href="#">Забыли пароль</a>					
+				</div>
+			</div>
+
+		</form>
+	</div>
+</body>
+</html>
